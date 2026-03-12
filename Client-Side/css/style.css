@@ -1,0 +1,720 @@
+.landing-page,
+.landing-page * {
+  box-sizing: border-box;
+}
+.landing-page {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 71, 71, 1) 0%,
+    rgba(183, 51, 51, 1) 33.65384638309479%,
+    rgba(170, 47, 47, 1) 62.0192289352417%,
+    rgba(153, 42, 42, 1) 100%
+  );
+  height: 1024px;
+  position: relative;
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+}
+.rectangle-1 {
+  background: rgba(31, 31, 33, 0.82);
+  width: 1455px;
+  height: 154px;
+  position: absolute;
+  left: -15px;
+  top: 0px;
+}
+.pages-toggles {
+  display: flex;
+  flex-direction: row;
+  gap: 40px;
+  row-gap: 0px;
+  align-items: flex-start;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  width: 1021px;
+  position: absolute;
+  left: 378px;
+  top: 59px;
+}
+.dashboard {
+  color: #ffffff;
+  text-align: left;
+  font-family: "Inter-Regular", sans-serif;
+  font-size: 32px;
+  font-weight: 400;
+  position: relative;
+}
+.roster {
+  color: #ffffff;
+  text-align: left;
+  font-family: "Inter-Regular", sans-serif;
+  font-size: 32px;
+  font-weight: 400;
+  position: relative;
+}
+.schedule {
+  color: #ffffff;
+  text-align: left;
+  font-family: "Inter-Regular", sans-serif;
+  font-size: 32px;
+  font-weight: 400;
+  position: relative;
+}
+.equipment {
+  color: #ffffff;
+  text-align: left;
+  font-family: "Inter-Regular", sans-serif;
+  font-size: 32px;
+  font-weight: 400;
+  position: relative;
+}
+.frame-1 {
+  display: flex;
+  flex-direction: row;
+  gap: 32px;
+  align-items: center;
+  justify-content: flex-start;
+  flex-shrink: 0;
+  position: relative;
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+}
+.frame-8 {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+.finances {
+  color: #ffffff;
+  text-align: left;
+  font-family: "Inter-Regular", sans-serif;
+  font-size: 32px;
+  font-weight: 400;
+  position: relative;
+}
+.alumni {
+  color: #ffffff;
+  text-align: left;
+  font-family: "Inter-Regular", sans-serif;
+  font-size: 32px;
+  font-weight: 400;
+  position: relative;
+}
+.team-logo {
+  width: 155px;
+  height: 155px;
+  position: absolute;
+  left: 36px;
+  top: 0px;
+  object-fit: cover;
+  aspect-ratio: 1;
+}
+.widgets-of-db {
+  width: 1316px;
+  height: 253px;
+  position: absolute;
+  left: 62px;
+  top: 237px;
+}
+.rectangle-7 {
+  background: #ffffff;
+  border-radius: 14.25px;
+  width: 216px;
+  height: 253px;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+}
+.rectangle-6 {
+  background: #ffffff;
+  border-radius: 14.25px;
+  width: 216px;
+  height: 253px;
+  position: absolute;
+  left: 275px;
+  top: 0px;
+}
+.rectangle-5 {
+  background: #ffffff;
+  border-radius: 14.25px;
+  width: 216px;
+  height: 253px;
+  position: absolute;
+  left: 550px;
+  top: 0px;
+}
+.rectangle-4 {
+  background: #ffffff;
+  border-radius: 14.25px;
+  width: 216px;
+  height: 253px;
+  position: absolute;
+  left: 825px;
+  top: 0px;
+}
+.rectangle-3 {
+  background: #ffffff;
+  border-radius: 14.25px;
+  width: 216px;
+  height: 253px;
+  position: absolute;
+  left: 1100px;
+  top: 0px;
+}
+.current-balance {
+  color: rgba(0, 0, 0, 0.51);
+  text-align: center;
+  font-family: "Inter-Bold", sans-serif;
+  font-size: 11.5px;
+  font-weight: 700;
+  position: absolute;
+  left: 1133.41px;
+  top: 177.25px;
+  width: 54px;
+  height: 16.13px;
+}
+.active-players {
+  color: #000000;
+  text-align: left;
+  font-family: "Inter-Regular", sans-serif;
+  font-size: 15.300000190734863px;
+  font-weight: 400;
+  position: absolute;
+  left: 30.99px;
+  top: 52.05px;
+  width: 82.39px;
+  height: 37px;
+}
+.upcoming-games {
+  color: #000000;
+  text-align: left;
+  font-family: "Inter-Regular", sans-serif;
+  font-size: 15.300000190734863px;
+  font-weight: 400;
+  position: absolute;
+  left: 309.46px;
+  top: 52.05px;
+  width: 81.38px;
+  height: 37px;
+}
+.inventory-management {
+  color: #000000;
+  text-align: left;
+  font-family: "Inter-Regular", sans-serif;
+  font-size: 15.300000190734863px;
+  font-weight: 400;
+  position: absolute;
+  left: 569.92px;
+  top: 48.55px;
+  width: 103.6px;
+  height: 37px;
+}
+.financial-reporting {
+  color: #000000;
+  text-align: left;
+  font-family: "Inter-Regular", sans-serif;
+  font-size: 15.300000190734863px;
+  font-weight: 400;
+  position: absolute;
+  left: 852.6px;
+  top: 52.05px;
+  width: 85.9px;
+  height: 37px;
+}
+.alumni-portal {
+  color: #000000;
+  text-align: left;
+  font-family: "Inter-Regular", sans-serif;
+  font-size: 15.300000190734863px;
+  font-weight: 400;
+  position: absolute;
+  left: 1133.41px;
+  top: 52.05px;
+  width: 63.7px;
+  height: 37px;
+}
+.roster-2 {
+  width: 59px;
+  height: 95px;
+  position: absolute;
+  left: calc(50% - 528px);
+  top: 67.05px;
+  overflow: hidden;
+}
+.clip-path-group {
+  height: auto;
+  position: absolute;
+  left: 0px;
+  top: 0.3px;
+  overflow: visible;
+}
+.clip-path-group2 {
+  height: auto;
+  position: absolute;
+  left: 0px;
+  top: 0.3px;
+  overflow: visible;
+}
+.clip-path-group3 {
+  height: auto;
+  position: absolute;
+  left: 6.67px;
+  top: 24.19px;
+  overflow: visible;
+}
+.clip-path-group4 {
+  height: auto;
+  position: absolute;
+  left: 1.45px;
+  top: 40px;
+  overflow: visible;
+}
+.clip-path-group5 {
+  height: auto;
+  position: absolute;
+  left: 33.33px;
+  top: 24.19px;
+  overflow: visible;
+}
+.clip-path-group6 {
+  height: auto;
+  position: absolute;
+  left: 33.33px;
+  top: 40px;
+  overflow: visible;
+}
+.vector {
+  width: 26.57%;
+  height: 16.5%;
+  position: absolute;
+  right: 37.81%;
+  left: 35.62%;
+  bottom: 49.44%;
+  top: 34.07%;
+  overflow: visible;
+}
+.clip-path-group7 {
+  height: auto;
+  position: absolute;
+  left: 14.67px;
+  top: 48px;
+  overflow: visible;
+}
+.schedule-icon {
+  width: 59px;
+  height: 95px;
+  position: absolute;
+  left: 416px;
+  top: 67.05px;
+  overflow: hidden;
+}
+.clip-path-group8 {
+  height: auto;
+  position: absolute;
+  left: 0px;
+  top: 0.3px;
+  overflow: visible;
+}
+.clip-path-group9 {
+  height: auto;
+  position: absolute;
+  left: 0px;
+  top: 0.3px;
+  overflow: visible;
+}
+.clip-path-group10 {
+  height: auto;
+  position: absolute;
+  left: 4.92px;
+  top: 22.6px;
+  overflow: visible;
+}
+.equipement {
+  width: 58.1px;
+  height: 94px;
+  position: absolute;
+  left: 683px;
+  top: 67.05px;
+  overflow: hidden;
+}
+.clip-path-group11 {
+  height: auto;
+  position: absolute;
+  left: 0px;
+  top: 0.3px;
+  overflow: visible;
+}
+.clip-path-group12 {
+  height: auto;
+  position: absolute;
+  left: 0px;
+  top: 0.3px;
+  overflow: visible;
+}
+.vector2 {
+  width: 95.63%;
+  height: 50.16%;
+  position: absolute;
+  right: 4.37%;
+  left: 0%;
+  bottom: 25.64%;
+  top: 24.2%;
+  overflow: visible;
+}
+.finance-1 {
+  width: 67px;
+  height: 95px;
+  position: absolute;
+  left: 954px;
+  top: 67.05px;
+  overflow: hidden;
+}
+.clip-path-group13 {
+  height: auto;
+  position: absolute;
+  left: 0px;
+  top: 0.21px;
+  overflow: visible;
+}
+.clip-path-group14 {
+  height: auto;
+  position: absolute;
+  left: 4px;
+  top: 0.21px;
+  overflow: visible;
+}
+.clip-path-group15 {
+  height: auto;
+  position: absolute;
+  left: 0px;
+  top: 29px;
+  overflow: visible;
+}
+.alumni-1 {
+  width: 60px;
+  height: 95px;
+  position: absolute;
+  left: 1235px;
+  top: 67.05px;
+  overflow: hidden;
+}
+.clip-path-group16 {
+  height: auto;
+  position: absolute;
+  left: 0.31px;
+  top: 0px;
+  overflow: visible;
+}
+.clip-path-group17 {
+  height: auto;
+  position: absolute;
+  left: 0.31px;
+  top: 26.74px;
+  overflow: visible;
+}
+._3-injured-12-active {
+  color: rgba(0, 0, 0, 0.51);
+  text-align: left;
+  font-family: "Inter-Bold", sans-serif;
+  font-size: 11.5px;
+  font-weight: 700;
+  position: absolute;
+  left: 19.68px;
+  top: 175.33px;
+}
+.current-balance2 {
+  color: rgba(0, 0, 0, 0.51);
+  text-align: left;
+  font-family: "Inter-Bold", sans-serif;
+  font-size: 11.5px;
+  font-weight: 700;
+  position: absolute;
+  left: 852.6px;
+  top: 184.83px;
+}
+.upcoming-games2 {
+  color: rgba(0, 0, 0, 0.51);
+  text-align: left;
+  font-family: "Inter-Bold", sans-serif;
+  font-size: 11.5px;
+  font-weight: 700;
+  position: absolute;
+  left: 306.15px;
+  top: 178.33px;
+}
+.items-out-of-stock-2-pending-orders {
+  color: rgba(0, 0, 0, 0.51);
+  text-align: left;
+  font-family: "Inter-Bold", sans-serif;
+  font-size: 11.5px;
+  font-weight: 700;
+  position: absolute;
+  left: 571.22px;
+  top: 184.83px;
+}
+._15 {
+  color: #1f48ff;
+  text-align: center;
+  font-family: "Inter-Bold", sans-serif;
+  font-size: 30px;
+  font-weight: 700;
+  position: absolute;
+  left: 37.19px;
+  top: 108.5px;
+}
+._3 {
+  color: #5e17eb;
+  text-align: center;
+  font-family: "Inter-Bold", sans-serif;
+  font-size: 30px;
+  font-weight: 700;
+  position: absolute;
+  left: 330.15px;
+  top: 108.5px;
+}
+._28 {
+  color: #000000;
+  text-align: center;
+  font-family: "Inter-Bold", sans-serif;
+  font-size: 30px;
+  font-weight: 700;
+  position: absolute;
+  left: 1146.26px;
+  top: 108.5px;
+}
+._250 {
+  color: #006837;
+  text-align: center;
+  font-family: "Inter-Bold", sans-serif;
+  font-size: 30px;
+  font-weight: 700;
+  position: absolute;
+  left: 846.66px;
+  top: 108.5px;
+}
+._32 {
+  color: #ed763d;
+  text-align: center;
+  font-family: "Inter-Bold", sans-serif;
+  font-size: 30px;
+  font-weight: 700;
+  position: absolute;
+  left: 600.62px;
+  top: 108.5px;
+}
+.bottom-section-of-db {
+  position: absolute;
+  inset: 0;
+}
+.activity {
+  background: #ffffff;
+  border-radius: 14.25px;
+  width: 492px;
+  height: 420px;
+  position: absolute;
+  left: 137.68px;
+  top: 552px;
+}
+.recent-activity {
+  color: #000000;
+  text-align: center;
+  font-family: "Inter-Bold", sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  text-transform: uppercase;
+  position: absolute;
+  left: 306.68px;
+  top: 586.8px;
+}
+.systems-modules {
+  background: #ffffff;
+  border-radius: 14.25px;
+  width: 492px;
+  height: 420px;
+  position: absolute;
+  left: 800.68px;
+  top: 552px;
+}
+.frame-9 {
+  width: 427.43px;
+  height: 315px;
+  position: absolute;
+  left: 833.36px;
+  top: 628.19px;
+}
+.right-side {
+  background: rgba(31, 72, 255, 0.85);
+  border-radius: 10px;
+  width: 427.43px;
+  height: 55px;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+}
+.rigth-side {
+  background: rgba(94, 23, 235, 0.38);
+  border-radius: 10px;
+  width: 427.43px;
+  height: 55px;
+  position: absolute;
+  left: 0px;
+  top: 65px;
+}
+.r-ight-side {
+  background: #ff914d;
+  border-radius: 10px;
+  width: 427.43px;
+  height: 55px;
+  position: absolute;
+  left: 0px;
+  top: 130px;
+}
+.right-side2 {
+  background: #006837;
+  border-radius: 10px;
+  width: 427.43px;
+  height: 55px;
+  position: absolute;
+  left: 0px;
+  top: 195px;
+}
+.right-side3 {
+  background: #8e99a2;
+  border-radius: 10px;
+  width: 427.43px;
+  height: 55px;
+  position: absolute;
+  left: 0px;
+  top: 260px;
+}
+.alumni-portal2 {
+  color: #ffffff;
+  text-align: center;
+  font-family: "Inter-SemiBold", sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  text-transform: uppercase;
+  position: absolute;
+  left: 80.96px;
+  top: 273.62px;
+  width: 264px;
+  height: 28.74px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.roster-player-information {
+  color: #ffffff;
+  text-align: left;
+  font-family: "Inter-SemiBold", sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  text-transform: uppercase;
+  position: absolute;
+  left: 81.32px;
+  top: 17px;
+  width: 264px;
+  height: 21px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.scheduling-notifications {
+  color: #ffffff;
+  text-align: left;
+  font-family: "Inter-SemiBold", sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  text-transform: uppercase;
+  position: absolute;
+  left: 82.11px;
+  top: 78.25px;
+  width: 264px;
+  height: 28.74px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.inventory-management2 {
+  color: #ffffff;
+  text-align: left;
+  font-family: "Inter-SemiBold", sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  text-transform: uppercase;
+  position: absolute;
+  left: 82.11px;
+  top: 143.37px;
+  width: 264px;
+  height: 28.74px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.system-modules {
+  color: #000000;
+  text-align: center;
+  font-family: "Inter-Bold", sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  text-transform: uppercase;
+  position: absolute;
+  left: 966.18px;
+  top: 586.8px;
+}
+.left-side {
+  background: #d9d9d9;
+  border-radius: 25px;
+  width: 425.08px;
+  height: 55px;
+  position: absolute;
+  left: 171.14px;
+  top: 628.19px;
+}
+.left-side2 {
+  background: #d9d9d9;
+  border-radius: 25px;
+  width: 425.08px;
+  height: 55px;
+  position: absolute;
+  left: 171.14px;
+  top: 801.95px;
+}
+.left-side3 {
+  background: #d9d9d9;
+  border-radius: 25px;
+  width: 425.08px;
+  height: 55px;
+  position: absolute;
+  left: 171.14px;
+  top: 715.07px;
+}
+.left-side4 {
+  background: #d9d9d9;
+  border-radius: 25px;
+  width: 425.08px;
+  height: 55px;
+  position: absolute;
+  left: 171.14px;
+  top: 888.82px;
+}
+.financial-reporting2 {
+  color: #ffffff;
+  text-align: center;
+  font-family: "Inter-SemiBold", sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  text-transform: uppercase;
+  position: absolute;
+  left: 914.32px;
+  top: 836.68px;
+  width: 264px;
+  height: 28.74px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

@@ -1,0 +1,350 @@
+.practice-page,
+.practice-page * {
+  box-sizing: border-box;
+}
+.practice-page {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 71, 71, 1) 0%,
+    rgba(183, 51, 51, 1) 33.65384638309479%,
+    rgba(170, 47, 47, 1) 62.0192289352417%,
+    rgba(153, 42, 42, 1) 100%
+  );
+  height: 1024px;
+  position: relative;
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+}
+.rectangle-1 {
+  background: rgba(31, 31, 33, 0.82);
+  width: 1455px;
+  height: 154px;
+  position: absolute;
+  left: -15px;
+  top: 0px;
+}
+.pages-toggles {
+  display: flex;
+  flex-direction: row;
+  gap: 40px;
+  row-gap: 0px;
+  align-items: flex-start;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  width: 1021px;
+  position: absolute;
+  left: 378px;
+  top: 59px;
+}
+.dashboard {
+  color: #ffffff;
+  text-align: left;
+  font-family: "Inter-Regular", sans-serif;
+  font-size: 32px;
+  font-weight: 400;
+  position: relative;
+}
+.roster {
+  color: #ffffff;
+  text-align: left;
+  font-family: "Inter-Regular", sans-serif;
+  font-size: 32px;
+  font-weight: 400;
+  position: relative;
+}
+.schedule {
+  color: #ffffff;
+  text-align: left;
+  font-family: "Inter-Regular", sans-serif;
+  font-size: 32px;
+  font-weight: 400;
+  position: relative;
+}
+.equipment {
+  color: #ffffff;
+  text-align: left;
+  font-family: "Inter-Regular", sans-serif;
+  font-size: 32px;
+  font-weight: 400;
+  position: relative;
+}
+.frame-1 {
+  display: flex;
+  flex-direction: row;
+  gap: 32px;
+  align-items: center;
+  justify-content: flex-start;
+  flex-shrink: 0;
+  position: relative;
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+}
+.frame-8 {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+.finances {
+  color: #ffffff;
+  text-align: left;
+  font-family: "Inter-Regular", sans-serif;
+  font-size: 32px;
+  font-weight: 400;
+  position: relative;
+}
+.alumni {
+  color: #ffffff;
+  text-align: left;
+  font-family: "Inter-Regular", sans-serif;
+  font-size: 32px;
+  font-weight: 400;
+  position: relative;
+}
+.team-logo {
+  width: 155px;
+  height: 155px;
+  position: absolute;
+  left: 36px;
+  top: 0px;
+  object-fit: cover;
+  aspect-ratio: 1;
+}
+.scheduling-notification-manage-games-practices-and-automated-smtp-email-notifications {
+  color: #ffffff;
+  text-align: left;
+  position: absolute;
+  left: 126.17px;
+  top: 210.4px;
+}
+.scheduling-notification-manage-games-practices-and-automated-smtp-email-notifications-span {
+  font-family: "Inter-Bold", sans-serif;
+  font-size: 30px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.scheduling-notification-manage-games-practices-and-automated-smtp-email-notifications-span2 {
+  font-family: "Inter-Regular", sans-serif;
+  font-size: 19px;
+  font-weight: 400;
+}
+.group-1 {
+  height: auto;
+  position: absolute;
+  left: 86px;
+  top: 310.64px;
+  overflow: visible;
+}
+.add-player-button {
+  position: absolute;
+  inset: 0;
+}
+.add-player-button2 {
+  background: #5e17eb;
+  border-radius: 10px;
+  padding: 17px 82px 17px 81px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
+  width: 225px;
+  height: 55px;
+  position: absolute;
+  left: 1076.5px;
+  top: 414.65px;
+}
+.add-practice {
+  color: #ffffff;
+  text-align: right;
+  font-family: "Inter-SemiBold", sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  text-transform: uppercase;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.add-svgrepo-com-1 {
+  width: 3.82%;
+  height: 5.37%;
+  position: absolute;
+  right: 19.55%;
+  left: 76.63%;
+  bottom: 54.14%;
+  top: 40.49%;
+  overflow: visible;
+}
+.practice-schedule {
+  color: #000000;
+  text-align: center;
+  font-family: "Inter-Bold", sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  text-transform: uppercase;
+  position: absolute;
+  left: 119.5px;
+  top: 431.65px;
+}
+.group-12 {
+  height: auto;
+  position: absolute;
+  left: 83.53px;
+  top: 407.57px;
+  overflow: visible;
+}
+.tab-1 {
+  background: #d9d9d9;
+  border-radius: 10px;
+  padding: 18px 40px 18px 44px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  width: 175px;
+  height: 56px;
+  position: absolute;
+  left: 123px;
+  top: 338px;
+}
+.game-schedule {
+  color: #000000;
+  text-align: center;
+  font-family: "Inter-Bold", sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  text-transform: uppercase;
+  position: relative;
+}
+.tab-2 {
+  background: #d9d9d9;
+  border-radius: 10px;
+  padding: 18px 40px 18px 44px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  width: 158px;
+  height: 56px;
+  position: absolute;
+  left: 315px;
+  top: 338px;
+}
+.practices {
+  color: #000000;
+  text-align: center;
+  font-family: "Inter-Bold", sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  text-transform: uppercase;
+  position: relative;
+}
+.tab-3 {
+  background: #d9d9d9;
+  border-radius: 10px;
+  padding: 18px 40px 18px 44px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  width: 215px;
+  height: 56.3px;
+  position: absolute;
+  left: 490px;
+  top: 338px;
+}
+.email-notifications {
+  color: #000000;
+  text-align: center;
+  font-family: "Inter-Bold", sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  text-transform: uppercase;
+  position: relative;
+}
+.frame-13 {
+  background: #d9d9d9;
+  border-radius: 10px;
+  padding: 18px 40px 18px 44px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  width: 1182px;
+  height: 148px;
+  position: absolute;
+  left: 113.5px;
+  top: 489.83px;
+}
+.terps-ice-hockey-practice-date-time-7-00-pm-location-rink-ice-rink-com {
+  text-align: left;
+  font-family: "Inter-Bold", sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  text-transform: uppercase;
+  position: relative;
+  width: 1153.32px;
+}
+.terps-ice-hockey-practice-date-time-7-00-pm-location-rink-ice-rink-com-span {
+  color: #f30e0e;
+}
+.terps-ice-hockey-practice-date-time-7-00-pm-location-rink-ice-rink-com-span2 {
+  color: #000000;
+}
+.frame-14 {
+  background: #d9d9d9;
+  border-radius: 10px;
+  padding: 18px 40px 18px 44px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  width: 1182px;
+  height: 148px;
+  position: absolute;
+  left: 120px;
+  top: 662px;
+}
+.frame-15 {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+.frame-16 {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+.terps-ice-hockey-practice-date-time-7-00-pm-location-rink-ice-rink-com2 {
+  text-align: left;
+  font-family: "Inter-Bold", sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  text-transform: uppercase;
+  position: relative;
+  width: 1154px;
+  height: 120px;
+}
+.terps-ice-hockey-practice-date-time-7-00-pm-location-rink-ice-rink-com-2-span {
+  color: #f30e0e;
+}
+.terps-ice-hockey-practice-date-time-7-00-pm-location-rink-ice-rink-com-2-span2 {
+  color: #000000;
+}
