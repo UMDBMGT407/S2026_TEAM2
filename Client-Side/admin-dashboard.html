@@ -56,39 +56,39 @@
         <!-- align links to the right -->
         <ul class="navbar-nav ms-auto">
           
-  <li class="nav-item">
-    <a class="nav-link" href="index.html">Public Site</a>
-  </li>
+          <li class="nav-item">
+            <a class="nav-link" href="index.html">Public Site</a>
+          </li>
           
-  <li class="nav-item">
-    <a class="nav-link active" href="admin-dashboard.html">Dashboard</a>
-  </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="admin-dashboard.html">Dashboard</a>
+          </li>
 
-  <li class="nav-item">
-    <a class="nav-link" href="roster.html">Roster</a>
-  </li>
+          <li class="nav-item">
+            <a class="nav-link" href="roster.html">Roster</a>
+          </li>
 
-  <li class="nav-item">
-    <a class="nav-link" href="schedule.html">Schedule</a>
-  </li>
+          <li class="nav-item">
+            <a class="nav-link" href="schedule.html">Schedule</a>
+          </li>
 
-  <li class="nav-item">
-    <a class="nav-link" href="equipment.html">Equipment</a>
-  </li>
+          <li class="nav-item">
+            <a class="nav-link" href="equipment.html">Equipment</a>
+          </li>
 
-  <li class="nav-item">
-    <a class="nav-link" href="finances.html">Finances</a>
-  </li>
+          <li class="nav-item">
+            <a class="nav-link" href="finances.html">Finances</a>
+          </li>
 
-  <li class="nav-item">
-    <a class="nav-link" href="alumni.html">Alumni</a>
-  </li>
+          <li class="nav-item">
+            <a class="nav-link" href="alumni.html">Alumni</a>
+          </li>
 
-  <li class="nav-item">
-    <a class="nav-link" href="newsletters.html">Newsletters</a>
-  </li>
+          <li class="nav-item">
+            <a class="nav-link" href="newsletters.html">Newsletters</a>
+          </li>
 
-</ul>
+        </ul>
 
       </div>
     </div>
@@ -155,31 +155,37 @@
 
     </div>
 
-   <!-- second row with finance cards -->
-<div class="row g-4 mt-1">
+    <!-- second row with finance cards -->
+    <div class="row g-4 mt-1">
 
-  <!-- total revenue card -->
-  <div class="col-md-4">
-    <div class="card p-4 card-box text-center">
-      <h3>Total Revenue</h3>
-      <p class="display-6 text-success">$15,200</p>
-      <p>Alumni donations and ticket sales</p>
+      <!-- total revenue card -->
+      <div class="col-md-4">
+        <div class="card p-4 card-box text-center">
+          <h3>Total Revenue</h3>
+          <p class="display-6 text-success">$15,200</p>
+          <p>Alumni donations and ticket sales</p>
+        </div>
+      </div>
+
+      <!-- NEW: available funds card -->
+      <div class="col-md-4">
+        <div class="card p-4 card-box text-center">
+          <h3>Available Funds</h3>
+          <p class="display-6 text-success">$5,350</p>
+          <p>Alumni donations and ticket sales</p>
+        </div>
+      </div>
+
+      <!-- total expenses card -->
+      <div class="col-md-4">
+        <div class="card p-4 card-box text-center">
+          <h3>Total Expenses</h3>
+          <p class="display-6 text-danger">$9,850</p>
+          <p>Equipment and facility costs</p>
+        </div>
+      </div>
+
     </div>
-  </div>
-
-  <!-- empty column just for spacing -->
-  <div class="col-md-4"></div>
-
-  <!-- total expenses card -->
-  <div class="col-md-4">
-    <div class="card p-4 card-box text-center">
-      <h3>Total Expenses</h3>
-      <p class="display-6 text-danger">$9,850</p>
-      <p>Equipment and facility costs</p>
-    </div>
-  </div>
-
-</div>
 
     <!-- third row of dashboard -->
     <div class="row g-4 mt-1">
@@ -190,7 +196,6 @@
 
           <h3>Recent Activity</h3>
 
-          <!-- list of recent actions in the system -->
           <ul class="mt-3">
             <li>New player added to roster</li>
             <li>Schedule updated for next week</li>
@@ -201,57 +206,62 @@
         </div>
       </div>
 
-      <!-- system modules links -->
-      <div class="col-md-6">
+      <!-- system modules -->
+      <div class="col-lg-6">
         <div class="card p-4 card-box h-100">
 
           <h3>System Modules</h3>
 
-          <!-- links to the different system pages changed to center the menu -->
           <div class="row g-3 mt-2 justify-content-center">
 
-            <!-- roster module -->
             <div class="col-12">
-              <a href="roster.html" class="module-link roster-bg">
-                Roster / Player Information
-              </a>
+              <a href="roster.html" class="module-link roster-bg">Roster / Player Information</a>
             </div>
 
-            <!-- schedule module -->
             <div class="col-12">
-              <a href="schedule.html" class="module-link schedule-bg">
-                Scheduling & Notifications
-              </a>
+              <a href="schedule.html" class="module-link schedule-bg">Scheduling & Notifications</a>
             </div>
 
-            <!-- equipment module -->
             <div class="col-12">
-              <a href="equipment.html" class="module-link equipment-bg">
-                Inventory Management
-              </a>
+              <a href="equipment.html" class="module-link equipment-bg">Inventory Management</a>
             </div>
 
-            <!-- finances module -->
             <div class="col-12">
-              <a href="finances.html" class="module-link finances-bg">
-                Financial Reporting
-              </a>
+              <a href="finances.html" class="module-link finances-bg">Financial Reporting</a>
             </div>
 
-            <!-- alumni module -->
             <div class="col-12">
-              <a href="alumni.html" class="module-link alumni-bg">
-                Alumni Portal
-              </a>
-            </div>
-            <!-- newsletter module -->
-            <div class="col-12">
-              <a href="newsletters.html" class="module-link newsletter-bg">
-                Newsletter Management
-              </a>
+              <a href="alumni.html" class="module-link alumni-bg">Alumni Portal</a>
             </div>
 
-</div>
+            <div class="col-12">
+              <a href="newsletters.html" class="module-link newsletter-bg">Newsletter Management</a>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- NEW: budget overview -->
+      <div class="col-lg-6">
+        <div class="card p-4 card-box h-100">
+
+          <h3>Budget Overview</h3>
+
+          <div class="mb-3 p-4 rounded" style="background:#a61919; color:white;">
+            <h4>Predicted Spend</h4>
+            <p class="display-6 text-center">$17,850</p>
+          </div>
+
+          <div class="mb-3 p-4 rounded" style="background:#b8a315; color:white;">
+            <h4>Actual Spend</h4>
+            <p class="display-6 text-center">$9,850</p>
+          </div>
+
+          <div class="p-4 rounded" style="background:black; color:white;">
+            <h4>Variance</h4>
+            <p class="display-6 text-center">$8,000</p>
           </div>
 
         </div>
