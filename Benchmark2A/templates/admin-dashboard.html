@@ -34,7 +34,7 @@
       <a class="navbar-brand d-flex align-items-center" href="admin-dashboard.html">
 
         <!-- team logo image, maybe later we can improve it -->
-        <img src="images/team-logo0.png" alt="Team Logo" class="logo">
+        <img src="{{ url_for('static', filename='images/team-logo0.png') }}" alt="Team Logo" class="logo">
 
         <!-- system name- please change it -->
         Hockey System
@@ -57,35 +57,35 @@
         <ul class="navbar-nav ms-auto">
           
           <li class="nav-item">
-            <a class="nav-link" href="index.html">Public Site</a>
+            <a class="nav-link" href="/">Public Site</a>
           </li>
           
           <li class="nav-item">
-            <a class="nav-link active" href="admin-dashboard.html">Dashboard</a>
+            <a class="nav-link active" href="/admin">Dashboard</a>
           </li>
 
           <li class="nav-item">
-            <a class="nav-link" href="roster.html">Roster</a>
+            <a class="nav-link" href="/roster">Roster</a>
           </li>
 
           <li class="nav-item">
-            <a class="nav-link" href="schedule.html">Schedule</a>
+            <a class="nav-link" href="/schedule">Schedule</a>
           </li>
 
           <li class="nav-item">
-            <a class="nav-link" href="equipment.html">Equipment</a>
+            <a class="nav-link" href="/equipment">Equipment</a>
           </li>
 
           <li class="nav-item">
-            <a class="nav-link" href="finances.html">Finances</a>
+            <a class="nav-link" href="/finances">Finances</a>
           </li>
 
           <li class="nav-item">
-            <a class="nav-link" href="alumni.html">Alumni</a>
+            <a class="nav-link" href="/alumni">Alumni</a>
           </li>
 
           <li class="nav-item">
-            <a class="nav-link" href="newsletters.html">Newsletters</a>
+            <a class="nav-link" href="/newsletters">Newsletters</a>
           </li>
 
         </ul>
@@ -215,27 +215,27 @@
           <div class="row g-3 mt-2 justify-content-center">
 
             <div class="col-12">
-              <a href="roster.html" class="module-link roster-bg">Roster / Player Information</a>
+              <a href="/roster" class="module-link roster-bg">Roster / Player Information</a>
             </div>
 
             <div class="col-12">
-              <a href="schedule.html" class="module-link schedule-bg">Scheduling & Notifications</a>
+              <a href="/schedule" class="module-link schedule-bg">Scheduling & Notifications</a>
             </div>
 
             <div class="col-12">
-              <a href="equipment.html" class="module-link equipment-bg">Inventory Management</a>
+              <a href="/equipment" class="module-link equipment-bg">Inventory Management</a>
             </div>
 
             <div class="col-12">
-              <a href="finances.html" class="module-link finances-bg">Financial Reporting</a>
+              <a href="/finances" class="module-link finances-bg">Financial Reporting</a>
             </div>
 
             <div class="col-12">
-              <a href="alumni.html" class="module-link alumni-bg">Alumni Portal</a>
+              <a href="/alumni" class="module-link alumni-bg">Alumni Portal</a>
             </div>
 
             <div class="col-12">
-              <a href="newsletters.html" class="module-link newsletter-bg">Newsletter Management</a>
+              <a href="/newsletters" class="module-link newsletter-bg">Newsletter Management</a>
             </div>
 
           </div>
