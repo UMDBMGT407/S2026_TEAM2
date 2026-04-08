@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <!-- makes page responsive -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Alumni Portal</title>
+
+  <!-- bootstrap css -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- shared css file -->
+  <link rel="stylesheet" href="css/newstyle.css">
+</head>
+<body>
+
+  <!-- top navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="admin-dashboard.html">
+        <img src="images/team-logo0.png" alt="Team Logo" class="logo">
+        Hockey System
+      </a>
+
+      <!-- button for smaller screens -->
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <!-- nav links -->
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="index.html">Public Site</a></li>
+          <li class="nav-item"><a class="nav-link" href="admin-dashboard.html">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="roster.html">Roster</a></li>
+          <li class="nav-item"><a class="nav-link" href="schedule.html">Schedule</a></li>
+          <li class="nav-item"><a class="nav-link" href="equipment.html">Equipment</a></li>
+          <li class="nav-item"><a class="nav-link" href="finances.html">Finances</a></li>
+          <li class="nav-item"><a class="nav-link active" href="alumni.html">Alumni</a></li>
+          <li class="nav-item"><a class="nav-link" href="newsletters.html">Newsletters</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- red banner -->
+  <section class="hero text-center">
+    <div class="container">
+      <h1>Alumni Portal</h1>
+      <p class="mb-0">Manage alumni records, newsletters, and donations</p>
+    </div>
+  </section>
+
+  <!-- main content -->
+  <main class="container my-5">
+
+    <!-- top row with search and action buttons -->
+    <div class="row mb-4">
+      <div class="col-md-6 mb-3 mb-md-0">
+        <input type="text" class="form-control" placeholder="Search alumni by name, class year, or occupation">
+      </div>
+
+      <div class="col-md-3 mb-3 mb-md-0">
+        <!-- add alumni button -->
+        <button type="button"
+                class="btn btn-danger w-100"
+                data-bs-toggle="modal"
+                data-bs-target="#addAlumniModal">
+          Add Alumni
+        </button>
+      </div>
+
+      <div class="col-md-3">
+        <!-- newsletter button -->
+        <button type="button"
+                class="btn btn-secondary w-100"
+                data-bs-toggle="modal"
+                data-bs-target="#newsletterModal">
+          Newsletters
+        </button>
+      </div>
+    </div>
+
+    <!-- summary cards -->
+    <div class="row g-4 mb-4">
+
+      <div class="col-md-4">
+        <div class="card p-4 card-box text-center">
+          <h3>Total Donations</h3>
+          <p class="display-6 text-success">$15,200</p>
+          <p class="mb-0">Aligned with finance report</p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card p-4 card-box text-center">
+          <h3>Active Alumni</h3>
+          <p class="display-6 text-primary">42</p>
+          <p class="mb-0">Registered in the portal</p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card p-4 card-box text-center">
+          <h3>Newsletter Subscribers</h3>
+          <p class="display-6 text-dark">36</p>
+          <p class="mb-0">Subscribed to updates</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- tabs -->
+    <ul class="nav nav-tabs mb-4" id="alumniTabs" role="tablist">
+
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active"
+                id="records-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#records-pane"
+                type="button"
+                role="tab">
+          Alumni Records
+        </button>
+      </li>
+
+      <li class="nav-item" role="presentation">
+        <button class="nav-link"
+                id="donations-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#donations-pane"
+                type="button"
+                role="tab">
+          Donation Summary
+        </button>
+      </li>
+
+    </ul>
+
+    <!-- tab content -->
+    <div class="tab-content">
+
+      <!-- ALUMNI RECORDS TAB -->
+      <div class="tab-pane fade show active" id="records-pane" role="tabpanel">
+
+        <div class="row g-4">
+
+          <div class="col-md-6">
+            <div class="card p-4 card-box h-100">
+              <div class="d-flex align-items-center mb-3">
+                <img src="images/team-logo0.png" alt="Alumni Profile" class="profile-img me-3">
+                <div>
+                  <h4 class="mb-1">Marco Rossi</h4>
+                  <p class="mb-0">Class of 2022 • Defense</p>
+                </div>
+              </div>
+              <p><strong>Email:</strong> mrossi@email.com</p>
+              <p><strong>Occupation:</strong> Financial Analyst</p>
+              <div class="donation-box">
+                <strong>Donated:</strong> $1,500
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card p-4 card-box h-100">
+              <div class="d-flex align-items-center mb-3">
+                <img src="images/team-logo0.png" alt="Alumni Profile" class="profile-img me-3">
+                <div>
+                  <h4 class="mb-1">Jake Thompson</h4>
+                  <p class="mb-0">Class of 2021 • Forward</p>
+                </div>
+              </div>
+              <p><strong>Email:</strong> jthompson@email.com</p>
+              <p><strong>Occupation:</strong> Marketing Coordinator</p>
+              <div class="donation-box">
+                <strong>Donated:</strong> $2,000
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card p-4 card-box h-100">
+              <div class="d-flex align-items-center mb-3">
+                <img src="images/team-logo0.png" alt="Alumni Profile" class="profile-img me-3">
+                <div>
+                  <h4 class="mb-1">Liam Connor</h4>
+                  <p class="mb-0">Class of 2020 • Goalie</p>
+                </div>
+              </div>
+              <p><strong>Email:</strong> loconnor@email.com</p>
+              <p><strong>Occupation:</strong> Operations Manager</p>
+              <div class="donation-box">
+                <strong>Donated:</strong> $750
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card p-4 card-box h-100">
+              <div class="d-flex align-items-center mb-3">
+                <img src="images/team-logo0.png" alt="Alumni Profile" class="profile-img me-3">
+                <div>
+                  <h4 class="mb-1">Jake Lake</h4>
+                  <p class="mb-0">Class of 2019 • Defense</p>
+                </div>
+              </div>
+              <p><strong>Email:</strong> jekkol@email.com</p>
+              <p><strong>Occupation:</strong> Engineer</p>
+              <div class="not-donated-box">
+                <strong>Status:</strong> Has not donated
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- DONATION SUMMARY TAB -->
+      <div class="tab-pane fade" id="donations-pane" role="tabpanel">
+
+        <div class="card p-4 card-box mb-4">
+          <h3>Donation Summary</h3>
+
+          <div class="table-responsive mt-3">
+            <table class="table table-striped table-bordered align-middle">
+              <thead class="table-dark">
+                <tr>
+                  <th>Alumni Name</th>
+                  <th>Class Year</th>
+                  <th>Donation Status</th>
+                  <th>Total Donated</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Marco Rossi</td>
+                  <td>2022</td>
+                  <td><span class="badge bg-success">Donated</span></td>
+                  <td>$1,500</td>
+                </tr>
+                <tr>
+                  <td>Jake Thompson</td>
+                  <td>2021</td>
+                  <td><span class="badge bg-success">Donated</span></td>
+                  <td>$2,000</td>
+                </tr>
+                <tr>
+                  <td>Liam Connor</td>
+                  <td>2020</td>
+                  <td><span class="badge bg-success">Donated</span></td>
+                  <td>$750</td>
+                </tr>
+                <tr>
+                  <td>Jake Lake</td>
+                  <td>2019</td>
+                  <td><span class="badge bg-danger">No Donation</span></td>
+                  <td>$0</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="row g-4">
+          <div class="col-md-6">
+            <div class="card p-4 card-box h-100">
+              <h3>Donation Breakdown</h3>
+              <p><strong>Total Donations:</strong> $15,200</p>
+              <p><strong>Top Donor Contribution:</strong> $2,500</p>
+              <p><strong>Average Donation:</strong> $633</p>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card p-4 card-box h-100">
+              <h3>Donation Notes</h3>
+              <ul class="mb-0">
+                <li>Most alumni donations are one-time annual contributions</li>
+                <li>Donations support equipment, travel, and rink expenses</li>
+                <li>Potential to increase giving through newsletter campaigns</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- back button -->
+    <div class="mt-4">
+      <a href="index.html" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+
+  </main>
+
+  <!-- ADD ALUMNI MODAL -->
+  <div class="modal fade" id="addAlumniModal" tabindex="-1" aria-labelledby="addAlumniModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title" id="addAlumniModalLabel">Add New Alumni</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <form>
+
+            <!-- first and last name -->
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="alumniFirstName" class="form-label">First Name</label>
+                <input type="text" class="form-control" id="alumniFirstName" placeholder="Enter first name">
+              </div>
+
+              <div class="col-md-6">
+                <label for="alumniLastName" class="form-label">Last Name</label>
+                <input type="text" class="form-control" id="alumniLastName" placeholder="Enter last name">
+              </div>
+            </div>
+
+            <!-- class year and position -->
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="alumniClassYear" class="form-label">Class Year</label>
+                <input type="number" class="form-control" id="alumniClassYear" placeholder="Enter class year">
+              </div>
+
+              <div class="col-md-6">
+                <label for="alumniPosition" class="form-label">Former Position</label>
+                <select class="form-select" id="alumniPosition">
+                  <option selected>Select position</option>
+                  <option>Forward</option>
+                  <option>Defense</option>
+                  <option>Goalie</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- email and occupation -->
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="alumniEmail" class="form-label">Email</label>
+                <input type="email" class="form-control" id="alumniEmail" placeholder="Enter email">
+              </div>
+
+              <div class="col-md-6">
+                <label for="alumniOccupation" class="form-label">Occupation</label>
+                <input type="text" class="form-control" id="alumniOccupation" placeholder="Enter occupation">
+              </div>
+            </div>
+
+            <!-- donation status -->
+            <div class="mb-3">
+              <label for="alumniDonationStatus" class="form-label">Donation Status</label>
+              <select class="form-select" id="alumniDonationStatus">
+                <option selected>Select status</option>
+                <option>Donated</option>
+                <option>Has Not Donated</option>
+              </select>
+            </div>
+
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-success">Save Alumni</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- NEWSLETTER MODAL -->
+  <div class="modal fade" id="newsletterModal" tabindex="-1" aria-labelledby="newsletterModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title" id="newsletterModalLabel">Newsletter Subscription</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <form>
+
+            <!-- only email as requested -->
+            <div class="mb-3">
+              <label for="newsletterEmail" class="form-label">Email Address</label>
+              <input type="email" class="form-control" id="newsletterEmail" placeholder="Enter email">
+            </div>
+
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary">Add to Newsletter</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- bootstrap javascript -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

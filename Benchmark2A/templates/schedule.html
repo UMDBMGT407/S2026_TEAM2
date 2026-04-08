@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <!-- makes page responsive -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Scheduling & Notifications</title>
+
+  <!-- bootstrap css -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- shared css file -->
+  <link rel="stylesheet" href="css/newstyle.css">
+</head>
+<body>
+
+  <!-- top navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="admin-dashboard.html">
+        <img src="images/team-logo0.png" alt="Team Logo" class="logo">
+        Hockey System
+      </a>
+
+      <!-- button for smaller screens -->
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <!-- navigation links -->
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="index.html">Public Site</a></li>
+          <li class="nav-item"><a class="nav-link" href="admin-dashboard.html">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="roster.html">Roster</a></li>
+          <li class="nav-item"><a class="nav-link active" href="schedule.html">Schedule</a></li>
+          <li class="nav-item"><a class="nav-link" href="equipment.html">Equipment</a></li>
+          <li class="nav-item"><a class="nav-link" href="finances.html">Finances</a></li>
+          <li class="nav-item"><a class="nav-link" href="alumni.html">Alumni</a></li>
+          <li class="nav-item"><a class="nav-link" href="newsletters.html">Newsletters</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- red banner -->
+  <section class="hero text-center">
+    <div class="container">
+      <h1>Scheduling & Notifications</h1>
+      <p class="mb-0">Manage games, practices, and automated email notifications</p>
+    </div>
+  </section>
+
+  <!-- main content -->
+  <main class="container my-5">
+
+    <!-- top row with title and action buttons -->
+    <div class="row mb-4">
+      <div class="col-md-4 mb-3 mb-md-0">
+        <h2 class="mb-0">Schedule Module</h2>
+      </div>
+
+      <!-- buttons for different actions -->
+      <div class="col-md-8 text-md-end">
+        <button type="button"
+                class="btn btn-danger me-2 mb-2"
+                data-bs-toggle="modal"
+                data-bs-target="#addPracticeModal">
+          Add Practice
+        </button>
+
+        <button type="button"
+                class="btn btn-primary me-2 mb-2"
+                data-bs-toggle="modal"
+                data-bs-target="#addGameModal">
+          Add Game
+        </button>
+
+        <button type="button"
+                class="btn btn-success mb-2"
+                data-bs-toggle="modal"
+                data-bs-target="#sendMessageModal">
+          Send Message
+        </button>
+      </div>
+    </div>
+
+    <!-- tabs -->
+    <ul class="nav nav-tabs mb-4" id="scheduleTabs" role="tablist">
+
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active"
+                id="games-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#games-pane"
+                type="button"
+                role="tab">
+          Game Schedule
+        </button>
+      </li>
+
+      <li class="nav-item" role="presentation">
+        <button class="nav-link"
+                id="practices-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#practices-pane"
+                type="button"
+                role="tab">
+          Practices
+        </button>
+      </li>
+
+      <li class="nav-item" role="presentation">
+        <button class="nav-link"
+                id="emails-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#emails-pane"
+                type="button"
+                role="tab">
+          Email Notifications
+        </button>
+      </li>
+
+    </ul>
+
+    <!-- tab content -->
+    <div class="tab-content">
+
+      <!-- GAME SCHEDULE TAB -->
+      <div class="tab-pane fade show active" id="games-pane" role="tabpanel">
+        <div class="row g-4">
+
+          <div class="col-md-6">
+            <div class="card p-4 card-box h-100">
+              <h3>Upcoming Game</h3>
+              <p><strong>Opponent:</strong> Georgetown Club Hockey</p>
+              <p><strong>Date:</strong> March 18, 2026</p>
+              <p><strong>Time:</strong> 8:30 PM</p>
+              <p><strong>Location:</strong> UMD Ice Arena</p>
+              <p><strong>Status:</strong> Scheduled</p>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card p-4 card-box h-100">
+              <h3>Next Away Game</h3>
+              <p><strong>Opponent:</strong> Navy Club Hockey</p>
+              <p><strong>Date:</strong> March 22, 2026</p>
+              <p><strong>Time:</strong> 6:00 PM</p>
+              <p><strong>Location:</strong> Navy Ice Rink</p>
+              <p><strong>Status:</strong> Confirmed</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- PRACTICES TAB -->
+      <div class="tab-pane fade" id="practices-pane" role="tabpanel">
+        <div class="row g-4">
+
+          <div class="col-md-6">
+            <div class="card p-4 card-box h-100">
+              <h3>Practice 1</h3>
+              <p><strong>Title:</strong> Terps Ice Hockey Practice</p>
+              <p><strong>Date:</strong> March 12, 2026</p>
+              <p><strong>Time:</strong> 7:00 PM</p>
+              <p><strong>Location:</strong> Campus Ice Rink</p>
+              <p><strong>Email Contact:</strong> ice@rink.com</p>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card p-4 card-box h-100">
+              <h3>Practice 2</h3>
+              <p><strong>Title:</strong> Terps Ice Hockey Practice</p>
+              <p><strong>Date:</strong> March 14, 2026</p>
+              <p><strong>Time:</strong> 7:00 PM</p>
+              <p><strong>Location:</strong> Community Ice Arena</p>
+              <p><strong>Email Contact:</strong> ice@rink.com</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- EMAIL NOTIFICATIONS TAB -->
+      <div class="tab-pane fade" id="emails-pane" role="tabpanel">
+
+        <div class="card p-4 card-box mb-4">
+          <h3>Recent Notifications</h3>
+
+          <div class="table-responsive mt-3">
+            <table class="table table-striped table-bordered align-middle">
+              <thead class="table-dark">
+                <tr>
+                  <th>Date</th>
+                  <th>Event</th>
+                  <th>Recipients</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>03/10/2026</td>
+                  <td>Practice Reminder</td>
+                  <td>All Players</td>
+                  <td><span class="badge bg-success">Sent</span></td>
+                </tr>
+                <tr>
+                  <td>03/09/2026</td>
+                  <td>Game Schedule Update</td>
+                  <td>All Players</td>
+                  <td><span class="badge bg-success">Sent</span></td>
+                </tr>
+                <tr>
+                  <td>03/08/2026</td>
+                  <td>Equipment Pickup Notice</td>
+                  <td>Defense Players</td>
+                  <td><span class="badge bg-warning text-dark">Scheduled</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="row g-4">
+
+          <div class="col-md-6">
+            <div class="card p-4 card-box h-100">
+              <h3>Manual Notifications</h3>
+              <p><strong>Use case:</strong> Send a quick message to all players or selected groups.</p>
+              <p class="mb-0">Use the green <strong>Send Message</strong> button at the top of the page to open the message form.</p>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card p-4 card-box h-100">
+              <h3>Automatic Notifications</h3>
+              <ul class="mb-0">
+                <li>Practice reminder sent 24 hours before practice</li>
+                <li>Game reminder sent 48 hours before game</li>
+                <li>Schedule change alert sent immediately</li>
+                <li>Email notifications support SMTP integration later</li>
+              </ul>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- back button -->
+    <div class="mt-4">
+      <a href="index.html" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+
+  </main>
+
+  <!-- ADD PRACTICE MODAL -->
+  <div class="modal fade" id="addPracticeModal" tabindex="-1" aria-labelledby="addPracticeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title" id="addPracticeModalLabel">Add New Practice</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <form>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="practiceTitle" class="form-label">Practice Title</label>
+                <input type="text" class="form-control" id="practiceTitle" placeholder="Enter practice title">
+              </div>
+
+              <div class="col-md-6">
+                <label for="practiceLocation" class="form-label">Location</label>
+                <input type="text" class="form-control" id="practiceLocation" placeholder="Enter location">
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-4">
+                <label for="practiceDate" class="form-label">Date</label>
+                <input type="date" class="form-control" id="practiceDate">
+              </div>
+
+              <div class="col-md-4">
+                <label for="practiceTime" class="form-label">Time</label>
+                <input type="time" class="form-control" id="practiceTime">
+              </div>
+
+              <div class="col-md-4">
+                <label for="practiceEmail" class="form-label">Contact Email</label>
+                <input type="email" class="form-control" id="practiceEmail" placeholder="Enter email">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="practiceNotes" class="form-label">Notes</label>
+              <textarea class="form-control" id="practiceNotes" rows="3" placeholder="Extra notes for players"></textarea>
+            </div>
+
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="sendPracticeEmail">
+              <label class="form-check-label" for="sendPracticeEmail">
+                Send email notification to all players
+              </label>
+            </div>
+
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-success">Save Practice</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD GAME MODAL -->
+  <div class="modal fade" id="addGameModal" tabindex="-1" aria-labelledby="addGameModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title" id="addGameModalLabel">Add New Game</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <form>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="opponentName" class="form-label">Opponent</label>
+                <input type="text" class="form-control" id="opponentName" placeholder="Enter opponent name">
+              </div>
+
+              <div class="col-md-6">
+                <label for="gameLocation" class="form-label">Location</label>
+                <input type="text" class="form-control" id="gameLocation" placeholder="Enter location">
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-4">
+                <label for="gameDate" class="form-label">Date</label>
+                <input type="date" class="form-control" id="gameDate">
+              </div>
+
+              <div class="col-md-4">
+                <label for="gameTime" class="form-label">Time</label>
+                <input type="time" class="form-control" id="gameTime">
+              </div>
+
+              <div class="col-md-4">
+                <label for="gameType" class="form-label">Game Type</label>
+                <select class="form-select" id="gameType">
+                  <option selected>Select type</option>
+                  <option>Home</option>
+                  <option>Away</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="gameNotes" class="form-label">Notes</label>
+              <textarea class="form-control" id="gameNotes" rows="3" placeholder="Extra notes for players"></textarea>
+            </div>
+
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="sendGameEmail">
+              <label class="form-check-label" for="sendGameEmail">
+                Send email notification to all players
+              </label>
+            </div>
+
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-success">Save Game</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- SEND MESSAGE MODAL -->
+  <div class="modal fade" id="sendMessageModal" tabindex="-1" aria-labelledby="sendMessageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title" id="sendMessageModalLabel">Send Message</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <form>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="messageSubject" class="form-label">Subject</label>
+                <input type="text" class="form-control" id="messageSubject" placeholder="Enter subject">
+              </div>
+
+              <div class="col-md-6">
+                <label for="messageRecipients" class="form-label">Recipients</label>
+                <select class="form-select" id="messageRecipients">
+                  <option selected>Select group</option>
+                  <option>All Players</option>
+                  <option>Coaches</option>
+                  <option>Injured Players</option>
+                  <option>Defense Players</option>
+                  <option>Forwards</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="messageBody" class="form-label">Message</label>
+              <textarea class="form-control" id="messageBody" rows="5" placeholder="Write the message here"></textarea>
+            </div>
+
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary">Send Message</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- bootstrap javascript -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

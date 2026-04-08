@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <!-- for phones and tablets -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Roster Management</title>
+
+  <!-- bootstrap css -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- our css file for the whole website only one file -->
+  <link rel="stylesheet" href="css/newstyle.css">
+</head>
+<body>
+
+  <!-- top navigation bar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+
+      <!-- logo + website name -->
+      <a class="navbar-brand d-flex align-items-center" href="admin-dashboard.html">
+        <img src="images/team-logo0.png" alt="Team Logo" class="logo">
+        Hockey System
+      </a>
+
+      <!-- hamburger button for smaller screens -->
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <!-- navbar links -->
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="index.html">Public Site</a></li>
+          <li class="nav-item"><a class="nav-link" href="admin-dashboard.html">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link active" href="roster.html">Roster</a></li>
+          <li class="nav-item"><a class="nav-link" href="schedule.html">Schedule</a></li>
+          <li class="nav-item"><a class="nav-link" href="equipment.html">Equipment</a></li>
+          <li class="nav-item"><a class="nav-link" href="finances.html">Finances</a></li>
+          <li class="nav-item"><a class="nav-link" href="alumni.html">Alumni</a></li>
+          <li class="nav-item"><a class="nav-link" href="newsletters.html">Newsletters</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- red banner section -->
+  <section class="hero text-center">
+    <div class="container">
+      <h1>Roster Management</h1>
+      <p class="mb-0">Manage player information and team roster</p>
+    </div>
+  </section>
+
+  <!-- main page content -->
+  <main class="container my-5">
+
+    <!-- white card with search + button + table -->
+    <div class="card p-4 card-box">
+
+      <!-- top row with search bar and add player button -->
+      <div class="row mb-4">
+
+        <div class="col-md-8 mb-3 mb-md-0">
+          <!-- search bar for player search -->
+          <input type="text" class="form-control" placeholder="Search by name, position, or jersey number">
+        </div>
+
+        <div class="col-md-4 text-md-end">
+          <!-- button to open popup form -->
+          <button class="btn btn-danger"
+                  data-bs-toggle="modal"
+                  data-bs-target="#addPlayerModal">
+            Add Player
+          </button>
+        </div>
+
+      </div>
+
+      <!-- responsive roster table -->
+      <div class="table-responsive">
+        <table class="table table-striped table-bordered align-middle">
+
+          <!-- table header -->
+          <thead class="table-dark">
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Position</th>
+              <th>Year</th>
+              <th>Injured</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+
+          <!-- sample data for prototype -->
+          <tbody>
+            <tr>
+              <td>10</td>
+              <td>Player One</td>
+              <td>Forward</td>
+              <td>Senior</td>
+              <td>No</td>
+              <td>player1@team.edu</td>
+              <td>555-111-1111</td>
+              <td>
+                <button class="btn btn-sm btn-primary mb-1">Edit</button>
+                <button class="btn btn-sm btn-danger mb-1">Delete</button>
+                <button class="btn btn-sm btn-warning mb-1"
+                        data-bs-toggle="modal"
+                        data-bs-target="#moveToAlumniModal">
+                  Move to Alumni
+                </button>
+              </td>
+            </tr>
+
+            <tr>
+              <td>22</td>
+              <td>Player Two</td>
+              <td>Defense</td>
+              <td>Junior</td>
+              <td>Yes</td>
+              <td>player2@team.edu</td>
+              <td>555-222-2222</td>
+              <td>
+                <button class="btn btn-sm btn-primary mb-1">Edit</button>
+                <button class="btn btn-sm btn-danger mb-1">Delete</button>
+                <button class="btn btn-sm btn-warning mb-1"
+                        data-bs-toggle="modal"
+                        data-bs-target="#moveToAlumniModal">
+                  Move to Alumni
+                </button>
+              </td>
+            </tr>
+
+            <tr>
+  <td>N/A</td>
+  <td>Coach Smith</td>
+  <td>Coach</td>
+  <td>N/A</td>
+  <td>No</td>
+  <td>coach@team.edu</td>
+  <td>555-888-9999</td>
+  <td>
+    <button class="btn btn-sm btn-primary">Edit</button>
+    <button class="btn btn-sm btn-danger">Delete</button>
+  </td>
+</tr>
+
+            <tr>
+              <td>7</td>
+              <td>Player Three</td>
+              <td>Goalie</td>
+              <td>Sophomore</td>
+              <td>No</td>
+              <td>player3@team.edu</td>
+              <td>555-333-3333</td>
+              <td>
+                <button class="btn btn-sm btn-primary mb-1">Edit</button>
+                <button class="btn btn-sm btn-danger mb-1">Delete</button>
+                <button class="btn btn-sm btn-warning mb-1"
+                        data-bs-toggle="modal"
+                        data-bs-target="#moveToAlumniModal">
+                  Move to Alumni
+                </button>
+              </td>
+            </tr>
+
+            <tr>
+              <td>14</td>
+              <td>Player Four</td>
+              <td>Forward</td>
+              <td>Freshman</td>
+              <td>No</td>
+              <td>player4@team.edu</td>
+              <td>555-444-4444</td>
+              <td>
+                <button class="btn btn-sm btn-primary mb-1">Edit</button>
+                <button class="btn btn-sm btn-danger mb-1">Delete</button>
+                <button class="btn btn-sm btn-warning mb-1"
+                        data-bs-toggle="modal"
+                        data-bs-target="#moveToAlumniModal">
+                  Move to Alumni
+                </button>
+              </td>
+            </tr>
+          </tbody>
+
+        </table>
+      </div>
+
+      <!-- back button -->
+      <div class="mt-3">
+        <a href="index.html" class="btn btn-secondary">Back to Dashboard</a>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- add player modal -->
+  <div class="modal fade" id="addPlayerModal" tabindex="-1" aria-labelledby="addPlayerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+
+        <!-- popup top part -->
+        <div class="modal-header">
+          <h5 class="modal-title" id="addPlayerModalLabel">Add New Player</h5>
+
+          <!-- close X button -->
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <!-- popup body with form -->
+        <div class="modal-body">
+          <form>
+
+            <!-- first and last name -->
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="firstName" class="form-label">First Name</label>
+                <input type="text" class="form-control" id="firstName" placeholder="Enter first name">
+              </div>
+
+              <div class="col-md-6">
+                <label for="lastName" class="form-label">Last Name</label>
+                <input type="text" class="form-control" id="lastName" placeholder="Enter last name">
+              </div>
+            </div>
+
+            <!-- jersey, position, year -->
+            <div class="row mb-3">
+              <div class="col-md-4">
+                <label for="jerseyNumber" class="form-label">Jersey Number</label>
+                <input type="number" class="form-control" id="jerseyNumber" placeholder="Example 24">
+              </div>
+
+              <div class="col-md-4">
+                <label for="position" class="form-label">Position</label>
+                <select class="form-select" id="position">
+                  <option selected>Select position</option>
+                  <option>Forward</option>
+                  <option>Defense</option>
+                  <option>Goalie</option>
+                  <option>Coach</option>
+                </select>
+              </div>
+
+              <div class="col-md-4">
+                <label for="year" class="form-label">Year</label>
+                <select class="form-select" id="year">
+                  <option selected>Select year</option>
+                  <option>Freshman</option>
+                  <option>Sophomore</option>
+                  <option>Junior</option>
+                  <option>Senior</option>
+                  <option>N/A</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- email and phone -->
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" placeholder="Enter email">
+              </div>
+
+              <div class="col-md-6">
+                <label for="phone" class="form-label">Phone</label>
+                <input type="text" class="form-control" id="phone" placeholder="Enter phone number">
+              </div>
+            </div>
+
+            <!-- injury status -->
+            <div class="mb-3">
+              <label for="injuryStatus" class="form-label">Injury Status</label>
+              <select class="form-select" id="injuryStatus">
+                <option selected>Select status</option>
+                <option>Healthy</option>
+                <option>Injured</option>
+              </select>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- popup buttons -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-success">Save Player</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!--
+    this modal converts a player into an alumni record
+    roster info already exists, but alumni need extra info
+    so here we collect missing fields like class year and occupation
+  -->
+  <div class="modal fade" id="moveToAlumniModal" tabindex="-1" aria-labelledby="moveToAlumniModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title" id="moveToAlumniModalLabel">Convert Player to Alumni Record</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <form>
+
+            <!-- explanation -->
+            <p class="mb-3">
+              Complete the missing alumni information before moving the player from the active roster to alumni records.
+            </p>
+
+            <!-- player info already known in the system -->
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Player Name</label>
+                <input type="text" class="form-control" placeholder="Player name" value="Selected Player" readonly>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Former Position</label>
+                <input type="text" class="form-control" placeholder="Position" value="Forward / Defense / Goalie" readonly>
+              </div>
+            </div>
+
+            <!-- contact info already known -->
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" placeholder="Player email" value="player@email.com" readonly>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Phone</label>
+                <input type="text" class="form-control" placeholder="Phone number" value="555-000-0000" readonly>
+              </div>
+            </div>
+
+            <!-- alumni-specific fields -->
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="alumniClassYear" class="form-label">Class Year / Graduation Year</label>
+                <input type="number" class="form-control" id="alumniClassYear" placeholder="Enter graduation year">
+              </div>
+
+              <div class="col-md-6">
+                <label for="alumniOccupation" class="form-label">Occupation</label>
+                <input type="text" class="form-control" id="alumniOccupation" placeholder="Enter occupation">
+              </div>
+            </div>
+
+            <!-- donation status -->
+            <div class="mb-3">
+              <label for="alumniDonationStatus" class="form-label">Donation Status</label>
+              <select class="form-select" id="alumniDonationStatus">
+                <option selected>Select status</option>
+                <option>Donated</option>
+                <option>Has Not Donated</option>
+              </select>
+            </div>
+
+            <!-- newsletter option -->
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="alumniNewsletter">
+              <label class="form-check-label" for="alumniNewsletter">
+                Subscribe alumni to newsletter
+              </label>
+            </div>
+
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-warning">Confirm Move to Alumni</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- bootstrap js needed for modals -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
