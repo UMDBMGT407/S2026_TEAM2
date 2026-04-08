@@ -101,7 +101,7 @@ def logout():
 @app.route('/')
 @login_required
 def home():
-    return render_template('home.html')
+    return render_template('admin-dashboard.html')
 
 
 # ---------------------------
@@ -133,7 +133,34 @@ def equipment():
 @login_required
 @role_required('Admin')
 def admin_page():
-    return render_template('admin.html')
+    return render_template('admin-dashboard.html')
+
+@app.route('/finances')
+@login_required
+@role_required('Admin', 'Coach')
+def finances():
+    return render_template('finances.html')
+
+
+@app.route('/alumni')
+@login_required
+@role_required('Admin', 'Coach')
+def alumni():
+    return render_template('alumni.html')
+
+
+@app.route('/newsletters')
+@login_required
+@role_required('Admin', 'Coach')
+def newsletters():
+    return render_template('newsletters.html')
+
+
+@app.route('/supplier')
+@login_required
+@role_required('Admin', 'Coach')
+def supplier():
+    return render_template('supplier.html')
 
 
 # ---------------------------
