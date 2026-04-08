@@ -12,15 +12,15 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
   <!-- shared css file -->
-  <link rel="stylesheet" href="css/newstyle.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/newstyle.css') }}">
 </head>
 <body>
 
   <!-- top navigation -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
-      <a class="navbar-brand d-flex align-items-center" href="admin-dashboard.html">
-        <img src="images/team-logo0.png" alt="Team Logo" class="logo">
+      <a class="navbar-brand d-flex align-items-center" href="/admin-dashboard">
+        <img src="{{ url_for('static', filename='images/team-logo0.png') }}" alt="Team Logo" class="logo">
         Hockey System
       </a>
 
@@ -32,14 +32,14 @@
       <!-- nav links -->
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="index.html">Public Site</a></li>
-          <li class="nav-item"><a class="nav-link" href="admin-dashboard.html">Dashboard</a></li>
-          <li class="nav-item"><a class="nav-link" href="roster.html">Roster</a></li>
-          <li class="nav-item"><a class="nav-link" href="schedule.html">Schedule</a></li>
-          <li class="nav-item"><a class="nav-link active" href="equipment.html">Equipment</a></li>
-          <li class="nav-item"><a class="nav-link" href="finances.html">Finances</a></li>
-          <li class="nav-item"><a class="nav-link" href="alumni.html">Alumni</a></li>
-          <li class="nav-item"><a class="nav-link" href="newsletters.html">Newsletters</a></li>
+          <li class="nav-item"><a class="nav-link" href="/index">Public Site</a></li>
+          <li class="nav-item"><a class="nav-link" href="/admin-dashboard">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="/roster">Roster</a></li>
+          <li class="nav-item"><a class="nav-link" href="/schedule">Schedule</a></li>
+          <li class="nav-item"><a class="nav-link active" href="/equipment">Equipment</a></li>
+          <li class="nav-item"><a class="nav-link" href="/finances">Finances</a></li>
+          <li class="nav-item"><a class="nav-link" href="/alumni">Alumni</a></li>
+          <li class="nav-item"><a class="nav-link" href="/newsletters">Newsletters</a></li>
         </ul>
       </div>
     </div>
