@@ -13,7 +13,7 @@
     <section class="hero">
         <div class="container">
             <div class="d-flex align-items-center justify-content-center">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
+                <img src="{{ url_for('static', filename='images/team-logo0.png') }}" alt="Logo" class="logo">
                 <div>
                     <h1 class="mb-0">Hockey Management System</h1>
                     <p class="mb-0">Login to access your portal</p>
@@ -30,13 +30,17 @@
                         <div class="card-body p-4">
                             <h2 class="text-center mb-4">Login</h2>
 
-                            {% if error %}
-                                <div class="alert alert-danger" role="alert">
-                                    {{ error }}
-                                </div>
-                            {% endif %}
+                            {% with messages = get_flashed_messages(with_categories=true) %}
+                                {% if messages %}
+                                    {% for category, message in messages %}
+                                        <div class="alert alert-{{ category }}" role="alert">
+                                            {{ message }}
+                                        </div>
+                                    {% endfor %}
+                                {% endif %}
+                            {% endwith %}
 
-                            <form method="POST" action="/login">
+                            <form method="POST" action="{{ url_for('login') }}">
                                 <div class="mb-3">
                                     <label for="email" class="form-label">Email</label>
                                     <input type="email" class="form-control" id="email" name="email" required>
@@ -51,6 +55,12 @@
                                     <button type="submit" class="btn btn-danger">Login</button>
                                 </div>
                             </form>
+
+                            <div class="text-center mt-3">
+                                <a href="{{ url_for('root') }}" class="btn btn-outline-secondary btn-sm">
+                                    Back to Login
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
