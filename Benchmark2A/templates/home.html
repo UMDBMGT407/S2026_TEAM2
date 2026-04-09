@@ -1,3 +1,4 @@
+home.html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,27 +8,26 @@
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/newstyle.css') }}">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
 
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="/">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('public_page') }}">
+                <img src="{{ url_for('static', filename='images/team-logo0.png') }}" alt="Logo" class="logo">
                 Hockey Management System
             </a>
-            <a href="/logout" class="btn btn-danger btn-sm">Logout</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-danger btn-sm">Logout</a>
         </div>
     </nav>
 
     <section class="hero">
         <div class="container">
             <div class="d-flex align-items-center">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
+                <img src="{{ url_for('static', filename='images/team-logo0.png') }}" alt="Logo" class="logo">
                 <div>
-                    <h1 class="mb-1">Welcome, {{ current_user.name }}</h1>
-                    <p class="mb-0">Role: {{ current_user.role }}</p>
+                    <h1 class="mb-1">Welcome, {{ session.get('name') }}</h1>
+                    <p class="mb-0">Role: {{ session.get('role') }}</p>
                 </div>
             </div>
         </div>
@@ -41,56 +41,63 @@
                     <h3 class="mb-3">Modules</h3>
                     <div class="row">
                         <div class="col-md-4 mb-3">
-                            <a href="/roster" class="module-link roster-bg">Roster</a>
+                            <a href="{{ url_for('roster') }}" class="module-link roster-bg">Roster</a>
                         </div>
 
                         <div class="col-md-4 mb-3">
-                            <a href="/schedule" class="module-link schedule-bg">Schedule</a>
+                            <a href="{{ url_for('schedule') }}" class="module-link schedule-bg">Schedule</a>
                         </div>
 
-                        {% if current_user.role in ['Admin', 'Coach'] %}
+                        {% if session.get('role') in ['Admin', 'Coach'] %}
                         <div class="col-md-4 mb-3">
-                            <a href="/equipment" class="module-link equipment-bg">Equipment</a>
+                            <a href="{{ url_for('equipment') }}" class="module-link equipment-bg">Equipment</a>
                         </div>
                         {% endif %}
 
-                        {% if current_user.role == 'Admin' %}
+                        {% if session.get('role') == 'Admin' %}
                         <div class="col-md-4 mb-3">
-                            <a href="/admin" class="module-link finances-bg">Admin Panel</a>
+                            <a href="{{ url_for('admin_page') }}" class="module-link finances-bg">Admin Panel</a>
+                        </div>
+                        {% endif %}
+
+                        {% if session.get('role') in ['Admin', 'Supplier'] %}
+                        <div class="col-md-4 mb-3">
+                            <a href="{{ url_for('supplier_page') }}" class="module-link equipment-bg">Supplier Portal</a>
                         </div>
                         {% endif %}
                     </div>
                 </div>
             </div>
 
-            {% if current_user.role == 'Admin' %}
+            {% if session.get('role') == 'Admin' %}
             <div class="card border-0 card-box mb-4">
                 <div class="card-body">
                     <h3 class="mb-3">Add New User</h3>
 
                     <form id="userForm">
                         <div class="form-group">
-                            <label for="name">Name</label>
+                            <label>Name</label>
                             <input type="text" class="form-control" id="name" required>
                         </div>
 
                         <div class="form-group">
-                            <label for="email">Email</label>
+                            <label>Email</label>
                             <input type="email" class="form-control" id="email" required>
                         </div>
 
                         <div class="form-group">
-                            <label for="password">Password</label>
+                            <label>Password</label>
                             <input type="text" class="form-control" id="password" value="test123" required>
                         </div>
 
                         <div class="form-group">
-                            <label for="role">Role</label>
+                            <label>Role</label>
                             <select class="form-control" id="role" required>
                                 <option value="">-- Select Role --</option>
                                 <option value="Admin">Admin</option>
                                 <option value="Coach">Coach</option>
                                 <option value="Player">Player</option>
+                                <option value="Supplier">Supplier</option>
                             </select>
                         </div>
 
@@ -110,16 +117,24 @@
                                 <tr>
                                     <th>ID</th>
                                     <th>Name</th>
-                                    {% if current_user.role == 'Admin' %}
+                                    {% if session.get('role') == 'Admin' %}
                                     <th>Email</th>
                                     {% endif %}
                                     <th>Role</th>
-                                    {% if current_user.role == 'Admin' %}
-                                    <th>Actions</th>
-                                    {% endif %}
                                 </tr>
                             </thead>
-                            <tbody id="userTable"></tbody>
+                            <tbody>
+                                {% for user in users %}
+                                <tr>
+                                    <td>{{ user.id }}</td>
+                                    <td>{{ user.name }}</td>
+                                    {% if session.get('role') == 'Admin' %}
+                                    <td>{{ user.email }}</td>
+                                    {% endif %}
+                                    <td>{{ user.role }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -127,86 +142,6 @@
 
         </div>
     </main>
-
-    <script>
-        $(document).ready(function () {
-
-            function loadUsers() {
-                $.ajax({
-                    url: '/users',
-                    type: 'GET',
-                    success: function (users) {
-                        let rows = '';
-
-                        users.forEach(function (user) {
-                            rows += `<tr>
-                                <td>${user.id}</td>
-                                <td>${user.name}</td>`;
-
-                            if ('email' in user) {
-                                rows += `<td>${user.email}</td>`;
-                            }
-
-                            rows += `<td>${user.role}</td>`;
-
-                            if ('email' in user) {
-                                rows += `<td>
-                                    <button class="btn btn-danger btn-sm" onclick="deleteUser(${user.id})">Delete</button>
-                                </td>`;
-                            }
-
-                            rows += `</tr>`;
-                        });
-
-                        $('#userTable').html(rows);
-                    },
-                    error: function (xhr) {
-                        console.log('Error:', xhr.responseText);
-                    }
-                });
-            }
-
-            window.deleteUser = function (id) {
-                $.ajax({
-                    url: `/user/${id}`,
-                    type: 'DELETE',
-                    success: function () {
-                        loadUsers();
-                    },
-                    error: function (xhr) {
-                        console.log('Error:', xhr.responseText);
-                    }
-                });
-            };
-
-            $('#userForm').submit(function (event) {
-                event.preventDefault();
-
-                const formData = {
-                    name: $('#name').val(),
-                    email: $('#email').val(),
-                    password: $('#password').val(),
-                    role: $('#role').val()
-                };
-
-                $.ajax({
-                    type: 'POST',
-                    url: '/user',
-                    contentType: 'application/json',
-                    data: JSON.stringify(formData),
-                    success: function () {
-                        loadUsers();
-                        $('#userForm')[0].reset();
-                    },
-                    error: function (xhr) {
-                        console.log('Error:', xhr.responseText);
-                    }
-                });
-            });
-
-            loadUsers();
-        });
-    </script>
 
 </body>
 </html>
