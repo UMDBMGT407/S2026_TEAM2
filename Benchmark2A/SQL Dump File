@@ -1,1 +1,45 @@
+-- BMGT 407 Hockey System SQL Dump
 
+DROP DATABASE IF EXISTS user_management;
+CREATE DATABASE user_management;
+USE user_management;
+
+DROP TABLE IF EXISTS players;
+DROP TABLE IF EXISTS users;
+
+-- Users table for authentication and roles
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(50) NOT NULL
+);
+
+-- Players table for roster details
+CREATE TABLE players (
+    player_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    jersey_number INT,
+    position VARCHAR(50),
+    year VARCHAR(50),
+    injured BOOLEAN DEFAULT FALSE,
+    phone VARCHAR(20),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Sample role accounts
+-- All four users share the same hashed password
+INSERT INTO users (id, name, email, password, role) VALUES
+(1, 'Admin User', 'admin@umd.edu', 'scrypt:32768:8:1$JJ3eNoPuCRp6X5Jd$f1d550168a9c313512a23d86fc3a4b107f03211228d1222d8e87b259c75b75988ad8d63d6a7029b8b0d038520f4dfce7519e2f0cb39a827e82784b13296cf70d', 'admin'),
+(2, 'Coach User', 'coach@umd.edu', 'scrypt:32768:8:1$JJ3eNoPuCRp6X5Jd$f1d550168a9c313512a23d86fc3a4b107f03211228d1222d8e87b259c75b75988ad8d63d6a7029b8b0d038520f4dfce7519e2f0cb39a827e82784b13296cf70d', 'coach'),
+(3, 'Player User', 'player@umd.edu', 'scrypt:32768:8:1$JJ3eNoPuCRp6X5Jd$f1d550168a9c313512a23d86fc3a4b107f03211228d1222d8e87b259c75b75988ad8d63d6a7029b8b0d038520f4dfce7519e2f0cb39a827e82784b13296cf70d', 'player'),
+(4, 'Supplier User', 'supplier@umd.edu', 'scrypt:32768:8:1$JJ3eNoPuCRp6X5Jd$f1d550168a9c313512a23d86fc3a4b107f03211228d1222d8e87b259c75b75988ad8d63d6a7029b8b0d038520f4dfce7519e2f0cb39a827e82784b13296cf70d', 'supplier');
+
+ALTER TABLE users AUTO_INCREMENT = 5;
+
+-- Sample roster record linked to the Player user
+INSERT INTO players (player_id, user_id, jersey_number, position, year, injured, phone) VALUES
+(1, 3, 27, 'Forward', 'Sophomore', FALSE, '555-123-4567');
+
+ALTER TABLE players AUTO_INCREMENT = 2;
