@@ -2,15 +2,19 @@
 <html lang="en">
 <head>
 
+  <!-- basic page settings -->
   <meta charset="UTF-8">
+
+  <!-- for phones and tablets -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Supplier Portal</title>
 
   <!-- bootstrap css -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-  <!-- shared css -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/newstyle.css') }}">
+  <!-- shared css file -->
+  <link rel="stylesheet" href="css/newstyle.css">
 
   <style>
     body {
@@ -74,6 +78,12 @@
       font-weight: 600;
     }
 
+    .supplier-btn-primary:hover {
+      background: #2210d9;
+      border-color: #2210d9;
+      color: white;
+    }
+
     .supplier-btn-secondary {
       background: #6c2cff;
       border-color: #6c2cff;
@@ -81,28 +91,61 @@
       font-weight: 600;
     }
 
-    .metric-number-blue { color: #2c47ff; font-weight: 700; }
-    .metric-number-purple { color: #6c2cff; font-weight: 700; }
-    .metric-number-orange { color: #e86f31; font-weight: 700; }
+    .supplier-btn-secondary:hover {
+      background: #551fe0;
+      border-color: #551fe0;
+      color: white;
+    }
 
-    .text-status-new { color: #2c47ff; font-weight: 700; }
-    .text-status-progress { color: #5a31ff; font-weight: 700; }
-    .text-status-completed { color: #39c61a; font-weight: 700; }
+    .metric-number-blue {
+      color: #2c47ff;
+      font-weight: 700;
+    }
 
-    .text-label-accent { color: #ff8c00; font-weight: 700; }
+    .metric-number-purple {
+      color: #6c2cff;
+      font-weight: 700;
+    }
+
+    .metric-number-orange {
+      color: #e86f31;
+      font-weight: 700;
+    }
+
+    .text-status-new {
+      color: #2c47ff;
+      font-weight: 700;
+    }
+
+    .text-status-progress {
+      color: #5a31ff;
+      font-weight: 700;
+    }
+
+    .text-status-completed {
+      color: #39c61a;
+      font-weight: 700;
+    }
+
+    .text-label-accent {
+      color: #ff8c00;
+      font-weight: 700;
+    }
   </style>
 
 </head>
-
 <body>
 
-  <!-- HEADER -->
+  <!-- ===============================
+       SUPPLIER HEADER
+       =============================== -->
   <header class="supplier-topbar">
     <div class="container">
       <div class="row align-items-center gy-3">
 
         <div class="col-md-3">
           <div class="d-flex align-items-center">
+            <img src="images/team-logo0.png" alt="Team Logo" class="logo me-2">
             <span class="fw-bold">UMD Hockey</span>
           </div>
         </div>
@@ -122,73 +165,207 @@
     </div>
   </header>
 
-  <!-- MAIN CONTENT -->
+  <!-- ===============================
+       MAIN SUPPLIER CONTENT
+       =============================== -->
   <main class="container my-4">
 
-    <!-- stats -->
+    <!-- summary cards -->
     <div class="row g-4 mb-4">
 
       <div class="col-md-4">
         <div class="supplier-stat-card">
-          <div>New Orders</div>
-          <div class="display-6 metric-number-blue">15</div>
+          <div class="row align-items-center">
+            <div class="col-8">
+              <div>New</div>
+              <div>Orders</div>
+              <div class="display-6 metric-number-blue">15</div>
+            </div>
+            <div class="col-4 text-end">
+              <div class="fs-1">📦</div>
+            </div>
+          </div>
         </div>
       </div>
 
       <div class="col-md-4">
         <div class="supplier-stat-card">
-          <div>In Progress</div>
-          <div class="display-6 metric-number-purple">3</div>
+          <div class="row align-items-center">
+            <div class="col-8">
+              <div>In</div>
+              <div>Progress</div>
+              <div class="display-6 metric-number-purple">3</div>
+            </div>
+            <div class="col-4 text-end">
+              <div class="fs-1">🗓️</div>
+            </div>
+          </div>
         </div>
       </div>
 
       <div class="col-md-4">
         <div class="supplier-stat-card">
-          <div>Completed</div>
-          <div class="display-6 metric-number-orange">3</div>
+          <div class="row align-items-center">
+            <div class="col-8">
+              <div>Completed</div>
+              <div class="display-6 metric-number-orange">3</div>
+            </div>
+            <div class="col-4 text-end">
+              <div class="fs-1">✅</div>
+            </div>
+          </div>
         </div>
       </div>
 
     </div>
 
-    <!-- NEW ORDERS -->
+    <!-- new orders -->
     <div class="supplier-section-card mb-4">
-      <div class="section-chip">NEW ORDERS</div>
+      <div class="section-chip">NEW ORDERS - ACTION REQUIRED</div>
 
       <div class="order-card-new">
-        <p><strong>ORDER #1</strong></p>
-        <button class="btn supplier-btn-primary" data-bs-toggle="modal" data-bs-target="#confirmOrderModal">
-          Confirm Order
-        </button>
+        <p class="mb-2">
+          <strong>ORDER #1</strong>
+          <span class="text-status-new">NEW ORDER</span><br>
+          <strong>VENDOR:</strong> SUPPLY CO<br>
+          <strong>EMAIL:</strong> XXX@XX.COM<br>
+          <strong>ORDER DATE:</strong> MM/DD/YYYY
+        </p>
+
+        <div class="order-card-sub">
+          <strong>ORDER ITEMS:</strong><br>
+          ITEM 1 - X 10 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $$$<br>
+          ITEM 2 X 20 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $$$<br>
+          <strong>TOTAL:</strong> $$$<br>
+          <span class="text-label-accent">CUSTOMER NOTES:</span>
+        </div>
+
+        <div class="text-center mt-3">
+          <button class="btn supplier-btn-primary px-4"
+                  data-bs-toggle="modal"
+                  data-bs-target="#confirmOrderModal">
+            Confirm Order &amp; Provide Details
+          </button>
+        </div>
       </div>
     </div>
 
-    <!-- BACK BUTTONS (FIXED) -->
+    <!-- in progress -->
+    <div class="supplier-section-card mb-4">
+      <div class="section-chip">ORDERS IN PROGRESS</div>
+
+      <div class="order-card-neutral">
+        <div class="row align-items-center">
+          <div class="col-lg-8">
+            <p class="mb-0">
+              <strong>ORDER #2</strong>
+              <span class="text-status-progress">IN PROGRESS</span><br>
+              <strong>ORDER DATE:</strong><br>
+              <span class="text-status-progress">EST. DELIVERY:</span> MM/DD/YYYY<br>
+              <strong>TOTAL:</strong> XX<br>
+              <strong>VENDOR NOTES:</strong>
+            </p>
+          </div>
+
+          <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+            <button class="btn supplier-btn-secondary">
+              Marked as Delivered
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- completed -->
+    <div class="supplier-section-card mb-4">
+      <div class="section-chip">COMPLETED ORDERS</div>
+
+      <div class="order-card-neutral">
+        <p class="mb-0">
+          <strong>ORDER #2</strong>
+          <span class="text-status-completed">COMPLETED</span><br>
+          <strong>ORDER DATE:</strong><br>
+          <strong>DELIVERED ON:</strong> MM/DD/YYYY<br>
+          <strong>TOTAL:</strong> XX
+        </p>
+      </div>
+    </div>
+
+    <!-- back buttons -->
     <div class="d-flex gap-2 flex-wrap">
-      <a href="{{ url_for('public_page') }}" class="btn btn-light">Public Site</a>
-      <a href="{{ url_for('admin_page') }}" class="btn btn-dark">Admin Dashboard</a>
-      <a href="{{ url_for('roster') }}" class="btn btn-outline-light">Roster</a>
-      <a href="{{ url_for('schedule') }}" class="btn btn-outline-light">Schedule</a>
-      <a href="{{ url_for('equipment') }}" class="btn btn-outline-light">Equipment</a>
-      <a href="{{ url_for('finances') }}" class="btn btn-outline-light">Finances</a>
-      <a href="{{ url_for('newsletters') }}" class="btn btn-outline-light">Newsletters</a>
-      <a href="{{ url_for('alumni') }}" class="btn btn-outline-light">Alumni</a>
-      <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+      <a href="index.html" class="btn btn-light">Back to Public Site</a>
+      <a href="admin-dashboard.html" class="btn btn-dark">Go to Admin Dashboard</a>
     </div>
 
   </main>
 
-  <!-- MODAL -->
-  <div class="modal fade" id="confirmOrderModal">
-    <div class="modal-dialog">
-      <div class="modal-content p-3">
-        <h5>Confirm Order</h5>
-        <button class="btn btn-success">Save</button>
+  <!-- ===============================
+       CONFIRM ORDER MODAL
+       =============================== -->
+  <div class="modal fade" id="confirmOrderModal" tabindex="-1" aria-labelledby="confirmOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title" id="confirmOrderModalLabel">Confirm Order &amp; Provide Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <form>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="supplierOrderNumber" class="form-label">Order Number</label>
+                <input type="text" class="form-control" id="supplierOrderNumber" value="Order #1">
+              </div>
+
+              <div class="col-md-6">
+                <label for="orderStatus" class="form-label">Order Status</label>
+                <select class="form-select" id="orderStatus">
+                  <option selected>Select status</option>
+                  <option>In Progress</option>
+                  <option>Completed</option>
+                  <option>Received</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="orderDate" class="form-label">Order Date</label>
+                <input type="date" class="form-control" id="orderDate">
+              </div>
+
+              <div class="col-md-6">
+                <label for="estimatedDeliveryDate" class="form-label">Estimated Delivery Date</label>
+                <input type="date" class="form-control" id="estimatedDeliveryDate">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="totalCost" class="form-label">Total Cost</label>
+              <input type="text" class="form-control" id="totalCost" placeholder="Enter total cost">
+            </div>
+
+            <div class="mb-3">
+              <label for="vendorNotes" class="form-label">Vendor Notes</label>
+              <textarea class="form-control" id="vendorNotes" rows="4" placeholder="Add vendor notes here"></textarea>
+            </div>
+
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-success">Save Order Details</button>
+        </div>
+
       </div>
     </div>
   </div>
 
-  <!-- bootstrap js -->
+  <!-- bootstrap javascript -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
