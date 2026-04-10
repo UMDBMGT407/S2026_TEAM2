@@ -48,6 +48,34 @@ def load_user(user_id):
         return User(*user_data)
     return None
 
+@app.route('/add_player', methods=['POST'])
+@login_required
+def add_player():
+    name = request.form.get('name', '').strip()
+    jersey_number = request.form.get('jersey_number')
+    position = request.form.get('position', '').strip()
+    year = request.form.get('year', '').strip()
+    injured = request.form.get('injured', 0)
+    email = request.form.get('email', '').strip()
+    phone = request.form.get('phone', '').strip()
+
+    if not name or not position or not year:
+        flash('Please fill in all required fields.', 'danger')
+        return redirect(url_for('roster'))
+
+    if jersey_number == '':
+        jersey_number = None
+
+    cur = mysql.connection.cursor()
+    cur.execute("""
+        INSERT INTO players (name, jersey_number, position, year, injured, email, phone)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
+    """, (name, jersey_number, position, year, injured, email, phone))
+    mysql.connection.commit()
+    cur.close()
+
+    flash('Player added successfully.', 'success')
+    return redirect(url_for('roster'))
 
 # ---------------------------
 # ROLE CHECK
