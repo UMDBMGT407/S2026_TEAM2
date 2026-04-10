@@ -142,6 +142,11 @@ def home():
 def schedule():
     return render_template('schedule.html')
 
+@app.route('/calendar')
+@login_required
+@role_required('Admin', 'Coach', 'Player')
+def calendar():
+    return render_template('calendar.html')
 
 @app.route('/roster')
 @login_required
