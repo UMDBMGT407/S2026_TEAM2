@@ -5,84 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Calendar – Hockey System</title>
 
-  <!-- Bootstrap 5 (same as other pages) -->
+  <!-- Bootstrap 5 (same as all other pages) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
 
-  <!-- Site stylesheet (same as other pages) -->
+  <!-- Site stylesheet -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/newstyle.css') }}"/>
 
   <style>
-    /* ── Sidebar layout ── */
-    .sidebar {
-      width: 220px;
-      min-height: 100vh;
-      background: #1e1e2e;
-      position: fixed;
-      top: 0; left: 0; bottom: 0;
-      display: flex;
-      flex-direction: column;
-      z-index: 200;
-      overflow-y: auto;
-    }
-    .sidebar-logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 18px 16px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      text-decoration: none;
-    }
-    .sidebar-logo img {
-      width: 38px; height: 38px;
-      object-fit: contain; border-radius: 50%;
-    }
-    .sidebar-logo span {
-      color: #fff;
-      font-weight: 700;
-      font-size: 0.92rem;
-    }
-    .sidebar nav { padding: 8px 0; }
-    .sidebar nav a {
-      display: block;
-      color: rgba(255,255,255,0.62);
-      text-decoration: none;
-      padding: 10px 18px;
-      font-size: 0.9rem;
-      font-weight: 500;
-      border-left: 3px solid transparent;
-      transition: background 0.18s, color 0.18s;
-    }
-    .sidebar nav a:hover {
-      background: rgba(255,255,255,0.07);
-      color: #fff;
-    }
-    .sidebar nav a.active {
-      background: rgba(178,34,34,0.22);
-      color: #fff;
-      border-left-color: #b22222;
-    }
-    .page-wrapper {
-      margin-left: 220px;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+    /* ── Calendar-specific styles ── */
+    :root {
+      --game-color:     #c0392b;
+      --practice-color: #f39c12;
+      --other-color:    #2980b9;
+      --revenue-color:  #198754;
+      --expense-color:  #b22222;
     }
 
-    /* ── Hero bar (matches other pages) ── */
-    .hero {
-      background: #b22222;
-      color: white;
-      padding: 24px 32px;
-    }
-    .hero h1 { font-size: 1.6rem; font-weight: 700; margin: 0; }
-    .hero p  { margin: 4px 0 0; font-size: 0.9rem; opacity: 0.85; }
-
-    /* ── Finance summary cards (matches dashboard stat cards) ── */
+    /* Finance summary cards */
     .fin-summary {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 16px;
-      padding: 24px 24px 0;
+      margin-bottom: 20px;
     }
     .fin-card {
       background: #fff;
@@ -91,34 +35,28 @@
       padding: 18px 20px;
     }
     .fin-card .fc-label {
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: #888;
-      margin-bottom: 4px;
+      font-size: 0.75rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      color: #888; margin-bottom: 4px;
     }
-    .fin-card .fc-amount {
-      font-size: 1.6rem;
-      font-weight: 700;
-    }
-    .fin-card .fc-sub { font-size: 0.78rem; color: #999; margin-top: 2px; }
-    .fc-revenue .fc-amount { color: #198754; }
-    .fc-expense .fc-amount { color: #b22222; }
+    .fin-card .fc-amount { font-size: 1.5rem; font-weight: 700; }
+    .fin-card .fc-sub    { font-size: 0.78rem; color: #999; margin-top: 2px; }
+    .fc-revenue .fc-amount { color: var(--revenue-color); }
+    .fc-expense .fc-amount { color: var(--expense-color); }
     .fc-net     .fc-amount { color: #0d6efd; }
 
-    /* ── Toolbar ── */
+    /* Toolbar */
     .cal-toolbar {
       background: #fff;
       border-radius: 12px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.06);
-      margin: 20px 24px 0;
       padding: 12px 18px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 10px;
+      margin-bottom: 16px;
     }
     .month-nav { display: flex; align-items: center; gap: 10px; }
     .month-nav button {
@@ -129,7 +67,7 @@
     .month-nav button:hover { background: #e0e0e0; }
     .month-label {
       font-size: 1.1rem; font-weight: 700;
-      min-width: 190px; text-align: center; color: #2c3e50;
+      min-width: 180px; text-align: center; color: #2c3e50;
     }
     .filter-group { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
     .filter-pill {
@@ -137,25 +75,24 @@
       font-size: 0.76rem; font-weight: 600;
       cursor: pointer; border: 1.5px solid transparent;
       display: flex; align-items: center; gap: 5px;
-      background: none; font-family: inherit;
-      transition: opacity 0.2s;
+      background: none; font-family: inherit; transition: opacity 0.2s;
     }
     .filter-pill .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-    .fp-game     { border-color: #c0392b; color: #c0392b; background: rgba(192,57,43,0.08); }
-    .fp-practice { border-color: #d68910; color: #9a6700; background: rgba(243,156,18,0.08); }
-    .fp-other    { border-color: #2471a3; color: #1a5276; background: rgba(41,128,185,0.08); }
-    .fp-game .dot     { background: #c0392b; }
-    .fp-practice .dot { background: #f39c12; }
-    .fp-other .dot    { background: #2980b9; }
+    .fp-game     { border-color: var(--game-color);     color: var(--game-color);     background: rgba(192,57,43,0.08); }
+    .fp-practice { border-color: var(--practice-color); color: #9a6700;               background: rgba(243,156,18,0.08); }
+    .fp-other    { border-color: var(--other-color);    color: #1a5276;               background: rgba(41,128,185,0.08); }
+    .fp-game .dot     { background: var(--game-color); }
+    .fp-practice .dot { background: var(--practice-color); }
+    .fp-other .dot    { background: var(--other-color); }
     .filter-pill.off  { opacity: 0.3; }
 
-    /* ── Calendar grid ── */
+    /* Calendar grid */
     .cal-wrap {
-      margin: 16px 24px 0;
       background: #fff;
       border-radius: 12px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.08);
       overflow: hidden;
+      margin-bottom: 0;
     }
     .cal-header-row {
       display: grid;
@@ -164,27 +101,19 @@
       border-bottom: 1px solid #e0e0e0;
     }
     .cal-header-row div {
-      padding: 8px;
-      text-align: center;
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: #888;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
+      padding: 8px; text-align: center;
+      font-size: 0.75rem; font-weight: 700;
+      color: #888; text-transform: uppercase; letter-spacing: 0.8px;
     }
-    .cal-body {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-    }
+    .cal-body { display: grid; grid-template-columns: repeat(7, 1fr); }
     .cal-cell {
       border-right: 1px solid #f0f0f0;
       border-bottom: 1px solid #f0f0f0;
-      min-height: 110px;
-      padding: 6px;
+      min-height: 110px; padding: 6px;
     }
     .cal-cell:nth-child(7n) { border-right: none; }
-    .cal-cell.other-month { background: #fafafa; }
-    .cal-cell.today       { background: #fff8f0; }
+    .cal-cell.other-month   { background: #fafafa; }
+    .cal-cell.today         { background: #fff8f0; }
     .day-num {
       font-size: 0.78rem; font-weight: 700; color: #aaa;
       display: inline-block; margin-bottom: 4px;
@@ -197,59 +126,49 @@
     }
     .other-month .day-num { color: #ddd; }
 
-    /* event pills */
     .ev-pill {
       display: block; border-radius: 3px;
       padding: 2px 5px; font-size: 0.68rem; font-weight: 600;
       margin-bottom: 2px; cursor: pointer;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      border-left: 3px solid transparent;
-      transition: filter 0.12s;
+      border-left: 3px solid transparent; transition: filter 0.12s;
     }
     .ev-pill:hover { filter: brightness(0.9); }
-    .ev-game     { background: rgba(192,57,43,0.1);  border-left-color: #c0392b; color: #922b21; }
-    .ev-practice { background: rgba(243,156,18,0.1); border-left-color: #f39c12; color: #9a6700; }
-    .ev-other    { background: rgba(41,128,185,0.1); border-left-color: #2980b9; color: #1a5276; }
-    .has-finance::after {
-      content: ' $'; font-weight: 800; color: #198754;
-    }
+    .ev-game     { background: rgba(192,57,43,0.09);  border-left-color: var(--game-color);     color: #922b21; }
+    .ev-practice { background: rgba(243,156,18,0.09); border-left-color: var(--practice-color); color: #9a6700; }
+    .ev-other    { background: rgba(41,128,185,0.09); border-left-color: var(--other-color);    color: #1a5276; }
+    .has-finance::after { content: ' $'; font-weight: 800; color: var(--revenue-color); }
 
-    /* legend */
+    /* Legend */
     .cal-legend {
-      display: flex; gap: 18px; flex-wrap: wrap;
-      padding: 10px 24px;
-      font-size: 0.78rem; color: #888;
-      align-items: center;
+      display: flex; gap: 16px; flex-wrap: wrap;
+      padding: 10px 4px; font-size: 0.78rem; color: #888;
     }
     .cal-legend span { display: flex; align-items: center; gap: 5px; }
     .ldot { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
-    .ldot-game     { background: #c0392b; }
-    .ldot-practice { background: #f39c12; }
-    .ldot-other    { background: #2980b9; }
-    .ldot-finance  { background: #198754; }
+    .ldot-game     { background: var(--game-color); }
+    .ldot-practice { background: var(--practice-color); }
+    .ldot-other    { background: var(--other-color); }
+    .ldot-finance  { background: var(--revenue-color); }
 
-    /* ══ MODALS ══ */
+    /* ── MODALS ── */
     .modal-backdrop-custom {
       position: fixed; inset: 0;
       background: rgba(0,0,0,0.45);
       display: flex; align-items: center; justify-content: center;
-      z-index: 1050;
-      opacity: 0; pointer-events: none;
-      transition: opacity 0.2s;
+      z-index: 1055;
+      opacity: 0; pointer-events: none; transition: opacity 0.2s;
     }
     .modal-backdrop-custom.show { opacity: 1; pointer-events: all; }
     .modal-box {
-      background: #fff;
-      border-radius: 12px;
+      background: #fff; border-radius: 12px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.18);
       width: 90%; max-width: 520px;
       max-height: 90vh; overflow-y: auto;
-      transform: translateY(14px);
-      transition: transform 0.2s;
+      transform: translateY(14px); transition: transform 0.2s;
     }
     .modal-backdrop-custom.show .modal-box { transform: translateY(0); }
 
-    /* modal header strip — top border matches event type color like schedule.html */
     .mhdr {
       padding: 14px 18px;
       border-bottom: 1px solid #eee;
@@ -257,18 +176,14 @@
       border-top: 4px solid transparent;
       border-radius: 12px 12px 0 0;
     }
-    .mhdr.game     { border-top-color: #c0392b; }
-    .mhdr.practice { border-top-color: #f39c12; }
-    .mhdr.other    { border-top-color: #2980b9; }
-    .mhdr.finance  { border-top-color: #198754; }
+    .mhdr.game     { border-top-color: var(--game-color); }
+    .mhdr.practice { border-top-color: var(--practice-color); }
+    .mhdr.other    { border-top-color: var(--other-color); }
+    .mhdr.finance  { border-top-color: var(--revenue-color); }
     .mhdr-title { font-size: 1rem; font-weight: 700; color: #2c3e50; }
-    .mhdr-close {
-      background: none; border: none; font-size: 1.2rem;
-      color: #aaa; cursor: pointer; line-height: 1;
-    }
+    .mhdr-close { background: none; border: none; font-size: 1.2rem; color: #aaa; cursor: pointer; }
     .mhdr-close:hover { color: #555; }
 
-    /* status badge (matches schedule.html exactly) */
     .ev-badge {
       display: inline-block; font-size: 0.68rem; font-weight: 700;
       letter-spacing: 0.8px; text-transform: uppercase;
@@ -280,12 +195,10 @@
     .eb-practice  { background: #fef9e7; color: #9a6700; border: 1px solid #f39c12; }
     .eb-event     { background: #d6eaf8; color: #1a5276; border: 1px solid #2980b9; }
 
-    /* field rows (matches schedule.html card rows) */
     .mbody { padding: 16px 18px; }
     .frow {
       display: flex; padding: 8px 0;
-      border-bottom: 1px solid #f5f5f5;
-      font-size: 0.87rem; gap: 8px;
+      border-bottom: 1px solid #f5f5f5; font-size: 0.87rem; gap: 8px;
     }
     .frow:last-of-type { border-bottom: none; }
     .frow strong { color: #aaa; font-weight: 600; min-width: 120px; flex-shrink: 0; font-size: 0.82rem; }
@@ -293,110 +206,106 @@
     .tag-home { display:inline-block; background:#d5f5e3; color:#196f3d; border:1px solid #27ae60; border-radius:3px; font-size:0.65rem; font-weight:700; padding:1px 5px; margin-left:5px; }
     .tag-away { display:inline-block; background:#fef9e7; color:#9a6700; border:1px solid #f39c12;  border-radius:3px; font-size:0.65rem; font-weight:700; padding:1px 5px; margin-left:5px; }
 
-    /* ── Finance section inside detail modal ── */
     .fin-section {
-      margin-top: 14px;
-      border-top: 2px dashed #e8e8e8;
-      padding-top: 14px;
+      margin-top: 14px; border-top: 2px dashed #e8e8e8; padding-top: 14px;
     }
     .fin-section h6 {
       font-size: 0.83rem; font-weight: 700; color: #555;
       margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
     }
     .fin-entry-row {
-      display: flex; align-items: center;
-      justify-content: space-between;
-      padding: 5px 0; font-size: 0.83rem;
-      border-bottom: 1px solid #f8f8f8;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 5px 0; font-size: 0.83rem; border-bottom: 1px solid #f8f8f8;
     }
     .fin-entry-row:last-child { border-bottom: none; }
-    .fe-label { color: #555; }
     .fe-label small { display: block; color: #aaa; font-size: 0.74rem; }
     .fe-amt { font-weight: 700; }
-    .fe-amt.revenue { color: #198754; }
-    .fe-amt.expense { color: #b22222; }
+    .fe-amt.revenue { color: var(--revenue-color); }
+    .fe-amt.expense { color: var(--expense-color); }
     .fin-net-row {
       display: flex; justify-content: space-between;
       background: #f8f9fa; border-radius: 6px;
-      padding: 6px 10px; font-size: 0.87rem; font-weight: 700;
-      margin-top: 6px;
+      padding: 6px 10px; font-size: 0.87rem; font-weight: 700; margin-top: 6px;
     }
-    .net-pos { color: #198754; }
-    .net-neg { color: #b22222; }
+    .net-pos { color: var(--revenue-color); }
+    .net-neg { color: var(--expense-color); }
     .btn-add-fin {
       width: 100%; margin-top: 10px;
       background: none; border: 1.5px dashed #ddd;
       border-radius: 8px; padding: 6px;
       font-size: 0.8rem; font-weight: 600; color: #aaa;
-      cursor: pointer; font-family: inherit;
-      transition: border-color 0.2s, color 0.2s;
+      cursor: pointer; font-family: inherit; transition: border-color 0.2s, color 0.2s;
     }
     .btn-add-fin:hover { border-color: #b22222; color: #b22222; }
 
-    /* modal footer */
     .mftr {
-      padding: 12px 18px;
-      border-top: 1px solid #eee;
+      padding: 12px 18px; border-top: 1px solid #eee;
       display: flex; justify-content: flex-end; gap: 8px;
     }
 
-    /* ── Add Finance Modal ── */
+    /* Finance modal toggle */
     .type-toggle { display: flex; gap: 8px; margin-bottom: 14px; }
     .type-toggle button {
       flex: 1; padding: 7px; border-radius: 6px;
-      font-size: 0.85rem; font-weight: 600;
-      cursor: pointer; border: 1.5px solid #ddd;
-      background: #f8f8f8; color: #888;
+      font-size: 0.85rem; font-weight: 600; cursor: pointer;
+      border: 1.5px solid #ddd; background: #f8f8f8; color: #888;
       font-family: inherit; transition: all 0.18s;
     }
     .t-revenue { background: #d5f5e3 !important; border-color: #27ae60 !important; color: #196f3d !important; }
     .t-expense { background: #fadbd8 !important; border-color: #c0392b !important; color: #922b21 !important; }
-    .form-label { font-size: 0.82rem; font-weight: 600; color: #555; }
 
     @media (max-width: 768px) {
-      .sidebar { display: none; }
-      .page-wrapper { margin-left: 0; }
       .fin-summary { grid-template-columns: 1fr; }
       .cal-cell { min-height: 60px; }
-      .ev-pill { font-size: 0.6rem; }
+      .ev-pill  { font-size: 0.6rem; }
     }
   </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════
-     SIDEBAR (identical to all admin pages)
-══════════════════════════════ -->
-<aside class="sidebar">
-  <a class="sidebar-logo" href="/admin">
-    <img src="{{ url_for('static', filename='images/team-logo0.png') }}"
-         alt="Logo"
-         onerror="this.src='https://umdbmgt407.github.io/S2026_TEAM2/Client-Side/images/team-logo0.png'"/>
-    <span>Hockey System</span>
-  </a>
-  <nav>
-    <a href="/">Public Site</a>
-    <a href="/admin">Dashboard</a>
-    <a href="/roster">Roster</a>
-    <a href="/schedule">Schedule</a>
-    <a href="/calendar" class="active">Calendar</a>
-    <a href="/equipment">Equipment</a>
-    <a href="/finances">Finances</a>
-    <a href="/alumni">Alumni</a>
-    <a href="/newsletters">Newsletters</a>
-  </nav>
-</aside>
-
-<!-- ══════════════════════════════
-     PAGE WRAPPER
-══════════════════════════════ -->
-<div class="page-wrapper">
-
-  <!-- Hero bar (matches all other admin pages) -->
-  <div class="hero">
-    <h1>&#128197; Team Calendar</h1>
-    <p>View games, practices, and events. Log ticket revenue and event expenses per game.</p>
+<!-- ══════════════════════════════════════════════
+     TOP NAVBAR — identical to dashboard/finances
+══════════════════════════════════════════════ -->
+<nav class="navbar navbar-expand-lg navbar-dark" style="background-color:#1e1e2e;">
+  <div class="container-fluid px-4">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="/admin">
+      <img src="{{ url_for('static', filename='images/team-logo0.png') }}"
+           alt="Logo"
+           onerror="this.src='https://umdbmgt407.github.io/S2026_TEAM2/Client-Side/images/team-logo0.png'"
+           style="width:36px;height:36px;object-fit:contain;border-radius:50%;"/>
+      <span style="font-weight:700;font-size:1rem;">Hockey System</span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navLinks">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navLinks">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="/">Public Site</a></li>
+        <li class="nav-item"><a class="nav-link" href="/admin">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="/roster">Roster</a></li>
+        <li class="nav-item"><a class="nav-link" href="/schedule">Schedule</a></li>
+        <li class="nav-item"><a class="nav-link active fw-bold" href="/calendar">Calendar</a></li>
+        <li class="nav-item"><a class="nav-link" href="/equipment">Equipment</a></li>
+        <li class="nav-item"><a class="nav-link" href="/finances">Finances</a></li>
+        <li class="nav-item"><a class="nav-link" href="/alumni">Alumni</a></li>
+        <li class="nav-item"><a class="nav-link" href="/newsletters">Newsletters</a></li>
+      </ul>
+    </div>
   </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════
+     HERO — matches all other admin pages exactly
+══════════════════════════════════════════════ -->
+<div class="hero text-center">
+  <h1 class="fw-bold">Team Calendar</h1>
+  <p>View games, practices, and events. Log ticket revenue and event expenses per game.</p>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     PAGE CONTENT
+══════════════════════════════════════════════ -->
+<main class="container-fluid px-4 py-4">
 
   <!-- Finance Summary Cards -->
   <div class="fin-summary">
@@ -433,7 +342,7 @@
     <a href="/finances" class="btn btn-danger btn-sm">&#128200; Go to Finances</a>
   </div>
 
-  <!-- Calendar -->
+  <!-- Calendar Grid -->
   <div class="cal-wrap">
     <div class="cal-header-row">
       <div>Sun</div><div>Mon</div><div>Tue</div>
@@ -450,13 +359,12 @@
     <span><span class="ldot ldot-finance"></span> Has financial entry ($)</span>
   </div>
 
-  <div style="height:2rem;"></div>
-</div><!-- end page-wrapper -->
+</main>
 
 
-<!-- ══════════════════════════════
+<!-- ══════════════════════════════════════════════
      EVENT DETAIL MODAL
-══════════════════════════════ -->
+══════════════════════════════════════════════ -->
 <div class="modal-backdrop-custom" id="detailModal" onclick="bgClose(event,'detailModal')">
   <div class="modal-box">
     <div class="mhdr" id="detailHdr">
@@ -466,7 +374,6 @@
     <div class="mbody">
       <div id="detailBadge"></div>
       <div id="detailFields"></div>
-
       <!-- Finance section -->
       <div class="fin-section">
         <h6>&#128178; Financial Entries
@@ -484,9 +391,9 @@
 </div>
 
 
-<!-- ══════════════════════════════
+<!-- ══════════════════════════════════════════════
      ADD FINANCE MODAL
-══════════════════════════════ -->
+══════════════════════════════════════════════ -->
 <div class="modal-backdrop-custom" id="finModal" onclick="bgClose(event,'finModal')">
   <div class="modal-box" style="max-width:420px;">
     <div class="mhdr finance">
@@ -494,29 +401,24 @@
       <button class="mhdr-close" onclick="closeM('finModal')">&#10005;</button>
     </div>
     <div class="mbody">
-
-      <!-- Revenue / Expense toggle -->
       <div class="type-toggle">
         <button id="btnRev" onclick="setFinType('revenue')">&#8593; Revenue</button>
         <button id="btnExp" onclick="setFinType('expense')">&#8595; Expense</button>
       </div>
-
       <div class="row g-2 mb-3">
         <div class="col-7">
-          <label class="form-label">Category</label>
+          <label class="form-label fw-semibold" style="font-size:0.82rem;">Category</label>
           <select class="form-select form-select-sm" id="finCat"></select>
         </div>
         <div class="col-5">
-          <label class="form-label">Amount ($)</label>
+          <label class="form-label fw-semibold" style="font-size:0.82rem;">Amount ($)</label>
           <input type="number" class="form-control form-control-sm" id="finAmt" placeholder="0.00" min="0" step="0.01"/>
         </div>
       </div>
-
       <div class="mb-2">
-        <label class="form-label">Description <small class="text-muted">(optional)</small></label>
+        <label class="form-label fw-semibold" style="font-size:0.82rem;">Description <small class="text-muted fw-normal">(optional)</small></label>
         <input type="text" class="form-control form-control-sm" id="finDesc" placeholder="e.g. 120 tickets @ $15"/>
       </div>
-
     </div>
     <div class="mftr">
       <button class="btn btn-secondary btn-sm" onclick="closeM('finModal')">Cancel</button>
@@ -526,13 +428,9 @@
 </div>
 
 
-<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
 <script>
-// ══════════════════════════════════════════════════
-//  DATA — field names match schedule.html exactly
-// ══════════════════════════════════════════════════
+// ══ DATA — field names match schedule.html exactly ══════════════════
 const EVENTS = [
   // GAMES
   { id:1,  type:'game', title:'Upcoming Game',    date:'2026-03-18', time:'8:30 PM', opponent:'Georgetown Club Hockey', location:'UMD Ice Arena',      gameType:'Home', status:'Scheduled', notes:'' },
@@ -556,24 +454,22 @@ const EVENTS = [
   { id:14, type:'other', title:'Offseason Skate',       date:'2026-04-11', time:'3:00 PM', location:'Campus Ice Rink',     description:'Informal skate — all skill levels welcome.' },
 ];
 
-const REV_CATS = ['Ticket Sales', 'Sponsorship', 'Donation', 'Other Revenue'];
-const EXP_CATS = ['Ref Fees', 'Ice Rental', 'Travel', 'Equipment', 'Facility', 'Other Expense'];
+const REV_CATS = ['Ticket Sales','Sponsorship','Donation','Other Revenue'];
+const EXP_CATS = ['Ref Fees','Ice Rental','Travel','Equipment','Facility','Other Expense'];
 
-// ══ STATE ════════════════════════════════════════
-const TODAY   = new Date();
-let viewYear  = 2026, viewMonth = 2;   // default: March 2026
-let filters   = { game:true, practice:true, other:true };
-let activeEv  = null;
-let finType   = 'revenue';
-const finData = {};   // { eventId: [{type, category, amount, desc}] }
-
+// ══ STATE ══════════════════════════════════════════════════════════
+const TODAY  = new Date();
+let viewYear = 2026, viewMonth = 2;
+let filters  = { game:true, practice:true, other:true };
+let activeEv = null, finType = 'revenue';
+const finData = {};
 const MONTHS  = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const MSHORT  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-// ══ RENDER ═══════════════════════════════════════
+// ══ RENDER ═════════════════════════════════════════════════════════
 function render() {
   document.getElementById('monthLabel').textContent = `${MONTHS[viewMonth]} ${viewYear}`;
-  const body     = document.getElementById('calBody');
+  const body = document.getElementById('calBody');
   body.innerHTML = '';
 
   const firstDay    = new Date(viewYear, viewMonth, 1).getDay();
@@ -590,7 +486,6 @@ function render() {
     const m  = ((viewMonth+c.mo)%12+12)%12;
     const y  = viewYear + Math.floor((viewMonth+c.mo)/12);
     const ds = `${y}-${pad(m+1)}-${pad(c.day)}`;
-
     const cell = document.createElement('div');
     cell.className = 'cal-cell'+(c.other?' other-month':'')+(ds===todayStr?' today':'');
 
@@ -604,21 +499,17 @@ function render() {
       const hasFin = (finData[ev.id]||[]).length > 0;
       const pill = document.createElement('span');
       pill.className = `ev-pill ev-${ev.type}${hasFin?' has-finance':''}`;
-      pill.textContent = ev.type==='game'
-        ? `${ev.time} vs ${ev.opponent}`
-        : `${ev.time} ${ev.title}`;
+      pill.textContent = ev.type==='game' ? `${ev.time} vs ${ev.opponent}` : `${ev.time} ${ev.title}`;
       pill.title = pill.textContent;
       pill.onclick = e => { e.stopPropagation(); openDetail(ev); };
       cell.appendChild(pill);
     });
-
     body.appendChild(cell);
   });
-
-  updateSummaryCards();
+  updateCards();
 }
 
-// ══ FILTERS / NAV ════════════════════════════════
+// ══ FILTERS / NAV ══════════════════════════════════════════════════
 function toggleFilter(btn) {
   const t = btn.dataset.type;
   filters[t] = !filters[t];
@@ -628,13 +519,13 @@ function toggleFilter(btn) {
 document.getElementById('prevBtn').onclick = () => { if(--viewMonth<0){viewMonth=11;viewYear--;} render(); };
 document.getElementById('nextBtn').onclick = () => { if(++viewMonth>11){viewMonth=0;viewYear++;} render(); };
 
-// ══ DETAIL MODAL ═════════════════════════════════
+// ══ DETAIL MODAL ═══════════════════════════════════════════════════
 function openDetail(ev) {
   activeEv = ev;
   document.getElementById('detailHdr').className = `mhdr ${ev.type}`;
   document.getElementById('detailTitle').textContent = ev.title;
 
-  const badge  = document.getElementById('detailBadge');
+  const badge = document.getElementById('detailBadge');
   const fields = document.getElementById('detailFields');
 
   if (ev.type === 'game') {
@@ -644,7 +535,7 @@ function openDetail(ev) {
       <div class="frow"><strong>Date:</strong>      <span>${fmt(ev.date)}</span></div>
       <div class="frow"><strong>Time:</strong>      <span>${ev.time}</span></div>
       <div class="frow"><strong>Location:</strong>  <span>${ev.location}</span></div>
-      <div class="frow"><strong>Game Type:</strong> <span>${ev.gameType} <span class="tag-${ev.gameType.toLowerCase()}">${ev.gameType.toUpperCase()}</span></span></div>
+      <div class="frow"><strong>Game Type:</strong> <span>${ev.gameType}<span class="tag-${ev.gameType.toLowerCase()}">${ev.gameType.toUpperCase()}</span></span></div>
       <div class="frow"><strong>Status:</strong>    <span>${ev.status}</span></div>
       ${ev.notes?`<div class="frow"><strong>Notes:</strong><span>${ev.notes}</span></div>`:''}`;
   } else if (ev.type === 'practice') {
@@ -664,23 +555,19 @@ function openDetail(ev) {
       <div class="frow"><strong>Location:</strong>    <span>${ev.location}</span></div>
       ${ev.description?`<div class="frow"><strong>Description:</strong><span>${ev.description}</span></div>`:''}`;
   }
-
   renderFinList();
   openM('detailModal');
 }
 
-// ══ FINANCE LIST (inside detail modal) ═══════════
+// ══ FINANCE LIST ═══════════════════════════════════════════════════
 function renderFinList() {
   const entries = finData[activeEv.id] || [];
-  const count   = document.getElementById('finCount');
-  const list    = document.getElementById('finList');
-  count.textContent = entries.length ? `(${entries.length} entr${entries.length===1?'y':'ies'})` : '';
-
+  document.getElementById('finCount').textContent = entries.length ? `(${entries.length} entr${entries.length===1?'y':'ies'})` : '';
+  const list = document.getElementById('finList');
   if (!entries.length) {
     list.innerHTML = `<p class="text-muted" style="font-size:0.8rem;padding:4px 0;">No financial entries yet for this event.</p>`;
     return;
   }
-
   let rev=0, exp=0, html='';
   entries.forEach((e,i) => {
     const isRev = e.type==='revenue';
@@ -692,34 +579,28 @@ function renderFinList() {
       </span>
       <span style="display:flex;align-items:center;gap:8px;">
         <span class="fe-amt ${e.type}">$${e.amount.toFixed(2)}</span>
-        <button onclick="removeFin(${i})" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:0.8rem;" title="Remove">&#10005;</button>
+        <button onclick="removeFin(${i})" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:0.8rem;">&#10005;</button>
       </span>
     </div>`;
   });
-
-  const net = rev - exp;
-  html += `<div class="fin-net-row">
-    <span>Net</span>
-    <span class="${net>=0?'net-pos':'net-neg'}">$${net.toFixed(2)}</span>
-  </div>`;
+  const net = rev-exp;
+  html += `<div class="fin-net-row"><span>Net</span><span class="${net>=0?'net-pos':'net-neg'}">$${net.toFixed(2)}</span></div>`;
   list.innerHTML = html;
 }
-
 function removeFin(idx) {
-  finData[activeEv.id].splice(idx, 1);
+  finData[activeEv.id].splice(idx,1);
   renderFinList(); render();
 }
 
-// ══ ADD FINANCE MODAL ════════════════════════════
+// ══ ADD FINANCE ════════════════════════════════════════════════════
 function openAddFin() {
-  finType = 'revenue';
-  syncFinTypeUI();
-  document.getElementById('finAmt').value  = '';
+  finType = 'revenue'; syncFinUI();
+  document.getElementById('finAmt').value = '';
   document.getElementById('finDesc').value = '';
   openM('finModal');
 }
-function setFinType(t) { finType = t; syncFinTypeUI(); }
-function syncFinTypeUI() {
+function setFinType(t) { finType=t; syncFinUI(); }
+function syncFinUI() {
   document.getElementById('btnRev').className = finType==='revenue'?'t-revenue':'';
   document.getElementById('btnExp').className = finType==='expense'?'t-expense':'';
   const cats = finType==='revenue' ? REV_CATS : EXP_CATS;
@@ -727,49 +608,34 @@ function syncFinTypeUI() {
 }
 function saveFin() {
   const amt = parseFloat(document.getElementById('finAmt').value);
-  if (!amt || amt <= 0) { alert('Please enter a valid amount greater than $0.'); return; }
-  if (!finData[activeEv.id]) finData[activeEv.id] = [];
-  finData[activeEv.id].push({
-    type:     finType,
-    category: document.getElementById('finCat').value,
-    amount:   amt,
-    desc:     document.getElementById('finDesc').value.trim()
-  });
-  closeM('finModal');
-  renderFinList();
-  render();
+  if (!amt||amt<=0) { alert('Please enter a valid amount greater than $0.'); return; }
+  if (!finData[activeEv.id]) finData[activeEv.id]=[];
+  finData[activeEv.id].push({ type:finType, category:document.getElementById('finCat').value, amount:amt, desc:document.getElementById('finDesc').value.trim() });
+  closeM('finModal'); renderFinList(); render();
 }
 
-// ══ SUMMARY CARDS ════════════════════════════════
-function updateSummaryCards() {
-  let rev=0, exp=0;
-  Object.values(finData).forEach(arr => arr.forEach(e => {
-    if(e.type==='revenue') rev+=e.amount; else exp+=e.amount;
-  }));
-  const net = rev - exp;
+// ══ SUMMARY CARDS ══════════════════════════════════════════════════
+function updateCards() {
+  let rev=0,exp=0;
+  Object.values(finData).forEach(arr=>arr.forEach(e=>{ if(e.type==='revenue') rev+=e.amount; else exp+=e.amount; }));
+  const net=rev-exp;
   document.getElementById('totalRevenue').textContent  = `$${rev.toFixed(2)}`;
   document.getElementById('totalExpenses').textContent = `$${exp.toFixed(2)}`;
   const netEl = document.getElementById('netAmount');
-  netEl.textContent  = `$${net.toFixed(2)}`;
-  netEl.style.color  = net>=0 ? '#198754' : '#b22222';
+  netEl.textContent = `$${net.toFixed(2)}`;
+  netEl.style.color = net>=0 ? '#198754' : '#b22222';
 }
 
-// ══ HELPERS ══════════════════════════════════════
+// ══ HELPERS ════════════════════════════════════════════════════════
 function openM(id)  { document.getElementById(id).classList.add('show'); }
 function closeM(id) { document.getElementById(id).classList.remove('show'); }
 function bgClose(e,id) { if(e.target===document.getElementById(id)) closeM(id); }
 function goSchedule() { if(activeEv) window.location.href=`/schedule?event=${activeEv.id}`; }
 function pad(n) { return String(n).padStart(2,'0'); }
-function fmt(s) {
-  const [y,m,d] = s.split('-').map(Number);
-  return `${MSHORT[m-1]} ${d}, ${y}`;
-}
-document.addEventListener('keydown', e => {
-  if(e.key==='Escape'){ closeM('detailModal'); closeM('finModal'); }
-});
+function fmt(s) { const [y,m,d]=s.split('-').map(Number); return `${MSHORT[m-1]} ${d}, ${y}`; }
+document.addEventListener('keydown', e => { if(e.key==='Escape'){closeM('detailModal');closeM('finModal');} });
 
-// ══ INIT ═════════════════════════════════════════
-syncFinTypeUI();
+syncFinUI();
 render();
 </script>
 </body>
