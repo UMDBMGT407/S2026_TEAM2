@@ -1,1 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UMD Hockey – Calendar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --red:    #E03A3E;
+      --gold:   #FFD200;
+      --dark:   #1a1a1a;
+      --darker: #111111;
+      --mid:    #2c2c2c;
+      --light:  #f5f5f5;
+      --muted:  #888;
+      --game-color:     #E03A3E;
+      --practice-color: #FFD200;
+      --other-color:    #4ea8de;
+      --game-bg:        rgba(224,58,62,0.13);
+      --practice-bg:    rgba(255,210,0,0.13);
+      --other-bg:       rgba(78,168,222,0.13);
+    }
+ 
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+    body {
+      font-family: 'Barlow', sans-serif;
+      background: var(--darker);
+      color: var(--light);
+      min-height: 100vh;
+    }
+ 
+    /* ── HEADER ── */
+    header {
+      background: var(--dark);
+      border-bottom: 3px solid var(--red);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 70px;
+    }
+    .header-left { display: flex; align-items: center; gap: 1rem; }
+    .header-left img { height: 48px; }
+    .site-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.6rem; font-weight: 800; letter-spacing: 1px;
+    }
+    .site-title span { color: var(--gold); }
+    nav a {
+      color: var(--muted); text-decoration: none;
+      font-size: 0.9rem; font-weight: 600; letter-spacing: 0.5px;
+      margin-left: 1.5rem; transition: color 0.2s;
+    }
+    nav a:hover, nav a.active { color: var(--gold); }
+ 
+    /* ── PAGE HEADER ── */
+    .page-header {
+      background: linear-gradient(135deg, #1f1f1f 0%, #2a0a0a 100%);
+      padding: 2.5rem 2rem 2rem;
+      border-bottom: 1px solid #333;
+    }
+    .page-header h1 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 2.4rem; font-weight: 800;
+      letter-spacing: 2px; text-transform: uppercase;
+    }
+    .page-header h1 span { color: var(--red); }
+    .page-header p { color: var(--muted); margin-top: 0.25rem; font-size: 0.95rem; }
+ 
+    /* ── TOOLBAR ── */
+    .toolbar {
+      background: var(--dark);
+      padding: 1rem 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 1rem; border-bottom: 1px solid #333;
+    }
+    .month-nav { display: flex; align-items: center; gap: 1rem; }
+    .month-nav button {
+      background: var(--mid); border: 1px solid #444; color: var(--light);
+      width: 36px; height: 36px; border-radius: 6px;
+      font-size: 1.1rem; cursor: pointer; transition: background 0.2s, border-color 0.2s;
+    }
+    .month-nav button:hover { background: #3a3a3a; border-color: var(--gold); }
+    .month-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.4rem; font-weight: 700; letter-spacing: 1px;
+      min-width: 200px; text-align: center;
+    }
+    .filters { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .filter-btn {
+      border: 2px solid transparent; border-radius: 20px;
+      padding: 0.3rem 0.9rem; font-size: 0.82rem; font-weight: 600;
+      font-family: 'Barlow', sans-serif; cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .filter-btn .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .filter-btn.game     { background: var(--game-bg);     border-color: var(--game-color);     color: var(--game-color); }
+    .filter-btn.practice { background: var(--practice-bg); border-color: var(--practice-color); color: var(--practice-color); }
+    .filter-btn.other    { background: var(--other-bg);    border-color: var(--other-color);    color: var(--other-color); }
+    .filter-btn.game     .dot { background: var(--game-color); }
+    .filter-btn.practice .dot { background: var(--practice-color); }
+    .filter-btn.other    .dot { background: var(--other-color); }
+    .filter-btn.inactive { opacity: 0.35; background: transparent; }
+ 
+    /* ── CALENDAR GRID ── */
+    .calendar-wrap { padding: 1.5rem 2rem; }
+    .calendar { width: 100%; border-collapse: separate; border-spacing: 4px; }
+    .calendar thead th {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.85rem; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--muted); padding: 0.5rem; text-align: center;
+    }
+    .calendar td {
+      background: var(--dark);
+      border: 1px solid #2a2a2a; border-radius: 8px;
+      vertical-align: top; width: calc(100% / 7);
+      min-height: 110px; padding: 0.5rem; transition: border-color 0.2s;
+    }
+    .calendar td:hover { border-color: #444; }
+    .calendar td.other-month { opacity: 0.3; }
+    .calendar td.today { border-color: var(--gold); background: rgba(255,210,0,0.04); }
+    .day-number {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1rem; font-weight: 700; color: var(--muted);
+      display: block; margin-bottom: 0.4rem;
+    }
+    .today .day-number { color: var(--gold); }
+    .event-pill {
+      display: block; border-radius: 4px; padding: 0.18rem 0.45rem;
+      font-size: 0.72rem; font-weight: 600; margin-bottom: 3px;
+      cursor: pointer; white-space: nowrap; overflow: hidden;
+      text-overflow: ellipsis; transition: opacity 0.15s, transform 0.15s;
+      border-left: 3px solid transparent;
+    }
+    .event-pill:hover { opacity: 0.85; transform: translateX(2px); }
+    .event-pill.game     { background: var(--game-bg);     border-left-color: var(--game-color);     color: #ff9a9b; }
+    .event-pill.practice { background: var(--practice-bg); border-left-color: var(--practice-color); color: #ffe680; }
+    .event-pill.other    { background: var(--other-bg);    border-left-color: var(--other-color);    color: #a0d8f7; }
+ 
+    /* ── MODAL OVERLAY ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.25s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--dark); border: 1px solid #3a3a3a; border-radius: 12px;
+      width: 90%; max-width: 500px; overflow: hidden;
+      transform: translateY(20px); transition: transform 0.25s;
+    }
+    .modal-overlay.open .modal { transform: translateY(0); }
+ 
+    /* ── SCHEDULE-STYLE CARD (mirrors schedule.html exactly) ── */
+    .schedule-card {
+      border-left: 4px solid transparent;
+      padding: 1.5rem;
+    }
+    .schedule-card.game     { border-left-color: var(--game-color); }
+    .schedule-card.practice { border-left-color: var(--practice-color); }
+    .schedule-card.other    { border-left-color: var(--other-color); }
+ 
+    .card-header {
+      display: flex; align-items: center;
+      justify-content: space-between; margin-bottom: 0.75rem;
+    }
+    .card-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.35rem; font-weight: 800; letter-spacing: 0.5px;
+    }
+    .card-close {
+      background: none; border: none; color: var(--muted);
+      font-size: 1.3rem; cursor: pointer; transition: color 0.2s; line-height: 1;
+    }
+    .card-close:hover { color: var(--light); }
+ 
+    /* Status badge — identical style to schedule.html */
+    .status-badge {
+      display: inline-block; font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      padding: 0.2rem 0.65rem; border-radius: 20px; margin-bottom: 1rem;
+    }
+    .status-badge.scheduled { background: rgba(78,168,222,0.2);  color: #4ea8de; border: 1px solid #4ea8de; }
+    .status-badge.confirmed { background: rgba(72,199,142,0.2);  color: #48c78e; border: 1px solid #48c78e; }
+    .status-badge.cancelled { background: rgba(224,58,62,0.2);   color: var(--red); border: 1px solid var(--red); }
+    .status-badge.practice  { background: rgba(255,210,0,0.2);   color: var(--gold); border: 1px solid var(--gold); }
+    .status-badge.event     { background: rgba(78,168,222,0.2);  color: #4ea8de; border: 1px solid #4ea8de; }
+ 
+    /* Field rows — identical label:value layout to schedule.html */
+    .card-field {
+      display: flex; padding: 0.55rem 0;
+      border-bottom: 1px solid #2a2a2a; font-size: 0.9rem;
+      gap: 0.5rem;
+    }
+    .card-field:last-of-type { border-bottom: none; }
+    .card-field strong { color: var(--muted); font-weight: 700; min-width: 120px; flex-shrink: 0; }
+    .card-field span   { color: var(--light); font-weight: 500; }
+ 
+    .home-tag, .away-tag {
+      display: inline-block; border-radius: 4px;
+      font-size: 0.72rem; font-weight: 700;
+      padding: 0.1rem 0.4rem; margin-left: 0.4rem;
+      letter-spacing: 0.5px; vertical-align: middle;
+    }
+    .home-tag { background: rgba(72,199,142,0.15); color: #48c78e; border: 1px solid #48c78e; }
+    .away-tag { background: rgba(255,210,0,0.12);  color: var(--gold); border: 1px solid var(--gold); }
+ 
+    .card-footer {
+      padding: 1rem 1.5rem; border-top: 1px solid #2a2a2a;
+      display: flex; justify-content: flex-end; gap: 0.75rem;
+    }
+    .btn {
+      border-radius: 6px; padding: 0.5rem 1.2rem;
+      font-size: 0.88rem; font-weight: 700;
+      font-family: 'Barlow', sans-serif; cursor: pointer;
+      transition: all 0.2s; letter-spacing: 0.5px; border: none;
+    }
+    .btn-secondary { background: var(--mid); color: var(--light); border: 1px solid #444; }
+    .btn-secondary:hover { background: #3a3a3a; }
+    .btn-primary { background: var(--red); color: #fff; }
+    .btn-primary:hover { background: #c0282c; }
+ 
+    /* ── LEGEND ── */
+    .legend {
+      display: flex; gap: 1.5rem; padding: 1rem 2rem;
+      border-top: 1px solid #222; flex-wrap: wrap;
+    }
+    .legend-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.82rem; color: var(--muted); }
+    .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+    .legend-dot.game     { background: var(--game-color); }
+    .legend-dot.practice { background: var(--practice-color); }
+    .legend-dot.other    { background: var(--other-color); }
+ 
+    @media (max-width: 768px) {
+      .calendar td { min-height: 70px; }
+      .event-pill { font-size: 0.65rem; }
+      header { flex-direction: column; height: auto; padding: 1rem; gap: 0.5rem; }
+      nav { display: flex; flex-wrap: wrap; gap: 0.25rem; }
+      nav a { margin-left: 0; margin-right: 0.75rem; }
+      .toolbar { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+ 
+<!-- HEADER -->
+<header>
+  <div class="header-left">
+    <img src="https://umdbmgt407.github.io/S2026_TEAM2/Client-Side/images/team-logo0.png" alt="Team Logo" onerror="this.style.display='none'"/>
+    <div class="site-title">UMD <span>Hockey</span></div>
+  </div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="schedule.html">Schedule</a>
+    <a href="calendar.html" class="active">Calendar</a>
+    <a href="admin-dashboard.html">Admin Login</a>
+    <a href="supplier.html">Supplier Login</a>
+  </nav>
+</header>
+ 
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <h1>Team <span>Calendar</span></h1>
+  <p>View games, practices, and events. Click any event for full details.</p>
+</div>
+ 
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <div class="month-nav">
+    <button id="prevBtn">&#8249;</button>
+    <div class="month-label" id="monthLabel"></div>
+    <button id="nextBtn">&#8250;</button>
+  </div>
+  <div class="filters">
+    <button class="filter-btn game"     data-type="game"     onclick="toggleFilter(this)"><span class="dot"></span>Games</button>
+    <button class="filter-btn practice" data-type="practice" onclick="toggleFilter(this)"><span class="dot"></span>Practices</button>
+    <button class="filter-btn other"    data-type="other"    onclick="toggleFilter(this)"><span class="dot"></span>Other Events</button>
+  </div>
+</div>
+ 
+<!-- CALENDAR GRID -->
+<div class="calendar-wrap">
+  <table class="calendar">
+    <thead>
+      <tr><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th></tr>
+    </thead>
+    <tbody id="calendarBody"></tbody>
+  </table>
+</div>
+ 
+<!-- LEGEND -->
+<div class="legend">
+  <div class="legend-item"><span class="legend-dot game"></span> Game</div>
+  <div class="legend-item"><span class="legend-dot practice"></span> Practice</div>
+  <div class="legend-item"><span class="legend-dot other"></span> Other Event</div>
+</div>
+ 
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOnOverlay(event)">
+  <div class="modal">
+    <div class="schedule-card" id="scheduleCard">
+      <div class="card-header">
+        <div class="card-title" id="cardTitle"></div>
+        <button class="card-close" onclick="closeModal()">&#10005;</button>
+      </div>
+      <div id="statusBadgeWrap"></div>
+      <div id="cardFields"></div>
+    </div>
+    <div class="card-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+      <button class="btn btn-primary" onclick="drillDown()">&#128269; View on Schedule</button>
+    </div>
+  </div>
+</div>
+ 
+<script>
+  // ── EVENT DATA ───────────────────────────────────────────────────────────────
+  // Field names match schedule.html exactly: Opponent, Date, Time, Location,
+  // Status (games) | Title, Email Contact (practices)
+  const events = [
+    // GAMES
+    { id:1,  type:'game',     title:'Upcoming Game',    date:'2026-03-18', time:'8:30 PM', opponent:'Georgetown Club Hockey', location:'UMD Ice Arena',       gameType:'Home', status:'Scheduled', notes:'' },
+    { id:2,  type:'game',     title:'Next Away Game',   date:'2026-03-22', time:'6:00 PM', opponent:'Navy Club Hockey',       location:'Navy Ice Rink',        gameType:'Away', status:'Confirmed', notes:'Bus departs at 3:30 PM.' },
+    { id:3,  type:'game',     title:'Home Game',        date:'2026-03-28', time:'7:30 PM', opponent:'Towson',                 location:'UMD Ice Arena',        gameType:'Home', status:'Scheduled', notes:'Season finale. Alumni night.' },
+    { id:15, type:'game',     title:'Away Game',        date:'2026-04-07', time:'7:00 PM', opponent:'Johns Hopkins',          location:'Johns Hopkins Rink',   gameType:'Away', status:'Scheduled', notes:'Carpools available — contact captain.' },
+    // PRACTICES
+    { id:4,  type:'practice', title:'Practice 1', practiceTitle:'Terps Ice Hockey Practice', date:'2026-03-12', time:'7:00 PM', location:'Campus Ice Rink',     emailContact:'ice@rink.com', notes:'Power play & defensive zone coverage' },
+    { id:5,  type:'practice', title:'Practice 2', practiceTitle:'Terps Ice Hockey Practice', date:'2026-03-14', time:'7:00 PM', location:'Community Ice Arena', emailContact:'ice@rink.com', notes:'Scrimmage & line combinations' },
+    { id:6,  type:'practice', title:'Practice',   practiceTitle:'Terps Ice Hockey Practice', date:'2026-03-16', time:'6:30 PM', location:'Campus Ice Rink',     emailContact:'ice@rink.com', notes:'Game prep – penalty kill' },
+    { id:7,  type:'practice', title:'Practice',   practiceTitle:'Terps Ice Hockey Practice', date:'2026-03-19', time:'6:30 PM', location:'Campus Ice Rink',     emailContact:'ice@rink.com', notes:'Recovery & conditioning' },
+    { id:8,  type:'practice', title:'Practice',   practiceTitle:'Terps Ice Hockey Practice', date:'2026-03-24', time:'7:00 PM', location:'Community Ice Arena', emailContact:'ice@rink.com', notes:'Special teams' },
+    { id:9,  type:'practice', title:'Practice',   practiceTitle:'Terps Ice Hockey Practice', date:'2026-03-26', time:'7:00 PM', location:'Campus Ice Rink',     emailContact:'ice@rink.com', notes:'Game-day walkthrough' },
+    { id:16, type:'practice', title:'Practice',   practiceTitle:'Terps Ice Hockey Practice', date:'2026-04-02', time:'7:00 PM', location:'Campus Ice Rink',     emailContact:'ice@rink.com', notes:'Spring training kickoff' },
+    { id:17, type:'practice', title:'Practice',   practiceTitle:'Terps Ice Hockey Practice', date:'2026-04-09', time:'7:00 PM', location:'Community Ice Arena', emailContact:'ice@rink.com', notes:'Open ice' },
+    // OTHER EVENTS
+    { id:10, type:'other', title:'Team Meeting',        date:'2026-03-10', time:'6:00 PM', location:'Club Room 102',       description:'Season review and playoff discussion.' },
+    { id:11, type:'other', title:'Fundraiser Dinner',   date:'2026-03-20', time:'7:00 PM', location:'Student Union Hall',  description:'Annual team fundraising dinner. All supporters welcome.' },
+    { id:12, type:'other', title:'Equipment Check-in',  date:'2026-03-08', time:'5:00 PM', location:'Athletic Storage',    description:'Return borrowed equipment before the deadline.' },
+    { id:13, type:'other', title:'End-of-Season Banquet',date:'2026-04-04',time:'6:30 PM', location:'Stamp Student Union', description:'Celebrate the season! Awards and dinner.' },
+    { id:14, type:'other', title:'Offseason Skate',     date:'2026-04-11', time:'3:00 PM', location:'Campus Ice Rink',     description:'Informal skate — all skill levels welcome.' },
+  ];
+ 
+  // ── STATE ────────────────────────────────────────────────────────────────────
+  const today = new Date();
+  let viewYear = 2026, viewMonth = 2; // default: March 2026
+  let activeFilters = { game: true, practice: true, other: true };
+  let selectedEvent = null;
+ 
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+ 
+  // ── RENDER ───────────────────────────────────────────────────────────────────
+  function render() {
+    document.getElementById('monthLabel').textContent = `${MONTHS[viewMonth]} ${viewYear}`;
+    const tbody = document.getElementById('calendarBody');
+    tbody.innerHTML = '';
+ 
+    const firstDay    = new Date(viewYear, viewMonth, 1).getDay();
+    const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+    const daysInPrev  = new Date(viewYear, viewMonth, 0).getDate();
+    const todayStr    = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+ 
+    let cells = [];
+    for (let i = 0; i < firstDay; i++)
+      cells.push({ day: daysInPrev - firstDay + 1 + i, mo: -1, other: true });
+    for (let d = 1; d <= daysInMonth; d++)
+      cells.push({ day: d, mo: 0, other: false });
+    let n = 1;
+    while (cells.length % 7) cells.push({ day: n++, mo: 1, other: true });
+ 
+    for (let i = 0; i < cells.length; i += 7) {
+      const tr = document.createElement('tr');
+      for (let j = 0; j < 7; j++) {
+        const c  = cells[i+j];
+        const td = document.createElement('td');
+        const m  = ((viewMonth + c.mo) % 12 + 12) % 12;
+        const y  = viewYear + Math.floor((viewMonth + c.mo) / 12);
+        const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(c.day).padStart(2,'0')}`;
+ 
+        if (c.other) td.classList.add('other-month');
+        if (ds === todayStr) td.classList.add('today');
+ 
+        const num = document.createElement('span');
+        num.className = 'day-number';
+        num.textContent = c.day;
+        td.appendChild(num);
+ 
+        events.forEach(ev => {
+          if (ev.date === ds && activeFilters[ev.type]) {
+            const pill = document.createElement('span');
+            pill.className = `event-pill ${ev.type}`;
+            pill.textContent = `${ev.time}  ${ev.type === 'game' ? 'vs ' + ev.opponent : ev.title}`;
+            pill.onclick = e => { e.stopPropagation(); openModal(ev); };
+            td.appendChild(pill);
+          }
+        });
+ 
+        tr.appendChild(td);
+      }
+      tbody.appendChild(tr);
+    }
+  }
+ 
+  // ── MODAL ────────────────────────────────────────────────────────────────────
+  function openModal(ev) {
+    selectedEvent = ev;
+    const card   = document.getElementById('scheduleCard');
+    const title  = document.getElementById('cardTitle');
+    const badge  = document.getElementById('statusBadgeWrap');
+    const fields = document.getElementById('cardFields');
+ 
+    card.className = `schedule-card ${ev.type}`;
+    title.textContent = ev.title;
+ 
+    // ── Render exactly like schedule.html cards ──────────────────────────────
+    if (ev.type === 'game') {
+      badge.innerHTML  = `<span class="status-badge ${ev.status.toLowerCase()}">${ev.status}</span>`;
+      fields.innerHTML = `
+        <div class="card-field"><strong>Opponent:</strong>  <span>${ev.opponent}</span></div>
+        <div class="card-field"><strong>Date:</strong>      <span>${fmtDate(ev.date)}</span></div>
+        <div class="card-field"><strong>Time:</strong>      <span>${ev.time}</span></div>
+        <div class="card-field"><strong>Location:</strong>  <span>${ev.location}</span></div>
+        <div class="card-field"><strong>Game Type:</strong> <span>${ev.gameType}<span class="${ev.gameType==='Home'?'home-tag':'away-tag'}">${ev.gameType.toUpperCase()}</span></span></div>
+        <div class="card-field"><strong>Status:</strong>    <span>${ev.status}</span></div>
+        ${ev.notes ? `<div class="card-field"><strong>Notes:</strong><span>${ev.notes}</span></div>` : ''}`;
+ 
+    } else if (ev.type === 'practice') {
+      badge.innerHTML  = `<span class="status-badge practice">Practice</span>`;
+      fields.innerHTML = `
+        <div class="card-field"><strong>Title:</strong>         <span>${ev.practiceTitle}</span></div>
+        <div class="card-field"><strong>Date:</strong>          <span>${fmtDate(ev.date)}</span></div>
+        <div class="card-field"><strong>Time:</strong>          <span>${ev.time}</span></div>
+        <div class="card-field"><strong>Location:</strong>      <span>${ev.location}</span></div>
+        <div class="card-field"><strong>Email Contact:</strong> <span>${ev.emailContact}</span></div>
+        ${ev.notes ? `<div class="card-field"><strong>Notes:</strong><span>${ev.notes}</span></div>` : ''}`;
+ 
+    } else {
+      badge.innerHTML  = `<span class="status-badge event">Event</span>`;
+      fields.innerHTML = `
+        <div class="card-field"><strong>Date:</strong>        <span>${fmtDate(ev.date)}</span></div>
+        <div class="card-field"><strong>Time:</strong>        <span>${ev.time}</span></div>
+        <div class="card-field"><strong>Location:</strong>    <span>${ev.location}</span></div>
+        ${ev.description ? `<div class="card-field"><strong>Description:</strong><span>${ev.description}</span></div>` : ''}`;
+    }
+ 
+    document.getElementById('modalOverlay').classList.add('open');
+  }
+ 
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('open');
+    selectedEvent = null;
+  }
+  function closeModalOnOverlay(e) {
+    if (e.target === document.getElementById('modalOverlay')) closeModal();
+  }
+  function drillDown() {
+    if (selectedEvent) window.location.href = `schedule.html?event=${selectedEvent.id}`;
+  }
+  function fmtDate(s) {
+    const [y,m,d] = s.split('-').map(Number);
+    return `${MONTHS_SHORT[m-1]} ${d}, ${y}`;
+  }
+ 
+  // ── FILTERS & NAV ────────────────────────────────────────────────────────────
+  function toggleFilter(btn) {
+    const t = btn.dataset.type;
+    activeFilters[t] = !activeFilters[t];
+    btn.classList.toggle('inactive', !activeFilters[t]);
+    render();
+  }
+  document.getElementById('prevBtn').onclick = () => { if(--viewMonth<0){viewMonth=11;viewYear--;} render(); };
+  document.getElementById('nextBtn').onclick = () => { if(++viewMonth>11){viewMonth=0;viewYear++;} render(); };
+  document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+ 
+  render();
+</script>
+</body>
+</html>
+ 
 
