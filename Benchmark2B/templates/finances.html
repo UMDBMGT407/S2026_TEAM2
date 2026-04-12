@@ -170,7 +170,7 @@
     <div class="card p-4 card-box mb-4">
       <h3 class="section-title">Game Budget Comparison</h3>
       <p class="mini-note">
-        Click a game row to open the detailed financial popup. This table lets you compare projected and actual results at a glance.
+        Click a game row to open the detailed financial popup. This table compares projected and actual results for each game.
       </p>
 
       <div class="table-responsive mt-3">
@@ -183,62 +183,49 @@
               <th>Status</th>
               <th>Projected Revenue</th>
               <th>Actual Revenue</th>
+              <th>Revenue Check</th>
               <th>Projected Expenses</th>
               <th>Actual Expenses</th>
-              <th>Expense Variance</th>
-              <th>Budget Check</th>
+              <th>Expense Check</th>
             </tr>
           </thead>
           <tbody>
-            {% if actual_games %}
-              {% for actual in actual_games %}
-                {% set ns = namespace(projected_revenue=0, projected_expenses=0, projected_net=0) %}
-                {% for proj in projected_games %}
-                  {% if proj.game_id == actual.game_id %}
-                    {% set ns.projected_revenue = proj.projected_revenue %}
-                    {% set ns.projected_expenses = proj.projected_expenses %}
-                    {% set ns.projected_net = proj.projected_net %}
+            {% if game_comparisons %}
+              {% for game in game_comparisons %}
+              <tr class="game-row" data-game-id="{{ game.game_id }}">
+                <td>{{ game.game_date }}</td>
+                <td>{{ game.opponent }}</td>
+                <td>{{ game.game_type }}</td>
+                <td>{{ game.status }}</td>
+
+                <td class="text-success">${{ "%.2f"|format(game.projected_revenue) }}</td>
+                <td class="text-success">${{ "%.2f"|format(game.actual_revenue) }}</td>
+                <td>
+                  {% if game.projected_revenue == 0 and game.actual_revenue == 0 %}
+                    <span class="badge bg-secondary">No Data</span>
+                  {% elif game.actual_revenue > game.projected_revenue %}
+                    <span class="badge bg-success">Above Target</span>
+                  {% elif game.actual_revenue < game.projected_revenue %}
+                    <span class="badge bg-warning text-dark">Below Target</span>
+                  {% else %}
+                    <span class="badge bg-primary">On Target</span>
                   {% endif %}
-                {% endfor %}
+                </td>
 
-                {% set expense_variance = actual.total_expenses - ns.projected_expenses %}
-
-                {% if ns.projected_expenses > 0 %}
-                  {% set variance_percent = ((expense_variance | abs) / ns.projected_expenses) * 100 %}
-                {% elif actual.total_expenses > 0 %}
-                  {% set variance_percent = 100 %}
-                {% else %}
-                  {% set variance_percent = 0 %}
-                {% endif %}
-
-                <tr class="game-row" data-game-id="{{ actual.game_id }}">
-                  <td>{{ actual.game_date }}</td>
-                  <td>{{ actual.opponent }}</td>
-                  <td>{{ actual.game_type }}</td>
-                  <td>{{ actual.status }}</td>
-
-                  <td class="text-success">${{ "%.2f"|format(ns.projected_revenue) }}</td>
-                  <td class="text-success">${{ "%.2f"|format(actual.total_revenue) }}</td>
-
-                  <td class="text-warning">${{ "%.2f"|format(ns.projected_expenses) }}</td>
-                  <td class="text-danger">${{ "%.2f"|format(actual.total_expenses) }}</td>
-
-                  <td class="{% if expense_variance > 0 %}text-danger{% elif expense_variance < 0 %}text-success{% else %}text-primary{% endif %}">
-                    {% if expense_variance > 0 %}+{% endif %}${{ "%.2f"|format(expense_variance) }}
-                  </td>
-
-                  <td>
-                    {% if ns.projected_expenses == 0 and actual.total_expenses == 0 %}
-                      <span class="badge bg-secondary">No Data</span>
-                    {% elif variance_percent <= 10 %}
-                      <span class="badge bg-success">On Target</span>
-                    {% elif variance_percent <= 25 %}
-                      <span class="badge bg-warning text-dark">Close</span>
-                    {% else %}
-                      <span class="badge bg-danger">Far Off</span>
-                    {% endif %}
-                  </td>
-                </tr>
+                <td class="text-warning">${{ "%.2f"|format(game.projected_expenses) }}</td>
+                <td class="text-danger">${{ "%.2f"|format(game.actual_expenses) }}</td>
+                <td>
+                  {% if game.projected_expenses == 0 and game.actual_expenses == 0 %}
+                    <span class="badge bg-secondary">No Data</span>
+                  {% elif game.actual_expenses > game.projected_expenses %}
+                    <span class="badge bg-danger">Over Budget</span>
+                  {% elif game.actual_expenses < game.projected_expenses %}
+                    <span class="badge bg-success">Under Budget</span>
+                  {% else %}
+                    <span class="badge bg-primary">On Budget</span>
+                  {% endif %}
+                </td>
+              </tr>
               {% endfor %}
             {% else %}
               <tr>
@@ -291,7 +278,7 @@
     <div class="card p-4 card-box mb-4">
       <h3 class="section-title">How to Use This Page</h3>
       <div class="info-note">
-        Click any game row to open its financial details. Inside the popup, you can add actual entries, add projections, review totals, and compare planned costs with real costs. The comparison table on this page highlights whether each game stayed close to budget or if the actual expenses were much higher than expected.
+        Click any game row to open its financial details. Inside the popup, you can add actual entries, add projections, review totals, and compare expected results with real results. Revenue is evaluated as above target, below target, or on target, while expenses are evaluated as under budget, over budget, or on budget.
       </div>
     </div>
 
@@ -301,7 +288,6 @@
 
   </main>
 
-  <!-- ACTUAL ENTRY MODAL -->
   <div class="modal fade" id="addActualEntryModal" tabindex="-1" aria-labelledby="addActualEntryModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
@@ -378,7 +364,6 @@
     </div>
   </div>
 
-  <!-- PROJECTION MODAL -->
   <div class="modal fade" id="addProjectionModal" tabindex="-1" aria-labelledby="addProjectionModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
@@ -455,7 +440,6 @@
     </div>
   </div>
 
-  <!-- GAME DETAIL MODAL -->
   <div class="modal fade" id="gameDetailModal" tabindex="-1" aria-labelledby="gameDetailModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
       <div class="modal-content">
@@ -475,7 +459,6 @@
     </div>
   </div>
 
-  <!-- DELETE GAME MODAL -->
   <div class="modal fade" id="deleteGameModal" tabindex="-1" aria-labelledby="deleteGameModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -520,6 +503,7 @@
         if (!categoryMap[key]) {
           categoryMap[key] = {
             category_name: key,
+            category_type: entry.category_type,
             projected: 0,
             actual: 0
           };
@@ -532,6 +516,7 @@
         if (!categoryMap[key]) {
           categoryMap[key] = {
             category_name: key,
+            category_type: entry.category_type,
             projected: 0,
             actual: 0
           };
@@ -549,18 +534,25 @@
         const variance = row.actual - row.projected;
         let statusBadge = '<span class="badge bg-secondary">No Data</span>';
 
-        if (row.projected === 0 && row.actual === 0) {
-          statusBadge = '<span class="badge bg-secondary">No Data</span>';
-        } else if (row.projected === 0 && row.actual > 0) {
-          statusBadge = '<span class="badge bg-danger">Unplanned Cost</span>';
-        } else {
-          const variancePercent = Math.abs(variance) / row.projected * 100;
-          if (variancePercent <= 10) {
-            statusBadge = '<span class="badge bg-success">On Target</span>';
-          } else if (variancePercent <= 25) {
-            statusBadge = '<span class="badge bg-warning text-dark">Close</span>';
+        if (row.category_type === 'Revenue') {
+          if (row.projected === 0 && row.actual === 0) {
+            statusBadge = '<span class="badge bg-secondary">No Data</span>';
+          } else if (row.actual > row.projected) {
+            statusBadge = '<span class="badge bg-success">Above Target</span>';
+          } else if (row.actual < row.projected) {
+            statusBadge = '<span class="badge bg-warning text-dark">Below Target</span>';
           } else {
-            statusBadge = '<span class="badge bg-danger">Far Off</span>';
+            statusBadge = '<span class="badge bg-primary">On Target</span>';
+          }
+        } else {
+          if (row.projected === 0 && row.actual === 0) {
+            statusBadge = '<span class="badge bg-secondary">No Data</span>';
+          } else if (row.actual > row.projected) {
+            statusBadge = '<span class="badge bg-danger">Over Budget</span>';
+          } else if (row.actual < row.projected) {
+            statusBadge = '<span class="badge bg-success">Under Budget</span>';
+          } else {
+            statusBadge = '<span class="badge bg-primary">On Budget</span>';
           }
         }
 
@@ -568,8 +560,8 @@
           <tr>
             <td>${row.category_name}</td>
             <td class="text-warning">${money(row.projected)}</td>
-            <td class="text-danger">${money(row.actual)}</td>
-            <td class="${variance > 0 ? 'text-danger' : variance < 0 ? 'text-success' : 'text-primary'}">
+            <td class="${row.category_type === 'Revenue' ? 'text-success' : 'text-danger'}">${money(row.actual)}</td>
+            <td class="${variance > 0 ? (row.category_type === 'Revenue' ? 'text-success' : 'text-danger') : variance < 0 ? (row.category_type === 'Revenue' ? 'text-danger' : 'text-success') : 'text-primary'}">
               ${variance > 0 ? '+' : ''}${money(variance)}
             </td>
             <td>${statusBadge}</td>
@@ -710,7 +702,7 @@
 
           <div class="comparison-box">
             <h6>Projection vs Actual Comparison</h6>
-            <p class="small-muted">This section compares projected and actual totals by category so you can see whether the budget estimate was close.</p>
+            <p class="small-muted">Revenue is evaluated differently from expenses so the status reflects whether results were positive or negative for the team.</p>
             <div class="table-responsive">
               <table class="table table-striped table-bordered align-middle mb-0">
                 <thead class="table-dark">
