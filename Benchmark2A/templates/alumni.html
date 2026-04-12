@@ -2,53 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-
-  <!-- makes page responsive -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>Alumni Portal</title>
 
-  <!-- bootstrap css -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  <!-- shared css file -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/newstyle.css') }}">
 </head>
 <body>
 
-  <!-- top navigation -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
-      <a class="navbar-brand d-flex align-items-center" href="/admin-dashboard">
-        <img src="{{ url_for('static', filename='images/team-logo0.png') }}" alt="Team Logo" class="logo">
-        Hockey System
-      </a>
+  {% include '_navbar.html' %}
 
-      <!-- button for smaller screens -->
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <!-- nav links -->
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="/index">Public Site</a></li>
-           <li class="nav-item">
-            <a class="nav-link" href="/calendar">Calendar</a>
-          </li>
-          <li class="nav-item"><a class="nav-link" href="/admin-dashboard">Dashboard</a></li>
-          <li class="nav-item"><a class="nav-link" href="/roster">Roster</a></li>
-          <li class="nav-item"><a class="nav-link" href="/schedule">Schedule</a></li>
-          <li class="nav-item"><a class="nav-link" href="/equipment">Equipment</a></li>
-          <li class="nav-item"><a class="nav-link" href="/finances">Finances</a></li>
-          <li class="nav-item"><a class="nav-link active" href="/alumni">Alumni</a></li>
-          <li class="nav-item"><a class="nav-link" href="/newsletters">Newsletters</a></li>
-        </ul>
-      </div>
-    </div>
-  </nav>
-
-  <!-- red banner -->
   <section class="hero text-center">
     <div class="container">
       <h1>Alumni Portal</h1>
@@ -56,39 +19,26 @@
     </div>
   </section>
 
-  <!-- main content -->
   <main class="container my-5">
-
-    <!-- top row with search and action buttons -->
     <div class="row mb-4">
       <div class="col-md-6 mb-3 mb-md-0">
         <input type="text" class="form-control" placeholder="Search alumni by name, class year, or occupation">
       </div>
 
       <div class="col-md-3 mb-3 mb-md-0">
-        <!-- add alumni button -->
-        <button type="button"
-                class="btn btn-danger w-100"
-                data-bs-toggle="modal"
-                data-bs-target="#addAlumniModal">
+        <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#addAlumniModal">
           Add Alumni
         </button>
       </div>
 
       <div class="col-md-3">
-        <!-- newsletter button -->
-        <button type="button"
-                class="btn btn-secondary w-100"
-                data-bs-toggle="modal"
-                data-bs-target="#newsletterModal">
+        <button type="button" class="btn btn-secondary w-100" data-bs-toggle="modal" data-bs-target="#newsletterModal">
           Newsletters
         </button>
       </div>
     </div>
 
-    <!-- summary cards -->
     <div class="row g-4 mb-4">
-
       <div class="col-md-4">
         <div class="card p-4 card-box text-center">
           <h3>Total Donations</h3>
@@ -112,48 +62,29 @@
           <p class="mb-0">Subscribed to updates</p>
         </div>
       </div>
-
     </div>
 
-    <!-- tabs -->
     <ul class="nav nav-tabs mb-4" id="alumniTabs" role="tablist">
-
       <li class="nav-item" role="presentation">
-        <button class="nav-link active"
-                id="records-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#records-pane"
-                type="button"
-                role="tab">
+        <button class="nav-link active" id="records-tab" data-bs-toggle="tab" data-bs-target="#records-pane" type="button" role="tab">
           Alumni Records
         </button>
       </li>
 
       <li class="nav-item" role="presentation">
-        <button class="nav-link"
-                id="donations-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#donations-pane"
-                type="button"
-                role="tab">
+        <button class="nav-link" id="donations-tab" data-bs-toggle="tab" data-bs-target="#donations-pane" type="button" role="tab">
           Donation Summary
         </button>
       </li>
-
     </ul>
 
-    <!-- tab content -->
     <div class="tab-content">
-
-      <!-- ALUMNI RECORDS TAB -->
       <div class="tab-pane fade show active" id="records-pane" role="tabpanel">
-
         <div class="row g-4">
-
           <div class="col-md-6">
             <div class="card p-4 card-box h-100">
               <div class="d-flex align-items-center mb-3">
-                <img src="images/team-logo0.png" alt="Alumni Profile" class="profile-img me-3">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Alumni Profile" class="profile-img me-3">
                 <div>
                   <h4 class="mb-1">Marco Rossi</h4>
                   <p class="mb-0">Class of 2022 • Defense</p>
@@ -170,7 +101,7 @@
           <div class="col-md-6">
             <div class="card p-4 card-box h-100">
               <div class="d-flex align-items-center mb-3">
-                <img src="images/team-logo0.png" alt="Alumni Profile" class="profile-img me-3">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Alumni Profile" class="profile-img me-3">
                 <div>
                   <h4 class="mb-1">Jake Thompson</h4>
                   <p class="mb-0">Class of 2021 • Forward</p>
@@ -187,7 +118,7 @@
           <div class="col-md-6">
             <div class="card p-4 card-box h-100">
               <div class="d-flex align-items-center mb-3">
-                <img src="images/team-logo0.png" alt="Alumni Profile" class="profile-img me-3">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Alumni Profile" class="profile-img me-3">
                 <div>
                   <h4 class="mb-1">Liam Connor</h4>
                   <p class="mb-0">Class of 2020 • Goalie</p>
@@ -204,7 +135,7 @@
           <div class="col-md-6">
             <div class="card p-4 card-box h-100">
               <div class="d-flex align-items-center mb-3">
-                <img src="images/team-logo0.png" alt="Alumni Profile" class="profile-img me-3">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Alumni Profile" class="profile-img me-3">
                 <div>
                   <h4 class="mb-1">Jake Lake</h4>
                   <p class="mb-0">Class of 2019 • Defense</p>
@@ -217,13 +148,10 @@
               </div>
             </div>
           </div>
-
         </div>
       </div>
 
-      <!-- DONATION SUMMARY TAB -->
       <div class="tab-pane fade" id="donations-pane" role="tabpanel">
-
         <div class="card p-4 card-box mb-4">
           <h3>Donation Summary</h3>
 
@@ -288,23 +216,17 @@
             </div>
           </div>
         </div>
-
       </div>
-
     </div>
 
-    <!-- back button -->
     <div class="mt-4">
-      <a href="index.html" class="btn btn-secondary">Back to Dashboard</a>
+      <a href="{{ url_for('admin_page') }}" class="btn btn-secondary">Back to Dashboard</a>
     </div>
-
   </main>
 
-  <!-- ADD ALUMNI MODAL -->
   <div class="modal fade" id="addAlumniModal" tabindex="-1" aria-labelledby="addAlumniModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
-
         <div class="modal-header">
           <h5 class="modal-title" id="addAlumniModalLabel">Add New Alumni</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -312,8 +234,6 @@
 
         <div class="modal-body">
           <form>
-
-            <!-- first and last name -->
             <div class="row mb-3">
               <div class="col-md-6">
                 <label for="alumniFirstName" class="form-label">First Name</label>
@@ -326,7 +246,6 @@
               </div>
             </div>
 
-            <!-- class year and position -->
             <div class="row mb-3">
               <div class="col-md-6">
                 <label for="alumniClassYear" class="form-label">Class Year</label>
@@ -344,7 +263,6 @@
               </div>
             </div>
 
-            <!-- email and occupation -->
             <div class="row mb-3">
               <div class="col-md-6">
                 <label for="alumniEmail" class="form-label">Email</label>
@@ -357,7 +275,6 @@
               </div>
             </div>
 
-            <!-- donation status -->
             <div class="mb-3">
               <label for="alumniDonationStatus" class="form-label">Donation Status</label>
               <select class="form-select" id="alumniDonationStatus">
@@ -366,7 +283,6 @@
                 <option>Has Not Donated</option>
               </select>
             </div>
-
           </form>
         </div>
 
@@ -374,16 +290,13 @@
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
           <button type="button" class="btn btn-success">Save Alumni</button>
         </div>
-
       </div>
     </div>
   </div>
 
-  <!-- NEWSLETTER MODAL -->
   <div class="modal fade" id="newsletterModal" tabindex="-1" aria-labelledby="newsletterModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
-
         <div class="modal-header">
           <h5 class="modal-title" id="newsletterModalLabel">Newsletter Subscription</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -391,13 +304,10 @@
 
         <div class="modal-body">
           <form>
-
-            <!-- only email as requested -->
             <div class="mb-3">
               <label for="newsletterEmail" class="form-label">Email Address</label>
               <input type="email" class="form-control" id="newsletterEmail" placeholder="Enter email">
             </div>
-
           </form>
         </div>
 
@@ -405,12 +315,10 @@
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
           <button type="button" class="btn btn-primary">Add to Newsletter</button>
         </div>
-
       </div>
     </div>
   </div>
 
-  <!-- bootstrap javascript -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
