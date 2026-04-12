@@ -13,7 +13,7 @@ app.secret_key = 'bmgt407_hockey_secret_key'
 # ---------------------------
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'yourpasswd!'
+app.config['MYSQL_PASSWORD'] = 'Acciaio1!'
 app.config['MYSQL_DB'] = 'user_management'
 
 mysql = MySQL(app)
@@ -191,23 +191,22 @@ def build_game_comparisons(actual_games, projected_games):
         actual_expenses = float(actual['total_expenses'])
         actual_net = float(actual['net_result'])
 
+        revenue_variance = actual_revenue - projected_revenue
         expense_variance = actual_expenses - projected_expenses
 
         if projected_expenses > 0:
-            variance_percent = abs(expense_variance) / projected_expenses * 100
+            expense_variance_percent = abs(expense_variance) / projected_expenses * 100
         elif actual_expenses > 0:
-            variance_percent = 100.0
+            expense_variance_percent = 100.0
         else:
-            variance_percent = 0.0
+            expense_variance_percent = 0.0
 
-        if projected_expenses == 0 and actual_expenses == 0:
-            budget_status = 'No Data'
-        elif variance_percent <= 10:
-            budget_status = 'On Target'
-        elif variance_percent <= 25:
-            budget_status = 'Close'
+        if projected_revenue > 0:
+            revenue_variance_percent = abs(revenue_variance) / projected_revenue * 100
+        elif actual_revenue > 0:
+            revenue_variance_percent = 100.0
         else:
-            budget_status = 'Far Off'
+            revenue_variance_percent = 0.0
 
         comparisons.append({
             'game_id': actual['game_id'],
@@ -221,9 +220,10 @@ def build_game_comparisons(actual_games, projected_games):
             'actual_expenses': actual_expenses,
             'projected_net': projected_net,
             'actual_net': actual_net,
+            'revenue_variance': revenue_variance,
             'expense_variance': expense_variance,
-            'variance_percent': variance_percent,
-            'budget_status': budget_status
+            'revenue_variance_percent': revenue_variance_percent,
+            'expense_variance_percent': expense_variance_percent
         })
 
     return comparisons
@@ -562,7 +562,8 @@ def game_details(game_id):
                 fe.amount,
                 fe.description,
                 fe.entry_date,
-                fc.category_name
+                fc.category_name,
+                fc.category_type
             FROM financial_entries fe
             JOIN financial_categories fc ON fe.category_id = fc.category_id
             WHERE fe.game_id = %s
@@ -583,7 +584,8 @@ def game_details(game_id):
                 'amount': amount,
                 'description': row[4],
                 'entry_date': str(row[5]),
-                'category_name': row[6]
+                'category_name': row[6],
+                'category_type': row[7]
             })
             if row[2] == 'Revenue':
                 actual_revenue += amount
@@ -598,7 +600,8 @@ def game_details(game_id):
                 fp.projected_amount,
                 fp.notes,
                 fp.projection_date,
-                fc.category_name
+                fc.category_name,
+                fc.category_type
             FROM financial_projections fp
             JOIN financial_categories fc ON fp.category_id = fc.category_id
             WHERE fp.game_id = %s
@@ -619,7 +622,8 @@ def game_details(game_id):
                 'projected_amount': amount,
                 'notes': row[4],
                 'projection_date': str(row[5]),
-                'category_name': row[6]
+                'category_name': row[6],
+                'category_type': row[7]
             })
             if row[2] == 'Revenue':
                 projected_revenue += amount
@@ -908,44 +912,12 @@ def delete_financial_projection(projection_id):
     return redirect(url_for('finances'))
 
 
-@app.route('/delete_game_entries/<int:game_id>', methods=['POST'])
-@login_required
-@role_required('Admin', 'Coach')
-def delete_game_entries(game_id):
-    cur = mysql.connection.cursor()
-    try:
-        cur.execute("DELETE FROM financial_entries WHERE game_id = %s", (game_id,))
-        mysql.connection.commit()
-        flash('All actual financial entries for this game were deleted.', 'success')
-    except Exception as e:
-        mysql.connection.rollback()
-        flash(f'Could not delete game entries: {e}', 'danger')
-    finally:
-        cur.close()
-    return redirect(url_for('finances'))
-
-
-@app.route('/delete_game_projections/<int:game_id>', methods=['POST'])
-@login_required
-@role_required('Admin', 'Coach')
-def delete_game_projections(game_id):
-    cur = mysql.connection.cursor()
-    try:
-        cur.execute("DELETE FROM financial_projections WHERE game_id = %s", (game_id,))
-        mysql.connection.commit()
-        flash('All projections for this game were deleted.', 'success')
-    except Exception as e:
-        mysql.connection.rollback()
-        flash(f'Could not delete game projections: {e}', 'danger')
-    finally:
-        cur.close()
-    return redirect(url_for('finances'))
-
-
 @app.route('/delete_game/<int:game_id>', methods=['POST'])
 @login_required
 @role_required('Admin', 'Coach')
 def delete_game(game_id):
+    next_page = request.form.get('next_page', 'finances')
+
     cur = mysql.connection.cursor()
     try:
         cur.execute("DELETE FROM financial_entries WHERE game_id = %s", (game_id,))
@@ -958,6 +930,9 @@ def delete_game(game_id):
         flash(f'Could not delete game: {e}', 'danger')
     finally:
         cur.close()
+
+    if next_page == 'schedule':
+        return redirect(url_for('schedule'))
     return redirect(url_for('finances'))
 
 
