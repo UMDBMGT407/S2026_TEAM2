@@ -1,172 +1,428 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Roster Management</title>
 
+  <!-- makes page responsive -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Scheduling & Notifications</title>
+
+  <!-- bootstrap css -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- shared css file -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/newstyle.css') }}">
+
+  <style>
+    .section-note {
+      font-size: 0.92rem;
+      color: #6c757d;
+    }
+  </style>
 </head>
 <body>
 
   {% include '_navbar.html' %}
 
+  <!-- red banner -->
   <section class="hero text-center">
     <div class="container">
-      <h1>Roster Management</h1>
-      <p class="mb-0">Manage player information and team roster</p>
+      <h1>Scheduling & Notifications</h1>
+      <p class="mb-0">Manage games, practices, and automated email notifications</p>
     </div>
   </section>
 
+  <!-- main content -->
   <main class="container my-5">
-    <div class="card p-4 card-box">
 
-      {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-          {% for category, message in messages %}
-            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-              {{ message }}
-              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- top row with title and action buttons -->
+    <div class="row mb-4">
+      <div class="col-md-4 mb-3 mb-md-0">
+        <h2 class="mb-0">Schedule Module</h2>
+      </div>
+
+      <!-- buttons for different actions -->
+      <div class="col-md-8 text-md-end">
+        <button type="button"
+                class="btn btn-danger me-2 mb-2"
+                data-bs-toggle="modal"
+                data-bs-target="#addPracticeModal">
+          Add Practice
+        </button>
+
+        <button type="button"
+                class="btn btn-primary me-2 mb-2"
+                data-bs-toggle="modal"
+                data-bs-target="#addGameModal">
+          Add Game
+        </button>
+
+        <button type="button"
+                class="btn btn-success mb-2"
+                data-bs-toggle="modal"
+                data-bs-target="#sendMessageModal">
+          Send Message
+        </button>
+      </div>
+    </div>
+
+    <!-- tabs -->
+    <ul class="nav nav-tabs mb-4" id="scheduleTabs" role="tablist">
+
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active"
+                id="games-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#games-pane"
+                type="button"
+                role="tab">
+          Game Schedule
+        </button>
+      </li>
+
+      <li class="nav-item" role="presentation">
+        <button class="nav-link"
+                id="practices-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#practices-pane"
+                type="button"
+                role="tab">
+          Practices
+        </button>
+      </li>
+
+      <li class="nav-item" role="presentation">
+        <button class="nav-link"
+                id="emails-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#emails-pane"
+                type="button"
+                role="tab">
+          Email Notifications
+        </button>
+      </li>
+
+    </ul>
+
+    <!-- tab content -->
+    <div class="tab-content">
+
+      <!-- GAME SCHEDULE TAB -->
+      <div class="tab-pane fade show active" id="games-pane" role="tabpanel">
+
+        <div class="card p-4 card-box mb-4">
+          <h3>Games from Database</h3>
+          <p class="section-note mb-3">These games are loaded from the SQL database and are used by the finance module too.</p>
+
+          <div class="table-responsive">
+            <table class="table table-striped table-bordered align-middle">
+              <thead class="table-dark">
+                <tr>
+                  <th>Date</th>
+                  <th>Opponent</th>
+                  <th>Location</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% if games %}
+                  {% for game in games %}
+                  <tr>
+                    <td>{{ game.game_date }}</td>
+                    <td>{{ game.opponent }}</td>
+                    <td>{{ game.location }}</td>
+                    <td>{{ game.game_type }}</td>
+                    <td>{{ game.status }}</td>
+                  </tr>
+                  {% endfor %}
+                {% else %}
+                  <tr>
+                    <td colspan="5" class="text-center">No games found.</td>
+                  </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="row g-4">
+
+          <div class="col-md-6">
+            <div class="card p-4 card-box h-100">
+              <h3>Upcoming Game</h3>
+              <p><strong>Opponent:</strong> Georgetown Club Hockey</p>
+              <p><strong>Date:</strong> March 18, 2026</p>
+              <p><strong>Time:</strong> 8:30 PM</p>
+              <p><strong>Location:</strong> UMD Ice Arena</p>
+              <p><strong>Status:</strong> Scheduled</p>
             </div>
-          {% endfor %}
-        {% endif %}
-      {% endwith %}
+          </div>
 
-      <div class="row mb-4">
-        <div class="col-md-8 mb-3 mb-md-0">
-          <input type="text" class="form-control" placeholder="Search by name, position, or jersey number">
-        </div>
+          <div class="col-md-6">
+            <div class="card p-4 card-box h-100">
+              <h3>Next Away Game</h3>
+              <p><strong>Opponent:</strong> Navy Club Hockey</p>
+              <p><strong>Date:</strong> March 22, 2026</p>
+              <p><strong>Time:</strong> 6:00 PM</p>
+              <p><strong>Location:</strong> Navy Ice Rink</p>
+              <p><strong>Status:</strong> Confirmed</p>
+            </div>
+          </div>
 
-        <div class="col-md-4 text-md-end">
-          <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#addPlayerModal">
-            Add Player
-          </button>
         </div>
       </div>
 
-      <div class="table-responsive">
-        <table class="table table-striped table-bordered align-middle">
-          <thead class="table-dark">
-            <tr>
-              <th>#</th>
-              <th>Name</th>
-              <th>Position</th>
-              <th>Year</th>
-              <th>Injured</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Action</th>
-            </tr>
-          </thead>
+      <!-- PRACTICES TAB -->
+      <div class="tab-pane fade" id="practices-pane" role="tabpanel">
+        <div class="row g-4">
 
-          <tbody>
-            {% if players %}
-              {% for player in players %}
-              <tr>
-                <td>{{ player['jersey_number'] }}</td>
-                <td>{{ player['name'] }}</td>
-                <td>{{ player['position'] }}</td>
-                <td>{{ player['year'] }}</td>
-                <td>{{ 'Yes' if player['injured'] else 'No' }}</td>
-                <td>{{ player['email'] }}</td>
-                <td>{{ player['phone'] }}</td>
-                <td>
-                  <button type="button" class="btn btn-sm btn-secondary">Edit</button>
-                </td>
-              </tr>
-              {% endfor %}
-            {% else %}
-              <tr>
-                <td colspan="8" style="text-align:center;">No players found.</td>
-              </tr>
-            {% endif %}
-          </tbody>
-        </table>
+          <div class="col-md-6">
+            <div class="card p-4 card-box h-100">
+              <h3>Practice 1</h3>
+              <p><strong>Title:</strong> Terps Ice Hockey Practice</p>
+              <p><strong>Date:</strong> March 12, 2026</p>
+              <p><strong>Time:</strong> 7:00 PM</p>
+              <p><strong>Location:</strong> Campus Ice Rink</p>
+              <p><strong>Email Contact:</strong> ice@rink.com</p>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card p-4 card-box h-100">
+              <h3>Practice 2</h3>
+              <p><strong>Title:</strong> Terps Ice Hockey Practice</p>
+              <p><strong>Date:</strong> March 14, 2026</p>
+              <p><strong>Time:</strong> 7:00 PM</p>
+              <p><strong>Location:</strong> Community Ice Arena</p>
+              <p><strong>Email Contact:</strong> ice@rink.com</p>
+            </div>
+          </div>
+
+        </div>
       </div>
 
-      <div class="mt-3">
-        <a href="{{ url_for('admin_page') }}" class="btn btn-secondary">Back to Dashboard</a>
+      <!-- EMAIL NOTIFICATIONS TAB -->
+      <div class="tab-pane fade" id="emails-pane" role="tabpanel">
+
+        <div class="card p-4 card-box mb-4">
+          <h3>Recent Notifications</h3>
+
+          <div class="table-responsive mt-3">
+            <table class="table table-striped table-bordered align-middle">
+              <thead class="table-dark">
+                <tr>
+                  <th>Date</th>
+                  <th>Event</th>
+                  <th>Recipients</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>03/10/2026</td>
+                  <td>Practice Reminder</td>
+                  <td>All Players</td>
+                  <td><span class="badge bg-success">Sent</span></td>
+                </tr>
+                <tr>
+                  <td>03/09/2026</td>
+                  <td>Game Schedule Update</td>
+                  <td>All Players</td>
+                  <td><span class="badge bg-success">Sent</span></td>
+                </tr>
+                <tr>
+                  <td>03/08/2026</td>
+                  <td>Equipment Pickup Notice</td>
+                  <td>Defense Players</td>
+                  <td><span class="badge bg-warning text-dark">Scheduled</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="row g-4">
+
+          <div class="col-md-6">
+            <div class="card p-4 card-box h-100">
+              <h3>Manual Notifications</h3>
+              <p><strong>Use case:</strong> Send a quick message to all players or selected groups.</p>
+              <p class="mb-0">Use the green <strong>Send Message</strong> button at the top of the page to open the message form.</p>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card p-4 card-box h-100">
+              <h3>Automatic Notifications</h3>
+              <ul class="mb-0">
+                <li>Practice reminder sent 24 hours before practice</li>
+                <li>Game reminder sent 48 hours before game</li>
+                <li>Schedule change alert sent immediately</li>
+                <li>Email notifications support SMTP integration later</li>
+              </ul>
+            </div>
+          </div>
+
+        </div>
       </div>
 
     </div>
+
+    <!-- back button -->
+    <div class="mt-4">
+      <a href="{{ url_for('admin_page') }}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+
   </main>
 
-  <div class="modal fade" id="addPlayerModal" tabindex="-1" aria-labelledby="addPlayerModalLabel" aria-hidden="true">
+  <!-- ADD PRACTICE MODAL -->
+  <div class="modal fade" id="addPracticeModal" tabindex="-1" aria-labelledby="addPracticeModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
 
         <div class="modal-header">
-          <h5 class="modal-title" id="addPlayerModalLabel">Add New Player</h5>
+          <h5 class="modal-title" id="addPracticeModalLabel">Add New Practice</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
 
-        <form method="POST" action="{{ url_for('add_player') }}">
+        <div class="modal-body">
+          <form>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="practiceTitle" class="form-label">Practice Title</label>
+                <input type="text" class="form-control" id="practiceTitle" placeholder="Enter practice title">
+              </div>
+
+              <div class="col-md-6">
+                <label for="practiceLocation" class="form-label">Location</label>
+                <input type="text" class="form-control" id="practiceLocation" placeholder="Enter location">
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-4">
+                <label for="practiceDate" class="form-label">Date</label>
+                <input type="date" class="form-control" id="practiceDate">
+              </div>
+
+              <div class="col-md-4">
+                <label for="practiceTime" class="form-label">Time</label>
+                <input type="time" class="form-control" id="practiceTime">
+              </div>
+
+              <div class="col-md-4">
+                <label for="practiceEmail" class="form-label">Contact Email</label>
+                <input type="email" class="form-control" id="practiceEmail" placeholder="Enter email">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="practiceNotes" class="form-label">Notes</label>
+              <textarea class="form-control" id="practiceNotes" rows="3" placeholder="Extra notes for players"></textarea>
+            </div>
+
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="sendPracticeEmail">
+              <label class="form-check-label" for="sendPracticeEmail">
+                Send email notification to all players
+              </label>
+            </div>
+
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-success">Save Practice</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD GAME MODAL -->
+  <div class="modal fade" id="addGameModal" tabindex="-1" aria-labelledby="addGameModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title" id="addGameModalLabel">Add New Game</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <form method="POST" action="{{ url_for('add_game') }}">
           <div class="modal-body">
 
             <div class="row mb-3">
               <div class="col-md-6">
-                <label for="name" class="form-label">Full Name</label>
-                <input type="text" class="form-control" id="name" name="name" required>
+                <label for="opponent" class="form-label">Opponent</label>
+                <input type="text" class="form-control" id="opponent" name="opponent" placeholder="Enter opponent name" required>
               </div>
 
               <div class="col-md-6">
-                <label for="jersey_number" class="form-label">Jersey Number</label>
-                <input type="number" class="form-control" id="jersey_number" name="jersey_number" required>
+                <label for="location" class="form-label">Location</label>
+                <input type="text" class="form-control" id="location" name="location" placeholder="Enter location" required>
               </div>
             </div>
 
             <div class="row mb-3">
               <div class="col-md-4">
-                <label for="position" class="form-label">Position</label>
-                <select class="form-select" id="position" name="position" required>
-                  <option value="">Select position</option>
-                  <option value="Forward">Forward</option>
-                  <option value="Defense">Defense</option>
-                  <option value="Goalie">Goalie</option>
-                  <option value="Coach">Coach</option>
+                <label for="game_date" class="form-label">Date</label>
+                <input type="date" class="form-control" id="game_date" name="game_date" required>
+              </div>
+
+              <div class="col-md-4">
+                <label for="game_type" class="form-label">Game Type</label>
+                <select class="form-select" id="game_type" name="game_type" required>
+                  <option value="">Select type</option>
+                  <option value="Home">Home</option>
+                  <option value="Away">Away</option>
                 </select>
               </div>
 
               <div class="col-md-4">
-                <label for="year" class="form-label">Year</label>
-                <select class="form-select" id="year" name="year" required>
-                  <option value="">Select year</option>
-                  <option value="Freshman">Freshman</option>
-                  <option value="Sophomore">Sophomore</option>
-                  <option value="Junior">Junior</option>
-                  <option value="Senior">Senior</option>
-                  <option value="N/A">N/A</option>
-                </select>
-              </div>
-
-              <div class="col-md-4">
-                <label for="injured" class="form-label">Injured</label>
-                <select class="form-select" id="injured" name="injured" required>
-                  <option value="0">No</option>
-                  <option value="1">Yes</option>
+                <label for="status" class="form-label">Status</label>
+                <select class="form-select" id="status" name="status" required>
+                  <option value="">Select status</option>
+                  <option value="Scheduled">Scheduled</option>
+                  <option value="Confirmed">Confirmed</option>
+                  <option value="Completed">Completed</option>
+                  <option value="Cancelled">Cancelled</option>
                 </select>
               </div>
             </div>
 
-            <div class="row mb-3">
-              <div class="col-md-6">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" name="email" required>
-              </div>
+            <div class="mb-3">
+              <label for="gameNotes" class="form-label">Notes</label>
+              <textarea class="form-control" id="gameNotes" rows="3" placeholder="Optional notes for players or staff"></textarea>
+            </div>
 
-              <div class="col-md-6">
-                <label for="phone" class="form-label">Phone</label>
-                <input type="text" class="form-control" id="phone" name="phone">
-              </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="sendGameEmail">
+              <label class="form-check-label" for="sendGameEmail">
+                Send email notification to all players
+              </label>
             </div>
 
           </div>
 
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-success">Save Player</button>
+            <button type="submit" class="btn btn-success">Save Game</button>
           </div>
         </form>
 
@@ -174,6 +430,57 @@
     </div>
   </div>
 
+  <!-- SEND MESSAGE MODAL -->
+  <div class="modal fade" id="sendMessageModal" tabindex="-1" aria-labelledby="sendMessageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title" id="sendMessageModalLabel">Send Message</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <form>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="messageSubject" class="form-label">Subject</label>
+                <input type="text" class="form-control" id="messageSubject" placeholder="Enter subject">
+              </div>
+
+              <div class="col-md-6">
+                <label for="messageRecipients" class="form-label">Recipients</label>
+                <select class="form-select" id="messageRecipients">
+                  <option selected>Select group</option>
+                  <option>All Players</option>
+                  <option>Coaches</option>
+                  <option>Injured Players</option>
+                  <option>Defense Players</option>
+                  <option>Forwards</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="messageBody" class="form-label">Message</label>
+              <textarea class="form-control" id="messageBody" rows="5" placeholder="Write the message here"></textarea>
+            </div>
+
+          </form>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary">Send Message</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- bootstrap javascript -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
