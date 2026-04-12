@@ -1,136 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
-  <!-- basic page settings -->
   <meta charset="UTF-8">
-
-  <!-- for phones and tablets -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>Hockey Team Dashboard</title>
-
-  <!-- bootstrap css library -->
-  <!-- used for layout, navbar, cards, and grid system -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  <!-- our custom css file, only one file for the whole website -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/newstyle.css') }}">
-
 </head>
 <body>
 
+  {% include '_navbar.html' %}
 
-  <!-- ===============================
-       NAVIGATION BAR
-       =============================== -->
-
-  <!-- top navigation menu to move between system pages -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-
-    <div class="container">
-
-      <!-- logo and system name-we need a better logo- -->
-      <a class="navbar-brand d-flex align-items-center" href="admin-dashboard.html">
-
-        <!-- team logo image, maybe later we can improve it -->
-        <img src="{{ url_for('static', filename='images/team-logo0.png') }}" alt="Team Logo" class="logo">
-
-        <!-- system name- please change it -->
-        Hockey System
-
-      </a>
-
-      <!-- hamburger menu button for small screens -->
-      <button class="navbar-toggler" type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#navbarNav">
-
-        <span class="navbar-toggler-icon"></span>
-
-      </button>
-
-      <!-- navigation links -->
-      <div class="collapse navbar-collapse" id="navbarNav">
-
-        <!-- align links to the right -->
-        <ul class="navbar-nav ms-auto">
-          
-          <li class="nav-item">
-            <a class="nav-link" href="/">Public Site</a>
-          </li>
-          
-          <li class="nav-item">
-            <a class="nav-link active" href="/admin">Dashboard</a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link" href="/calendar">Calendar</a>
-          </li>
-          
-          <li class="nav-item">
-            <a class="nav-link" href="/roster">Roster</a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link" href="/schedule">Schedule</a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link" href="/equipment">Equipment</a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link" href="/finances">Finances</a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link" href="/alumni">Alumni</a>
-          </li>
-
-          <li class="nav-item">
-            <a class="nav-link" href="/newsletters">Newsletters</a>
-          </li>
-
-        </ul>
-
-      </div>
-    </div>
-  </nav>
-
-
-  <!-- ===============================
-       HERO / HEADER SECTION
-       =============================== -->
-
-  <!-- red banner at the top of the page -->
   <section class="hero text-center">
-
     <div class="container">
-
-      <!-- main system title -->
       <h1>Hockey Team Management System</h1>
-
-      <!-- short description -->
       <p class="mb-0">
         Dashboard for roster, schedule, equipment, finances, and alumni
       </p>
-
     </div>
-
   </section>
 
-
-  <!-- ===============================
-       MAIN DASHBOARD CONTENT
-       =============================== -->
-
   <main class="container my-5">
-
-    <!-- first row with summary cards -->
     <div class="row g-4">
-
-      <!-- active players card -->
       <div class="col-md-4">
         <div class="card p-4 card-box text-center">
           <h3>Active Players</h3>
@@ -139,7 +30,6 @@
         </div>
       </div>
 
-      <!-- upcoming games card -->
       <div class="col-md-4">
         <div class="card p-4 card-box text-center">
           <h3>Upcoming Games</h3>
@@ -148,7 +38,6 @@
         </div>
       </div>
 
-      <!-- inventory card -->
       <div class="col-md-4">
         <div class="card p-4 card-box text-center">
           <h3>Inventory Items</h3>
@@ -156,13 +45,9 @@
           <p>2 pending orders</p>
         </div>
       </div>
-
     </div>
 
-    <!-- second row with finance cards -->
     <div class="row g-4 mt-1">
-
-      <!-- total revenue card -->
       <div class="col-md-4">
         <div class="card p-4 card-box text-center">
           <h3>Total Revenue</h3>
@@ -171,7 +56,6 @@
         </div>
       </div>
 
-      <!-- NEW: available funds card -->
       <div class="col-md-4">
         <div class="card p-4 card-box text-center">
           <h3>Available Funds</h3>
@@ -180,7 +64,6 @@
         </div>
       </div>
 
-      <!-- total expenses card -->
       <div class="col-md-4">
         <div class="card p-4 card-box text-center">
           <h3>Total Expenses</h3>
@@ -188,69 +71,49 @@
           <p>Equipment and facility costs</p>
         </div>
       </div>
-
     </div>
 
-    <!-- third row of dashboard -->
     <div class="row g-4 mt-1">
-
-      <!-- recent activity section -->
       <div class="col-md-12">
         <div class="card p-4 card-box h-100">
-
           <h3>Recent Activity</h3>
-
           <ul class="mt-3">
             <li>New player added to roster</li>
             <li>Schedule updated for next week</li>
             <li>Equipment order submitted</li>
             <li>Alumni donation recorded</li>
           </ul>
-
         </div>
       </div>
 
-      <!-- system modules -->
       <div class="col-lg-6">
         <div class="card p-4 card-box h-100">
-
           <h3>System Modules</h3>
-
           <div class="row g-3 mt-2 justify-content-center">
-
             <div class="col-12">
-              <a href="/roster" class="module-link roster-bg">Roster / Player Information</a>
+              <a href="{{ url_for('roster') }}" class="module-link roster-bg">Roster / Player Information</a>
             </div>
-
             <div class="col-12">
-              <a href="/schedule" class="module-link schedule-bg">Scheduling & Notifications</a>
+              <a href="{{ url_for('schedule') }}" class="module-link schedule-bg">Scheduling & Notifications</a>
             </div>
-
             <div class="col-12">
-              <a href="/equipment" class="module-link equipment-bg">Inventory Management</a>
+              <a href="{{ url_for('equipment') }}" class="module-link equipment-bg">Inventory Management</a>
             </div>
-
             <div class="col-12">
-              <a href="/finances" class="module-link finances-bg">Financial Reporting</a>
+              <a href="{{ url_for('finances') }}" class="module-link finances-bg">Financial Reporting</a>
             </div>
-
             <div class="col-12">
-              <a href="/alumni" class="module-link alumni-bg">Alumni Portal</a>
+              <a href="{{ url_for('alumni') }}" class="module-link alumni-bg">Alumni Portal</a>
             </div>
-
             <div class="col-12">
-              <a href="/newsletters" class="module-link newsletter-bg">Newsletter Management</a>
+              <a href="{{ url_for('newsletters') }}" class="module-link newsletter-bg">Newsletter Management</a>
             </div>
-
           </div>
-
         </div>
       </div>
 
-      <!-- NEW: budget overview -->
       <div class="col-lg-6">
         <div class="card p-4 card-box h-100">
-
           <h3>Budget Overview</h3>
 
           <div class="mb-3 p-4 rounded" style="background:#a61919; color:white;">
@@ -267,16 +130,11 @@
             <h4>Variance</h4>
             <p class="display-6 text-center">$8,000</p>
           </div>
-
         </div>
       </div>
-
     </div>
-
   </main>
 
-  <!-- bootstrap javascript required for components like navbar -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
 </body>
 </html>
