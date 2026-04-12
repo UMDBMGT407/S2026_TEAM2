@@ -2,462 +2,429 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-
-  <!-- makes page responsive -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>Financial Reporting</title>
 
-  <!-- bootstrap css -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  <!-- shared css file -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/newstyle.css') }}">
+
+  <style>
+    .summary-card p.display-6 {
+      margin-bottom: 0.25rem;
+    }
+
+    .section-title {
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .table td, .table th {
+      vertical-align: middle;
+    }
+
+    .info-note {
+      background: #f8f9fa;
+      border-left: 5px solid #0d6efd;
+      padding: 14px;
+      border-radius: 8px;
+    }
+
+    .mini-note {
+      font-size: 0.9rem;
+      color: #6c757d;
+    }
+  </style>
 </head>
 <body>
 
-  <!-- top navigation -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
-      <a class="navbar-brand d-flex align-items-center" href="/admin-dashboard">
-        <img src="{{ url_for('static', filename='images/team-logo0.png') }}" alt="Team Logo" class="logo">
-        Hockey System
-      </a>
+  {% include '_navbar.html' %}
 
-      <!-- button for smaller screens -->
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <!-- navigation links -->
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="/index">Public Site</a></li>
-           <li class="nav-item">
-            <a class="nav-link" href="/calendar">Calendar</a>
-          </li>
-          <li class="nav-item"><a class="nav-link" href="/admin-dashboard">Dashboard</a></li>
-          <li class="nav-item"><a class="nav-link" href="/roster">Roster</a></li>
-          <li class="nav-item"><a class="nav-link" href="/schedule">Schedule</a></li>
-          <li class="nav-item"><a class="nav-link" href="/equipment">Equipment</a></li>
-          <li class="nav-item"><a class="nav-link active" href="/finances">Finances</a></li>
-          <li class="nav-item"><a class="nav-link" href="/alumni">Alumni</a></li>
-          <li class="nav-item"><a class="nav-link" href="/newsletters">Newsletters</a></li>
-        </ul>
-      </div>
-    </div>
-  </nav>
-
-  <!-- red banner -->
   <section class="hero text-center">
     <div class="container">
       <h1>Financial Reporting</h1>
-      <p class="mb-0">Track revenue, expenses, budget, and future financial planning</p>
+      <p class="mb-0">Track game finances, team operations, and future projections in one place</p>
     </div>
   </section>
 
-  <!-- main content -->
   <main class="container my-5">
 
-    <!-- finance summary cards -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- SUMMARY CARDS -->
     <div class="row g-4 mb-4">
-
       <div class="col-md-3">
-        <div class="card p-4 card-box text-center">
+        <div class="card p-4 card-box text-center summary-card">
           <h3>Total Revenue</h3>
-          <p class="display-6 text-success">$15,200</p>
-          <p class="mb-0">Current income</p>
+          <p class="display-6 text-success">${{ "%.2f"|format(totals.total_revenue) }}</p>
+          <p class="mb-0">Actual revenue recorded</p>
         </div>
       </div>
 
       <div class="col-md-3">
-        <div class="card p-4 card-box text-center">
+        <div class="card p-4 card-box text-center summary-card">
           <h3>Total Expenses</h3>
-          <p class="display-6 text-danger">$9,850</p>
-          <p class="mb-0">Current spending</p>
+          <p class="display-6 text-danger">${{ "%.2f"|format(totals.total_expenses) }}</p>
+          <p class="mb-0">Actual expenses recorded</p>
         </div>
       </div>
 
       <div class="col-md-3">
-        <div class="card p-4 card-box text-center">
-          <h3>Available Budget</h3>
-          <p class="display-6 text-primary">$5,350</p>
+        <div class="card p-4 card-box text-center summary-card">
+          <h3>Net Balance</h3>
+          <p class="display-6 {% if totals.net_balance >= 0 %}text-primary{% else %}text-danger{% endif %}">
+            ${{ "%.2f"|format(totals.net_balance) }}
+          </p>
           <p class="mb-0">Revenue minus expenses</p>
         </div>
       </div>
 
       <div class="col-md-3">
-        <div class="card p-4 card-box text-center">
-          <h3>Projected Costs</h3>
-          <p class="display-6 text-warning">$2,400</p>
-          <p class="mb-0">Future expenditures</p>
+        <div class="card p-4 card-box text-center summary-card">
+          <h3>Projected Expenses</h3>
+          <p class="display-6 text-warning">${{ "%.2f"|format(projections.projected_expenses) }}</p>
+          <p class="mb-0">Expected future spending</p>
         </div>
       </div>
-
     </div>
 
-    <!-- top row with title and action buttons -->
-    <div class="row mb-4">
+    <div class="row g-4 mb-4">
       <div class="col-md-6">
-        <h2>Finance Module</h2>
-        <p class="text-muted mb-0">Track financial items, categories, and reporting options.</p>
+        <div class="card p-4 card-box h-100 text-center summary-card">
+          <h3>Projected Revenue</h3>
+          <p class="display-6 text-success">${{ "%.2f"|format(projections.projected_revenue) }}</p>
+          <p class="mb-0">Expected future income</p>
+        </div>
       </div>
 
-      <div class="col-md-6 text-md-end mt-3 mt-md-0">
-        <!-- add item button -->
-        <button type="button"
-                class="btn btn-success me-2 mb-2"
-                data-bs-toggle="modal"
-                data-bs-target="#addFinanceItemModal">
-          Add Item
-        </button>
+      <div class="col-md-6">
+        <div class="card p-4 card-box h-100 text-center summary-card">
+          <h3>Projected Net</h3>
+          {% set projected_net_total = projections.projected_revenue - projections.projected_expenses %}
+          <p class="display-6 {% if projected_net_total >= 0 %}text-primary{% else %}text-danger{% endif %}">
+            ${{ "%.2f"|format(projected_net_total) }}
+          </p>
+          <p class="mb-0">Projected revenue minus projected expenses</p>
+        </div>
+      </div>
+    </div>
 
-        <!-- generate report button -->
-        <button type="button"
-                class="btn btn-primary mb-2"
-                data-bs-toggle="modal"
-                data-bs-target="#generateReportModal">
-          Generate Report
+    <!-- ACTION BUTTONS -->
+    <div class="row mb-4">
+      <div class="col-md-6 mb-3 mb-md-0">
+        <button type="button" class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#addActualEntryModal">
+          Add Actual Financial Entry
+        </button>
+      </div>
+
+      <div class="col-md-6">
+        <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#addProjectionModal">
+          Add Financial Projection
         </button>
       </div>
     </div>
 
-    <!-- tabs -->
-    <ul class="nav nav-tabs mb-4" id="financeTabs" role="tablist">
+    <!-- GAME ACTUALS -->
+    <div class="card p-4 card-box mb-4">
+      <h3 class="section-title">Game Financial Dashboard — Actual Results</h3>
+      <p class="mini-note">This section shows actual revenue and expenses tied directly to games.</p>
 
-      <li class="nav-item" role="presentation">
-        <button class="nav-link active"
-                id="inventory-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#inventory-pane"
-                type="button"
-                role="tab">
-          Inventory
-        </button>
-      </li>
-
-      <li class="nav-item" role="presentation">
-        <button class="nav-link"
-                id="revenue-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#revenue-pane"
-                type="button"
-                role="tab">
-          Revenue
-        </button>
-      </li>
-
-      <li class="nav-item" role="presentation">
-        <button class="nav-link"
-                id="expenses-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#expenses-pane"
-                type="button"
-                role="tab">
-          Expenses
-        </button>
-      </li>
-
-    </ul>
-
-    <!-- tab content -->
-    <div class="tab-content">
-
-      <!-- INVENTORY TAB -->
-      <div class="tab-pane fade show active" id="inventory-pane" role="tabpanel">
-
-        <div class="card p-4 card-box">
-          <h3 class="mb-3">Inventory Related Financial Items</h3>
-
-          <div class="table-responsive">
-            <table class="table table-striped table-bordered align-middle">
-              <thead class="table-dark">
-                <tr>
-                  <th>Item Name</th>
-                  <th>Category</th>
-                  <th>Quantity</th>
-                  <th>Unit Cost</th>
-                  <th>Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Hockey Jerseys</td>
-                  <td>Equipment</td>
-                  <td>25</td>
-                  <td>$75</td>
-                  <td>$1,875</td>
-                </tr>
-                <tr>
-                  <td>Replacement Helmets</td>
-                  <td>Equipment</td>
-                  <td>8</td>
-                  <td>$110</td>
-                  <td>$880</td>
-                </tr>
-                <tr>
-                  <td>Practice Pucks</td>
-                  <td>Supplies</td>
-                  <td>40</td>
-                  <td>$3</td>
-                  <td>$120</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
+      <div class="table-responsive mt-3">
+        <table class="table table-striped table-bordered align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>Date</th>
+              <th>Opponent</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Revenue</th>
+              <th>Expenses</th>
+              <th>Net</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if actual_games %}
+              {% for game in actual_games %}
+              <tr>
+                <td>{{ game.game_date }}</td>
+                <td>{{ game.opponent }}</td>
+                <td>{{ game.game_type }}</td>
+                <td>{{ game.status }}</td>
+                <td class="text-success">${{ "%.2f"|format(game.total_revenue) }}</td>
+                <td class="text-danger">${{ "%.2f"|format(game.total_expenses) }}</td>
+                <td class="{% if game.net_result >= 0 %}text-primary{% else %}text-danger{% endif %}">
+                  ${{ "%.2f"|format(game.net_result) }}
+                </td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="7" class="text-center">No actual game financial data found.</td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
       </div>
-
-      <!-- REVENUE TAB -->
-      <div class="tab-pane fade" id="revenue-pane" role="tabpanel">
-
-        <div class="card p-4 card-box">
-          <h3 class="mb-3">Revenue Items</h3>
-
-          <div class="table-responsive">
-            <table class="table table-striped table-bordered align-middle">
-              <thead class="table-dark">
-                <tr>
-                  <th>Source</th>
-                  <th>Category</th>
-                  <th>Quantity</th>
-                  <th>Unit Value</th>
-                  <th>Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Game Tickets</td>
-                  <td>Ticket Sales</td>
-                  <td>120</td>
-                  <td>$15</td>
-                  <td>$1,800</td>
-                </tr>
-                <tr>
-                  <td>Alumni Donation</td>
-                  <td>Donation</td>
-                  <td>1</td>
-                  <td>$2,500</td>
-                  <td>$2,500</td>
-                </tr>
-                <tr>
-                  <td>Team Sponsorship</td>
-                  <td>Sponsorship</td>
-                  <td>1</td>
-                  <td>$5,000</td>
-                  <td>$5,000</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- EXPENSES TAB -->
-      <div class="tab-pane fade" id="expenses-pane" role="tabpanel">
-
-        <div class="card p-4 card-box mb-4">
-          <h3 class="mb-3">Expense Items</h3>
-
-          <div class="table-responsive">
-            <table class="table table-striped table-bordered align-middle">
-              <thead class="table-dark">
-                <tr>
-                  <th>Expense Item</th>
-                  <th>Category</th>
-                  <th>Quantity</th>
-                  <th>Unit Cost</th>
-                  <th>Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Practice Ice Rental</td>
-                  <td>Facility</td>
-                  <td>4</td>
-                  <td>$300</td>
-                  <td>$1,200</td>
-                </tr>
-                <tr>
-                  <td>Bus Transportation</td>
-                  <td>Travel</td>
-                  <td>2</td>
-                  <td>$450</td>
-                  <td>$900</td>
-                </tr>
-                <tr>
-                  <td>Shoulder Pads</td>
-                  <td>Equipment</td>
-                  <td>8</td>
-                  <td>$70</td>
-                  <td>$560</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- future expenditures section -->
-        <div class="card p-4 card-box">
-          <h3>Projected Future Expenditures</h3>
-          <ul class="mb-0">
-            <li>Next month rink rental renewal: $1,200</li>
-            <li>Replacement goalie gear: $650</li>
-            <li>Travel cost for away tournament: $550</li>
-          </ul>
-        </div>
-
-      </div>
-
     </div>
 
-    <!-- back button -->
+    <!-- GAME PROJECTIONS -->
+    <div class="card p-4 card-box mb-4">
+      <h3 class="section-title">Game Financial Dashboard — Projected Results</h3>
+      <p class="mini-note">This section helps the administrator plan future spending and expected income before the game happens.</p>
+
+      <div class="table-responsive mt-3">
+        <table class="table table-striped table-bordered align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>Date</th>
+              <th>Opponent</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Projected Revenue</th>
+              <th>Projected Expenses</th>
+              <th>Projected Net</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if projected_games %}
+              {% for game in projected_games %}
+              <tr>
+                <td>{{ game.game_date }}</td>
+                <td>{{ game.opponent }}</td>
+                <td>{{ game.game_type }}</td>
+                <td>{{ game.status }}</td>
+                <td class="text-success">${{ "%.2f"|format(game.projected_revenue) }}</td>
+                <td class="text-warning">${{ "%.2f"|format(game.projected_expenses) }}</td>
+                <td class="{% if game.projected_net >= 0 %}text-primary{% else %}text-danger{% endif %}">
+                  ${{ "%.2f"|format(game.projected_net) }}
+                </td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="7" class="text-center">No projected game financial data found.</td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- GENERAL ENTRIES -->
+    <div class="card p-4 card-box mb-4">
+      <h3 class="section-title">Team Operations — Non-Game Finances</h3>
+      <p class="mini-note">This section tracks team expenses and earnings not directly tied to a game, such as jerseys, gloves, donations, and sponsorships.</p>
+
+      <div class="table-responsive mt-3">
+        <table class="table table-striped table-bordered align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Category</th>
+              <th>Description</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if general_entries %}
+              {% for entry in general_entries %}
+              <tr>
+                <td>{{ entry.entry_date }}</td>
+                <td>{{ entry.entry_type }}</td>
+                <td>{{ entry.category_name }}</td>
+                <td>{{ entry.description }}</td>
+                <td class="{% if entry.entry_type == 'Revenue' %}text-success{% else %}text-danger{% endif %}">
+                  ${{ "%.2f"|format(entry.amount) }}
+                </td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="5" class="text-center">No general team financial entries found.</td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- EXPLANATION -->
+    <div class="card p-4 card-box mb-4">
+      <h3 class="section-title">Why This Module Is Essential</h3>
+      <div class="info-note">
+        The finance module is directly connected to operations. Each scheduled game can generate projected and actual transportation costs, rink costs, referee costs, ticket sales, and merchandise revenue. At the same time, the system also tracks non-game team finances such as jersey purchases, glove orders, sponsorships, and donations. This gives the administrator a complete and simple financial overview.
+      </div>
+    </div>
+
     <div class="mt-4">
-      <a href="index.html" class="btn btn-secondary">Back to Dashboard</a>
+      <a href="{{ url_for('admin_page') }}" class="btn btn-secondary">Back to Dashboard</a>
     </div>
 
   </main>
 
-  <!-- ADD ITEM MODAL -->
-  <div class="modal fade" id="addFinanceItemModal" tabindex="-1" aria-labelledby="addFinanceItemModalLabel" aria-hidden="true">
+  <!-- ACTUAL ENTRY MODAL -->
+  <div class="modal fade" id="addActualEntryModal" tabindex="-1" aria-labelledby="addActualEntryModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
 
         <div class="modal-header">
-          <h5 class="modal-title" id="addFinanceItemModalLabel">Add Financial Item</h5>
+          <h5 class="modal-title" id="addActualEntryModalLabel">Add Actual Financial Entry</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
 
-        <div class="modal-body">
-          <form>
+        <form method="POST" action="{{ url_for('add_financial_entry') }}">
+          <div class="modal-body">
 
-            <!-- item name and category -->
             <div class="row mb-3">
               <div class="col-md-6">
-                <label for="financeItemName" class="form-label">Item Name</label>
-                <input type="text" class="form-control" id="financeItemName" placeholder="Enter item name">
+                <label for="entry_game_id" class="form-label">Game</label>
+                <select class="form-select" id="entry_game_id" name="game_id">
+                  <option value="">Not linked to a specific game</option>
+                  {% for game in games %}
+                  <option value="{{ game.game_id }}">{{ game.label }}</option>
+                  {% endfor %}
+                </select>
               </div>
 
               <div class="col-md-6">
-                <label for="financeCategory" class="form-label">Category</label>
-                <select class="form-select" id="financeCategory">
-                  <option selected>Select category</option>
-                  <option>Inventory</option>
-                  <option>Revenue</option>
-                  <option>Expense</option>
-                  <option>Donation</option>
-                  <option>Travel</option>
-                  <option>Facility</option>
+                <label for="entry_type" class="form-label">Entry Type</label>
+                <select class="form-select" id="entry_type" name="entry_type" required>
+                  <option value="">Select type</option>
+                  <option value="Revenue">Revenue</option>
+                  <option value="Expense">Expense</option>
                 </select>
               </div>
             </div>
 
-            <!-- quantity, unit cost, total -->
             <div class="row mb-3">
-              <div class="col-md-4">
-                <label for="financeQuantity" class="form-label">Quantity</label>
-                <input type="number" class="form-control" id="financeQuantity" placeholder="Enter quantity">
+              <div class="col-md-6">
+                <label for="entry_category_id" class="form-label">Category</label>
+                <select class="form-select" id="entry_category_id" name="category_id" required>
+                  <option value="">Select category</option>
+                  {% for category in categories %}
+                  <option value="{{ category.category_id }}">
+                    {{ category.category_name }} ({{ category.category_type }})
+                  </option>
+                  {% endfor %}
+                </select>
               </div>
 
-              <div class="col-md-4">
-                <label for="financeUnitCost" class="form-label">Unit Cost / Value</label>
-                <input type="number" class="form-control" id="financeUnitCost" placeholder="Enter amount">
-              </div>
-
-              <div class="col-md-4">
-                <label for="financeDate" class="form-label">Date</label>
-                <input type="date" class="form-control" id="financeDate">
+              <div class="col-md-6">
+                <label for="entry_amount" class="form-label">Amount</label>
+                <input type="number" step="0.01" class="form-control" id="entry_amount" name="amount" required>
               </div>
             </div>
 
-            <!-- notes -->
-            <div class="mb-3">
-              <label for="financeNotes" class="form-label">Notes</label>
-              <textarea class="form-control" id="financeNotes" rows="3" placeholder="Extra details"></textarea>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="entry_date" class="form-label">Entry Date</label>
+                <input type="date" class="form-control" id="entry_date" name="entry_date" required>
+              </div>
+
+              <div class="col-md-6">
+                <label for="entry_description" class="form-label">Description</label>
+                <input type="text" class="form-control" id="entry_description" name="description" placeholder="Optional description">
+              </div>
             </div>
 
-          </form>
-        </div>
+          </div>
 
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-success">Save Item</button>
-        </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-success">Save Entry</button>
+          </div>
+        </form>
 
       </div>
     </div>
   </div>
 
-  <!-- GENERATE REPORT MODAL -->
-  <div class="modal fade" id="generateReportModal" tabindex="-1" aria-labelledby="generateReportModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+  <!-- PROJECTION MODAL -->
+  <div class="modal fade" id="addProjectionModal" tabindex="-1" aria-labelledby="addProjectionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
       <div class="modal-content">
 
         <div class="modal-header">
-          <h5 class="modal-title" id="generateReportModalLabel">Generate Financial Report</h5>
+          <h5 class="modal-title" id="addProjectionModalLabel">Add Financial Projection</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
 
-        <div class="modal-body">
-          <form>
+        <form method="POST" action="{{ url_for('add_financial_projection') }}">
+          <div class="modal-body">
 
-            <!-- checkboxes for report content -->
-            <div class="form-check mb-2">
-              <input class="form-check-input" type="checkbox" id="reportInventory" checked>
-              <label class="form-check-label" for="reportInventory">
-                Include Inventory
-              </label>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="projection_game_id" class="form-label">Game</label>
+                <select class="form-select" id="projection_game_id" name="game_id">
+                  <option value="">Not linked to a specific game</option>
+                  {% for game in games %}
+                  <option value="{{ game.game_id }}">{{ game.label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label for="projection_type" class="form-label">Projection Type</label>
+                <select class="form-select" id="projection_type" name="projection_type" required>
+                  <option value="">Select type</option>
+                  <option value="Revenue">Revenue</option>
+                  <option value="Expense">Expense</option>
+                </select>
+              </div>
             </div>
 
-            <div class="form-check mb-2">
-              <input class="form-check-input" type="checkbox" id="reportRevenue" checked>
-              <label class="form-check-label" for="reportRevenue">
-                Include Revenue
-              </label>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="projection_category_id" class="form-label">Category</label>
+                <select class="form-select" id="projection_category_id" name="category_id" required>
+                  <option value="">Select category</option>
+                  {% for category in categories %}
+                  <option value="{{ category.category_id }}">
+                    {{ category.category_name }} ({{ category.category_type }})
+                  </option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label for="projected_amount" class="form-label">Projected Amount</label>
+                <input type="number" step="0.01" class="form-control" id="projected_amount" name="projected_amount" required>
+              </div>
             </div>
 
-            <div class="form-check mb-2">
-              <input class="form-check-input" type="checkbox" id="reportExpenses" checked>
-              <label class="form-check-label" for="reportExpenses">
-                Include Expenses
-              </label>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="projection_date" class="form-label">Projection Date</label>
+                <input type="date" class="form-control" id="projection_date" name="projection_date" required>
+              </div>
+
+              <div class="col-md-6">
+                <label for="projection_notes" class="form-label">Notes</label>
+                <input type="text" class="form-control" id="projection_notes" name="notes" placeholder="Optional notes">
+              </div>
             </div>
 
-            <div class="form-check mb-2">
-              <input class="form-check-input" type="checkbox" id="reportBudget" checked>
-              <label class="form-check-label" for="reportBudget">
-                Include Available Budget
-              </label>
-            </div>
+          </div>
 
-            <div class="form-check mb-3">
-              <input class="form-check-input" type="checkbox" id="reportProjection" checked>
-              <label class="form-check-label" for="reportProjection">
-                Include Projected Expenditures
-              </label>
-            </div>
-
-            <!-- report format -->
-            <label for="reportFormat" class="form-label">Export Format</label>
-            <select class="form-select" id="reportFormat">
-              <option selected>PDF</option>
-            </select>
-
-          </form>
-        </div>
-
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary">Generate PDF</button>
-        </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Projection</button>
+          </div>
+        </form>
 
       </div>
     </div>
   </div>
 
-  <!-- bootstrap js -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
