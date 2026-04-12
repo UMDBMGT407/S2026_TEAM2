@@ -12,8 +12,13 @@
 
     <section class="hero">
         <div class="container">
-            <div class="d-flex align-items-center justify-content-center">
-                <img src="{{ url_for('static', filename='images/team-logo0.png') }}" alt="Logo" class="logo">
+            <div class="d-flex align-items-center justify-content-center gap-3 flex-wrap text-center">
+                <img
+                    src="{{ url_for('static', filename='images/logo.png') }}"
+                    alt="Logo"
+                    class="logo"
+                    onerror="this.style.display='none';"
+                >
                 <div>
                     <h1 class="mb-0">Hockey Management System</h1>
                     <p class="mb-0">Login to access your portal</p>
@@ -57,8 +62,8 @@
                             </form>
 
                             <div class="text-center mt-3">
-                                <a href="{{ url_for('root') }}" class="btn btn-outline-secondary btn-sm">
-                                    Back to Login
+                                <a href="{{ url_for('public_page') }}" class="btn btn-outline-secondary btn-sm">
+                                    Back to Public Site
                                 </a>
                             </div>
                         </div>
