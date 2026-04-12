@@ -4,10 +4,20 @@ DROP DATABASE IF EXISTS user_management;
 CREATE DATABASE user_management;
 USE user_management;
 
+SET FOREIGN_KEY_CHECKS = 0;
+
+DROP TABLE IF EXISTS financial_projections;
+DROP TABLE IF EXISTS financial_entries;
+DROP TABLE IF EXISTS financial_categories;
+DROP TABLE IF EXISTS games;
 DROP TABLE IF EXISTS players;
 DROP TABLE IF EXISTS users;
 
--- Users table for authentication and roles
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- =========================================
+-- USERS TABLE
+-- =========================================
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -16,7 +26,9 @@ CREATE TABLE users (
     role VARCHAR(50) NOT NULL
 );
 
--- Players table for roster details
+-- =========================================
+-- PLAYERS TABLE
+-- =========================================
 CREATE TABLE players (
     player_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -28,18 +40,189 @@ CREATE TABLE players (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Sample role accounts
--- All four users share the same hashed password
+-- =========================================
+-- GAMES TABLE
+-- =========================================
+CREATE TABLE games (
+    game_id INT AUTO_INCREMENT PRIMARY KEY,
+    opponent VARCHAR(100) NOT NULL,
+    game_date DATE NOT NULL,
+    location VARCHAR(150),
+    game_type ENUM('Home', 'Away') NOT NULL,
+    status ENUM('Scheduled', 'Confirmed', 'Completed', 'Cancelled') DEFAULT 'Scheduled'
+);
+
+-- =========================================
+-- FINANCIAL CATEGORIES TABLE
+-- =========================================
+CREATE TABLE financial_categories (
+    category_id INT AUTO_INCREMENT PRIMARY KEY,
+    category_name VARCHAR(100) NOT NULL,
+    category_type ENUM('Revenue', 'Expense') NOT NULL
+);
+
+-- =========================================
+-- FINANCIAL ENTRIES TABLE
+-- =========================================
+CREATE TABLE financial_entries (
+    entry_id INT AUTO_INCREMENT PRIMARY KEY,
+    game_id INT NULL,
+    category_id INT NOT NULL,
+    entry_type ENUM('Revenue', 'Expense') NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    description VARCHAR(255),
+    entry_date DATE NOT NULL,
+    FOREIGN KEY (game_id) REFERENCES games(game_id) ON DELETE SET NULL,
+    FOREIGN KEY (category_id) REFERENCES financial_categories(category_id)
+);
+
+-- =========================================
+-- FINANCIAL PROJECTIONS TABLE
+-- =========================================
+CREATE TABLE financial_projections (
+    projection_id INT AUTO_INCREMENT PRIMARY KEY,
+    game_id INT NULL,
+    category_id INT NOT NULL,
+    projection_type ENUM('Revenue', 'Expense') NOT NULL,
+    projected_amount DECIMAL(10,2) NOT NULL,
+    notes VARCHAR(255),
+    projection_date DATE NOT NULL,
+    FOREIGN KEY (game_id) REFERENCES games(game_id) ON DELETE SET NULL,
+    FOREIGN KEY (category_id) REFERENCES financial_categories(category_id)
+);
+
+-- =========================================
+-- SAMPLE USERS
+-- =========================================
 INSERT INTO users (id, name, email, password, role) VALUES
-(1, 'Admin User', 'admin@umd.edu', 'scrypt:32768:8:1$JJ3eNoPuCRp6X5Jd$f1d550168a9c313512a23d86fc3a4b107f03211228d1222d8e87b259c75b75988ad8d63d6a7029b8b0d038520f4dfce7519e2f0cb39a827e82784b13296cf70d', 'admin'),
-(2, 'Coach User', 'coach@umd.edu', 'scrypt:32768:8:1$JJ3eNoPuCRp6X5Jd$f1d550168a9c313512a23d86fc3a4b107f03211228d1222d8e87b259c75b75988ad8d63d6a7029b8b0d038520f4dfce7519e2f0cb39a827e82784b13296cf70d', 'coach'),
-(3, 'Player User', 'player@umd.edu', 'scrypt:32768:8:1$JJ3eNoPuCRp6X5Jd$f1d550168a9c313512a23d86fc3a4b107f03211228d1222d8e87b259c75b75988ad8d63d6a7029b8b0d038520f4dfce7519e2f0cb39a827e82784b13296cf70d', 'player'),
-(4, 'Supplier User', 'supplier@umd.edu', 'scrypt:32768:8:1$JJ3eNoPuCRp6X5Jd$f1d550168a9c313512a23d86fc3a4b107f03211228d1222d8e87b259c75b75988ad8d63d6a7029b8b0d038520f4dfce7519e2f0cb39a827e82784b13296cf70d', 'supplier');
+(1, 'Admin User', 'admin@umd.edu', 'scrypt:32768:8:1$JJ3eNoPuCRp6X5Jd$f1d550168a9c313512a23d86fc3a4b107f03211228d1222d8e87b259c75b75988ad8d63d6a7029b8b0d038520f4dfce7519e2f0cb39a827e82784b13296cf70d', 'Admin'),
+(2, 'Coach User', 'coach@umd.edu', 'scrypt:32768:8:1$JJ3eNoPuCRp6X5Jd$f1d550168a9c313512a23d86fc3a4b107f03211228d1222d8e87b259c75b75988ad8d63d6a7029b8b0d038520f4dfce7519e2f0cb39a827e82784b13296cf70d', 'Coach'),
+(3, 'Player User', 'player@umd.edu', 'scrypt:32768:8:1$JJ3eNoPuCRp6X5Jd$f1d550168a9c313512a23d86fc3a4b107f03211228d1222d8e87b259c75b75988ad8d63d6a7029b8b0d038520f4dfce7519e2f0cb39a827e82784b13296cf70d', 'Player'),
+(4, 'Supplier User', 'supplier@umd.edu', 'scrypt:32768:8:1$JJ3eNoPuCRp6X5Jd$f1d550168a9c313512a23d86fc3a4b107f03211228d1222d8e87b259c75b75988ad8d63d6a7029b8b0d038520f4dfce7519e2f0cb39a827e82784b13296cf70d', 'Supplier');
 
 ALTER TABLE users AUTO_INCREMENT = 5;
 
--- Sample roster record linked to the Player user
-INSERT INTO players (player_id, user_id, jersey_number, position, year, injured, phone) VALUES
-(1, 3, 27, 'Forward', 'Sophomore', FALSE, '555-123-4567');
+-- =========================================
+-- SAMPLE PLAYER USERS
+-- =========================================
+INSERT INTO users (id, name, email, password, role) VALUES
+(5, 'Marco Rossi', 'marco.rossi@umd.edu', 'scrypt:32768:8:1$JJ3eNoPuCRp6X5Jd$f1d550168a9c313512a23d86fc3a4b107f03211228d1222d8e87b259c75b75988ad8d63d6a7029b8b0d038520f4dfce7519e2f0cb39a827e82784b13296cf70d', 'Player'),
+(6, 'Jake Thompson', 'jake.thompson@umd.edu', 'scrypt:32768:8:1$JJ3eNoPuCRp6X5Jd$f1d550168a9c313512a23d86fc3a4b107f03211228d1222d8e87b259c75b75988ad8d63d6a7029b8b0d038520f4dfce7519e2f0cb39a827e82784b13296cf70d', 'Player'),
+(7, 'Liam Connor', 'liam.connor@umd.edu', 'scrypt:32768:8:1$JJ3eNoPuCRp6X5Jd$f1d550168a9c313512a23d86fc3a4b107f03211228d1222d8e87b259c75b75988ad8d63d6a7029b8b0d038520f4dfce7519e2f0cb39a827e82784b13296cf70d', 'Player');
 
-ALTER TABLE players AUTO_INCREMENT = 2;
+ALTER TABLE users AUTO_INCREMENT = 8;
+
+INSERT INTO players (player_id, user_id, jersey_number, position, year, injured, phone) VALUES
+(1, 3, 27, 'Forward', 'Sophomore', FALSE, '555-123-4567'),
+(2, 5, 10, 'Defense', 'Senior', FALSE, '555-222-1111'),
+(3, 6, 14, 'Forward', 'Junior', TRUE, '555-222-3333'),
+(4, 7, 31, 'Goalie', 'Freshman', FALSE, '555-222-4444');
+
+ALTER TABLE players AUTO_INCREMENT = 5;
+
+-- =========================================
+-- FINANCIAL CATEGORIES
+-- =========================================
+INSERT INTO financial_categories (category_id, category_name, category_type) VALUES
+(1, 'Ticket Sales', 'Revenue'),
+(2, 'Donation', 'Revenue'),
+(3, 'Sponsorship', 'Revenue'),
+(4, 'Merchandise Sales', 'Revenue'),
+(5, 'Ref Fees', 'Expense'),
+(6, 'Ice Rental', 'Expense'),
+(7, 'Travel', 'Expense'),
+(8, 'Equipment', 'Expense'),
+(9, 'Facility', 'Expense'),
+(10, 'Food and Hospitality', 'Expense');
+
+ALTER TABLE financial_categories AUTO_INCREMENT = 11;
+
+-- =========================================
+-- GAMES FOR MARCH AND APRIL 2026
+-- =========================================
+INSERT INTO games (game_id, opponent, game_date, location, game_type, status) VALUES
+(1, 'Georgetown Club Hockey', '2026-03-18', 'UMD Ice Arena', 'Home', 'Completed'),
+(2, 'Navy Club Hockey', '2026-03-22', 'Navy Ice Rink', 'Away', 'Completed'),
+(3, 'Towson', '2026-03-28', 'UMD Ice Arena', 'Home', 'Completed'),
+(4, 'Johns Hopkins', '2026-04-07', 'Johns Hopkins Rink', 'Away', 'Confirmed'),
+(5, 'George Mason', '2026-04-12', 'UMD Ice Arena', 'Home', 'Scheduled'),
+(6, 'Delaware Club Hockey', '2026-04-19', 'Delaware Ice Center', 'Away', 'Scheduled'),
+(7, 'Maryland Alumni', '2026-04-26', 'UMD Ice Arena', 'Home', 'Scheduled');
+
+ALTER TABLE games AUTO_INCREMENT = 8;
+
+-- =========================================
+-- ACTUAL FINANCIAL ENTRIES
+-- =========================================
+INSERT INTO financial_entries (entry_id, game_id, category_id, entry_type, amount, description, entry_date) VALUES
+
+-- Game 1 Georgetown
+(1, 1, 1, 'Revenue', 1800.00, '120 tickets sold at $15', '2026-03-18'),
+(2, 1, 4, 'Revenue', 320.00, 'Game-day merchandise sales', '2026-03-18'),
+(3, 1, 5, 'Expense', 300.00, 'Referee fees', '2026-03-18'),
+(4, 1, 6, 'Expense', 400.00, 'Ice rental', '2026-03-18'),
+(5, 1, 10, 'Expense', 150.00, 'Snacks and drinks for event staff', '2026-03-18'),
+
+-- Game 2 Navy
+(6, 2, 7, 'Expense', 500.00, 'Bus transportation', '2026-03-22'),
+(7, 2, 5, 'Expense', 280.00, 'Referee fees', '2026-03-22'),
+(8, 2, 10, 'Expense', 120.00, 'Team food before game', '2026-03-22'),
+
+-- Game 3 Towson
+(9, 3, 1, 'Revenue', 2100.00, '140 tickets sold at $15', '2026-03-28'),
+(10, 3, 2, 'Revenue', 500.00, 'Alumni donation received during event', '2026-03-28'),
+(11, 3, 4, 'Revenue', 280.00, 'Merchandise sales', '2026-03-28'),
+(12, 3, 5, 'Expense', 300.00, 'Referee fees', '2026-03-28'),
+(13, 3, 6, 'Expense', 420.00, 'Ice rental', '2026-03-28'),
+(14, 3, 9, 'Expense', 100.00, 'Arena support costs', '2026-03-28'),
+
+-- General team finance
+(15, NULL, 3, 'Revenue', 5000.00, 'Spring team sponsorship', '2026-03-05'),
+(16, NULL, 8, 'Expense', 650.00, 'Replacement goalie gear', '2026-04-02'),
+(17, NULL, 8, 'Expense', 420.00, 'Practice jersey reorder', '2026-04-05'),
+(18, NULL, 2, 'Revenue', 750.00, 'General alumni donation', '2026-04-06'),
+(19, NULL, 8, 'Expense', 1200.00, 'New jerseys order', '2026-04-08'),
+(20, NULL, 8, 'Expense', 800.00, 'New gloves purchase', '2026-04-09'),
+(21, NULL, 2, 'Revenue', 1000.00, 'General donor contribution', '2026-04-10'),
+
+-- Game 4 partial actual
+(22, 4, 7, 'Expense', 250.00, 'Travel deposit for away game', '2026-04-06');
+
+ALTER TABLE financial_entries AUTO_INCREMENT = 23;
+
+-- =========================================
+-- PROJECTED FINANCIAL DATA
+-- =========================================
+INSERT INTO financial_projections (projection_id, game_id, category_id, projection_type, projected_amount, notes, projection_date) VALUES
+
+-- Game 4 Johns Hopkins
+(1, 4, 7, 'Expense', 600.00, 'Expected full travel cost for away game', '2026-04-07'),
+(2, 4, 5, 'Expense', 300.00, 'Expected referee fees', '2026-04-07'),
+
+-- Game 5 George Mason
+(3, 5, 1, 'Revenue', 1950.00, 'Projected ticket sales for home game', '2026-04-12'),
+(4, 5, 4, 'Revenue', 250.00, 'Projected merchandise sales', '2026-04-12'),
+(5, 5, 5, 'Expense', 300.00, 'Expected referee fees', '2026-04-12'),
+(6, 5, 6, 'Expense', 410.00, 'Expected ice rental', '2026-04-12'),
+(7, 5, 10, 'Expense', 130.00, 'Expected hospitality costs', '2026-04-12'),
+
+-- Game 6 Delaware
+(8, 6, 7, 'Expense', 650.00, 'Projected bus transportation', '2026-04-19'),
+(9, 6, 5, 'Expense', 280.00, 'Projected referee fees', '2026-04-19'),
+(10, 6, 10, 'Expense', 140.00, 'Projected team meal', '2026-04-19'),
+
+-- Game 7 Alumni Night
+(11, 7, 1, 'Revenue', 2400.00, 'Projected ticket sales for alumni night', '2026-04-26'),
+(12, 7, 2, 'Revenue', 800.00, 'Expected alumni donations during event', '2026-04-26'),
+(13, 7, 4, 'Revenue', 350.00, 'Projected merchandise sales', '2026-04-26'),
+(14, 7, 5, 'Expense', 320.00, 'Projected referee fees', '2026-04-26'),
+(15, 7, 6, 'Expense', 430.00, 'Projected ice rental', '2026-04-26'),
+(16, 7, 10, 'Expense', 180.00, 'Projected hospitality cost for alumni night', '2026-04-26'),
+
+-- General future team projections
+(17, NULL, 8, 'Expense', 500.00, 'Projected stick replacement order', '2026-04-15'),
+(18, NULL, 9, 'Expense', 350.00, 'Projected storage/facility cost', '2026-04-20'),
+(19, NULL, 2, 'Revenue', 600.00, 'Expected general donation campaign result', '2026-04-30'),
+(20, NULL, 8, 'Expense', 900.00, 'Projected spare gloves order', '2026-04-22');
+
+ALTER TABLE financial_projections AUTO_INCREMENT = 21;
