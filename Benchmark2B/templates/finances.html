@@ -7,6 +7,7 @@
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/newstyle.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     .summary-card p.display-6 {
@@ -35,11 +36,13 @@
       color: #6c757d;
     }
 
-    .game-row {
+    .game-row,
+    .team-row {
       cursor: pointer;
     }
 
-    .game-row:hover {
+    .game-row:hover,
+    .team-row:hover {
       background-color: #f8f9fa;
     }
 
@@ -84,6 +87,25 @@
       font-size: 0.85rem;
       color: #6c757d;
     }
+
+    .year-card {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+      height: 100%;
+    }
+
+    .year-card h6 {
+      margin-bottom: 0.35rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .chart-wrap {
+      max-width: 380px;
+      margin: 0 auto;
+    }
   </style>
 </head>
 <body>
@@ -109,6 +131,19 @@
         {% endfor %}
       {% endif %}
     {% endwith %}
+
+    <div class="row mb-4">
+      <div class="col-md-6 mb-2 mb-md-0">
+        <button type="button" class="btn btn-dark w-100" data-bs-toggle="modal" data-bs-target="#annualSummaryModal">
+          View Annual Summary
+        </button>
+      </div>
+      <div class="col-md-6">
+        <button type="button" class="btn btn-success w-100" onclick="openGeneralEntryModal()">
+          Add Team Finance Entry
+        </button>
+      </div>
+    </div>
 
     <div class="row g-4 mb-4">
       <div class="col-md-3">
@@ -183,9 +218,11 @@
               <th>Status</th>
               <th>Projected Revenue</th>
               <th>Actual Revenue</th>
+              <th>Revenue Variance</th>
               <th>Revenue Check</th>
               <th>Projected Expenses</th>
               <th>Actual Expenses</th>
+              <th>Expense Variance</th>
               <th>Expense Check</th>
             </tr>
           </thead>
@@ -200,6 +237,9 @@
 
                 <td class="text-success">${{ "%.2f"|format(game.projected_revenue) }}</td>
                 <td class="text-success">${{ "%.2f"|format(game.actual_revenue) }}</td>
+                <td class="{% if game.revenue_variance > 0 %}text-success{% elif game.revenue_variance < 0 %}text-danger{% else %}text-primary{% endif %}">
+                  {% if game.revenue_variance > 0 %}+{% endif %}${{ "%.2f"|format(game.revenue_variance) }}
+                </td>
                 <td>
                   {% if game.projected_revenue == 0 and game.actual_revenue == 0 %}
                     <span class="badge bg-secondary">No Data</span>
@@ -214,6 +254,9 @@
 
                 <td class="text-warning">${{ "%.2f"|format(game.projected_expenses) }}</td>
                 <td class="text-danger">${{ "%.2f"|format(game.actual_expenses) }}</td>
+                <td class="{% if game.expense_variance > 0 %}text-danger{% elif game.expense_variance < 0 %}text-success{% else %}text-primary{% endif %}">
+                  {% if game.expense_variance > 0 %}+{% endif %}${{ "%.2f"|format(game.expense_variance) }}
+                </td>
                 <td>
                   {% if game.projected_expenses == 0 and game.actual_expenses == 0 %}
                     <span class="badge bg-secondary">No Data</span>
@@ -229,7 +272,7 @@
               {% endfor %}
             {% else %}
               <tr>
-                <td colspan="10" class="text-center">No game financial data found.</td>
+                <td colspan="12" class="text-center">No game financial data found.</td>
               </tr>
             {% endif %}
           </tbody>
@@ -238,8 +281,10 @@
     </div>
 
     <div class="card p-4 card-box mb-4">
-      <h3 class="section-title">Team Operations — Non-Game Finances</h3>
-      <p class="mini-note">This section tracks team finances not directly tied to a single game.</p>
+      <h3 class="section-title">General Team Finances</h3>
+      <p class="mini-note">
+        Click a row to review team-wide revenue or expense entries that are not tied to one specific game, such as donations, sponsorships, equipment purchases, and operating costs.
+      </p>
 
       <div class="table-responsive mt-3">
         <table class="table table-striped table-bordered align-middle">
@@ -255,7 +300,15 @@
           <tbody>
             {% if general_entries %}
               {% for entry in general_entries %}
-              <tr>
+              <tr
+                class="team-row"
+                data-entry-id="{{ entry.entry_id }}"
+                data-entry-type="{{ entry.entry_type }}"
+                data-category-name="{{ entry.category_name }}"
+                data-description="{{ entry.description or '' }}"
+                data-entry-date="{{ entry.entry_date }}"
+                data-amount="{{ entry.amount }}"
+              >
                 <td>{{ entry.entry_date }}</td>
                 <td>{{ entry.entry_type }}</td>
                 <td>{{ entry.category_name }}</td>
@@ -278,7 +331,7 @@
     <div class="card p-4 card-box mb-4">
       <h3 class="section-title">How to Use This Page</h3>
       <div class="info-note">
-        Click any game row to open its financial details. Inside the popup, you can add actual entries, add projections, review totals, and compare expected results with real results. Revenue is evaluated as above target, below target, or on target, while expenses are evaluated as under budget, over budget, or on budget.
+        Use the annual summary to review overall revenue, expenses, and yearly financial patterns. Use the game comparison table to compare projected and actual results for each matchup. Use General Team Finances to track team-wide items such as donations, sponsorships, equipment, and other operating costs that are not linked to one specific game.
       </div>
     </div>
 
@@ -288,6 +341,71 @@
 
   </main>
 
+  <!-- ANNUAL SUMMARY MODAL -->
+  <div class="modal fade" id="annualSummaryModal" tabindex="-1" aria-labelledby="annualSummaryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="annualSummaryModalLabel">Annual Financial Summary</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="row g-3 mb-4">
+            <div class="col-md-4">
+              <div class="year-card">
+                <h6>Total Revenue</h6>
+                <div class="text-success fw-bold fs-4">${{ "%.2f"|format(totals.total_revenue) }}</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="year-card">
+                <h6>Total Expenses</h6>
+                <div class="text-danger fw-bold fs-4">${{ "%.2f"|format(totals.total_expenses) }}</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="year-card">
+                <h6>Net Balance</h6>
+                <div class="{% if totals.net_balance >= 0 %}text-primary{% else %}text-danger{% endif %} fw-bold fs-4">
+                  ${{ "%.2f"|format(totals.net_balance) }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row g-4">
+            <div class="col-md-6">
+              <div class="comparison-box">
+                <h6>Revenue Breakdown</h6>
+                <p class="small-muted mb-3">
+                  This chart shows where the team's money is coming from across the year.
+                </p>
+                <div class="chart-wrap">
+                  <canvas id="revenuePieChart"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="comparison-box">
+                <h6>Expense Breakdown</h6>
+                <p class="small-muted mb-3">
+                  This chart shows how the team is spending money across the year.
+                </p>
+                <div class="chart-wrap">
+                  <canvas id="expensePieChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD ACTUAL ENTRY MODAL -->
   <div class="modal fade" id="addActualEntryModal" tabindex="-1" aria-labelledby="addActualEntryModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
@@ -364,6 +482,7 @@
     </div>
   </div>
 
+  <!-- ADD PROJECTION MODAL -->
   <div class="modal fade" id="addProjectionModal" tabindex="-1" aria-labelledby="addProjectionModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
@@ -440,6 +559,7 @@
     </div>
   </div>
 
+  <!-- GAME DETAIL MODAL -->
   <div class="modal fade" id="gameDetailModal" tabindex="-1" aria-labelledby="gameDetailModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
       <div class="modal-content">
@@ -459,6 +579,34 @@
     </div>
   </div>
 
+  <!-- TEAM ENTRY DETAIL MODAL -->
+  <div class="modal fade" id="teamEntryDetailModal" tabindex="-1" aria-labelledby="teamEntryDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="teamEntryDetailModalLabel">Team Finance Entry</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <p><strong>Date:</strong> <span id="teamEntryDate"></span></p>
+          <p><strong>Type:</strong> <span id="teamEntryType"></span></p>
+          <p><strong>Category:</strong> <span id="teamEntryCategory"></span></p>
+          <p><strong>Description:</strong> <span id="teamEntryDescription"></span></p>
+          <p><strong>Amount:</strong> <span id="teamEntryAmount"></span></p>
+        </div>
+
+        <div class="modal-footer">
+          <form method="POST" id="teamEntryDeleteForm">
+            <button type="submit" class="btn btn-danger">Delete Entry</button>
+          </form>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELETE GAME MODAL -->
   <div class="modal fade" id="deleteGameModal" tabindex="-1" aria-labelledby="deleteGameModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -490,6 +638,13 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
+    const generalEntriesData = {{ general_entries|tojson }};
+    const annualRevenueBreakdown = {{ annual_revenue_breakdown|tojson }};
+    const annualExpenseBreakdown = {{ annual_expense_breakdown|tojson }};
+
+    let revenuePieChart = null;
+    let expensePieChart = null;
+
     function money(value) {
       const num = Number(value || 0);
       return `$${num.toFixed(2)}`;
@@ -779,6 +934,14 @@
       actualModal.show();
     }
 
+    function openGeneralEntryModal() {
+      document.getElementById('entry_game_id').value = '';
+      localStorage.removeItem('returnGameId');
+
+      const actualModal = new bootstrap.Modal(document.getElementById('addActualEntryModal'));
+      actualModal.show();
+    }
+
     function openProjectionModal(gameId) {
       const gameDetailModalEl = document.getElementById('gameDetailModal');
       const gameDetailModal = bootstrap.Modal.getInstance(gameDetailModalEl);
@@ -809,6 +972,25 @@
       deleteModal.show();
     }
 
+    function openTeamEntryDetail(row) {
+      const entryId = row.dataset.entryId;
+      const entryType = row.dataset.entryType;
+      const categoryName = row.dataset.categoryName;
+      const description = row.dataset.description || 'None';
+      const entryDate = row.dataset.entryDate;
+      const amount = row.dataset.amount;
+
+      document.getElementById('teamEntryDate').textContent = entryDate;
+      document.getElementById('teamEntryType').textContent = entryType;
+      document.getElementById('teamEntryCategory').textContent = categoryName;
+      document.getElementById('teamEntryDescription').textContent = description;
+      document.getElementById('teamEntryAmount').textContent = money(amount);
+      document.getElementById('teamEntryDeleteForm').action = `/delete_financial_entry/${entryId}`;
+
+      const modal = new bootstrap.Modal(document.getElementById('teamEntryDetailModal'));
+      modal.show();
+    }
+
     function saveReturnGameId(selectId) {
       const value = document.getElementById(selectId).value;
       if (value) {
@@ -821,8 +1003,70 @@
     function confirmDeleteAndReturn(gameId) {
       if (gameId) {
         localStorage.setItem('returnGameId', gameId);
+      } else {
+        localStorage.removeItem('returnGameId');
       }
       return confirm('Delete this item?');
+    }
+
+    function buildRevenuePieChart() {
+      const labels = annualRevenueBreakdown.map(item => item.category_name);
+      const values = annualRevenueBreakdown.map(item => Number(item.total_amount || 0));
+
+      const ctx = document.getElementById('revenuePieChart');
+      if (!ctx) return;
+
+      if (revenuePieChart) {
+        revenuePieChart.destroy();
+      }
+
+      revenuePieChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: values
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            }
+          }
+        }
+      });
+    }
+
+    function buildExpensePieChart() {
+      const labels = annualExpenseBreakdown.map(item => item.category_name);
+      const values = annualExpenseBreakdown.map(item => Number(item.total_amount || 0));
+
+      const ctx = document.getElementById('expensePieChart');
+      if (!ctx) return;
+
+      if (expensePieChart) {
+        expensePieChart.destroy();
+      }
+
+      expensePieChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: values
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            }
+          }
+        }
+      });
     }
 
     document.querySelectorAll('.game-row').forEach(row => {
@@ -830,6 +1074,17 @@
         const gameId = this.dataset.gameId;
         openGameDetail(gameId);
       });
+    });
+
+    document.querySelectorAll('.team-row').forEach(row => {
+      row.addEventListener('click', function () {
+        openTeamEntryDetail(this);
+      });
+    });
+
+    document.getElementById('annualSummaryModal').addEventListener('shown.bs.modal', function () {
+      buildRevenuePieChart();
+      buildExpensePieChart();
     });
 
     window.addEventListener('load', function () {
