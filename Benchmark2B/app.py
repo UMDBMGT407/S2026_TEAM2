@@ -194,19 +194,14 @@ def build_game_comparisons(actual_games, projected_games):
         revenue_variance = actual_revenue - projected_revenue
         expense_variance = actual_expenses - projected_expenses
 
-        if projected_expenses > 0:
-            expense_variance_percent = abs(expense_variance) / projected_expenses * 100
-        elif actual_expenses > 0:
-            expense_variance_percent = 100.0
-        else:
-            expense_variance_percent = 0.0
-
-        if projected_revenue > 0:
-            revenue_variance_percent = abs(revenue_variance) / projected_revenue * 100
-        elif actual_revenue > 0:
-            revenue_variance_percent = 100.0
-        else:
-            revenue_variance_percent = 0.0
+        revenue_variance_percent = (
+            abs(revenue_variance) / projected_revenue * 100
+            if projected_revenue > 0 else (100.0 if actual_revenue > 0 else 0.0)
+        )
+        expense_variance_percent = (
+            abs(expense_variance) / projected_expenses * 100
+            if projected_expenses > 0 else (100.0 if actual_expenses > 0 else 0.0)
+        )
 
         comparisons.append({
             'game_id': actual['game_id'],
@@ -499,6 +494,44 @@ def finances():
             for row in categories_raw
         ]
 
+        cur.execute("""
+            SELECT
+                fc.category_name,
+                COALESCE(SUM(fe.amount), 0) AS total_amount
+            FROM financial_entries fe
+            JOIN financial_categories fc ON fe.category_id = fc.category_id
+            WHERE fe.entry_type = 'Revenue'
+            GROUP BY fc.category_name
+            ORDER BY total_amount DESC
+        """)
+        annual_revenue_breakdown_raw = cur.fetchall()
+        annual_revenue_breakdown = [
+            {
+                'category_name': row[0],
+                'total_amount': float(row[1] or 0)
+            }
+            for row in annual_revenue_breakdown_raw
+        ]
+
+        cur.execute("""
+            SELECT
+                fc.category_name,
+                COALESCE(SUM(fe.amount), 0) AS total_amount
+            FROM financial_entries fe
+            JOIN financial_categories fc ON fe.category_id = fc.category_id
+            WHERE fe.entry_type = 'Expense'
+            GROUP BY fc.category_name
+            ORDER BY total_amount DESC
+        """)
+        annual_expense_breakdown_raw = cur.fetchall()
+        annual_expense_breakdown = [
+            {
+                'category_name': row[0],
+                'total_amount': float(row[1] or 0)
+            }
+            for row in annual_expense_breakdown_raw
+        ]
+
         return render_template(
             'finances.html',
             totals=totals,
@@ -508,7 +541,9 @@ def finances():
             game_comparisons=game_comparisons,
             general_entries=general_entries,
             games=games,
-            categories=categories
+            categories=categories,
+            annual_revenue_breakdown=annual_revenue_breakdown,
+            annual_expense_breakdown=annual_expense_breakdown
         )
 
     except Exception as e:
@@ -522,7 +557,9 @@ def finances():
             game_comparisons=[],
             general_entries=[],
             games=[],
-            categories=[]
+            categories=[],
+            annual_revenue_breakdown=[],
+            annual_expense_breakdown=[]
         )
     finally:
         cur.close()
