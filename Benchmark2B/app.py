@@ -13,7 +13,7 @@ app.secret_key = 'bmgt407_hockey_secret_key'
 # ---------------------------
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'Acciaio1!'
+app.config['MYSQL_PASSWORD'] = 'your passwd'
 app.config['MYSQL_DB'] = 'user_management'
 
 mysql = MySQL(app)
