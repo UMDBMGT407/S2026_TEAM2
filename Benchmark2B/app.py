@@ -117,7 +117,12 @@ def get_all_games():
                 game_date,
                 location,
                 game_type,
-                status
+                status,
+                projected_cost,
+                actual_cost,
+                final_score,
+                notes,
+                in_results
             FROM games
             ORDER BY game_date
         """)
@@ -131,7 +136,12 @@ def get_all_games():
                 'game_date': row[2],
                 'location': row[3],
                 'game_type': row[4],
-                'status': row[5]
+                'status': row[5],
+                'projected_cost': float(row[6]) if row[6] is not None else None,
+                'actual_cost': float(row[7]) if row[7] is not None else None,
+                'final_score': row[8],
+                'notes': row[9],
+                'in_results': bool(row[10]),
             }
             for row in rows
         ]
@@ -152,7 +162,11 @@ def get_all_practices():
                 practice_time,
                 location,
                 contact_email,
-                notes
+                notes,
+                status,
+                projected_cost,
+                actual_cost,
+                in_results
             FROM practices
             ORDER BY practice_date, practice_time
         """)
@@ -167,7 +181,11 @@ def get_all_practices():
                 'practice_time': row[3],
                 'location': row[4],
                 'contact_email': row[5],
-                'notes': row[6]
+                'notes': row[6],
+                'status': row[7],
+                'projected_cost': float(row[8]) if row[8] is not None else None,
+                'actual_cost': float(row[9]) if row[9] is not None else None,
+                'in_results': bool(row[10]),
             }
             for row in rows
         ]
@@ -351,6 +369,7 @@ def finances():
     cur = mysql.connection.cursor()
 
     try:
+        # Totals from actual entries
         cur.execute("""
             SELECT
                 COALESCE(SUM(CASE WHEN entry_type = 'Revenue' THEN amount ELSE 0 END), 0),
@@ -365,6 +384,7 @@ def finances():
             'net_balance': float(totals_row[2] or 0)
         }
 
+        # Totals from projections
         cur.execute("""
             SELECT
                 COALESCE(SUM(CASE WHEN projection_type = 'Revenue' THEN projected_amount ELSE 0 END), 0),
@@ -377,6 +397,7 @@ def finances():
             'projected_expenses': float(projected_row[1] or 0)
         }
 
+        # Game actual summaries
         cur.execute("""
             SELECT
                 g.game_id,
@@ -407,6 +428,7 @@ def finances():
             for row in actual_games_raw
         ]
 
+        # Game projected summaries
         cur.execute("""
             SELECT
                 g.game_id,
@@ -439,6 +461,7 @@ def finances():
 
         game_comparisons = build_game_comparisons(actual_games, projected_games)
 
+        # General team entries only (not linked to game or practice)
         cur.execute("""
             SELECT
                 fe.entry_id,
@@ -449,7 +472,7 @@ def finances():
                 fc.category_name
             FROM financial_entries fe
             JOIN financial_categories fc ON fe.category_id = fc.category_id
-            WHERE fe.game_id IS NULL
+            WHERE fe.game_id IS NULL AND fe.practice_id IS NULL
             ORDER BY fe.entry_date DESC, fe.entry_id DESC
         """)
         general_entries_raw = cur.fetchall()
@@ -480,6 +503,20 @@ def finances():
         ]
 
         cur.execute("""
+            SELECT practice_id, title, practice_date
+            FROM practices
+            ORDER BY practice_date, practice_time
+        """)
+        practices_raw = cur.fetchall()
+        practices = [
+            {
+                'practice_id': row[0],
+                'label': f"{row[1]} - {row[2]}"
+            }
+            for row in practices_raw
+        ]
+
+        cur.execute("""
             SELECT category_id, category_name, category_type
             FROM financial_categories
             ORDER BY category_type, category_name
@@ -494,6 +531,7 @@ def finances():
             for row in categories_raw
         ]
 
+        # Annual revenue breakdown
         cur.execute("""
             SELECT
                 fc.category_name,
@@ -513,6 +551,7 @@ def finances():
             for row in annual_revenue_breakdown_raw
         ]
 
+        # Annual expense breakdown
         cur.execute("""
             SELECT
                 fc.category_name,
@@ -541,6 +580,7 @@ def finances():
             game_comparisons=game_comparisons,
             general_entries=general_entries,
             games=games,
+            practices=practices,
             categories=categories,
             annual_revenue_breakdown=annual_revenue_breakdown,
             annual_expense_breakdown=annual_expense_breakdown
@@ -557,6 +597,7 @@ def finances():
             game_comparisons=[],
             general_entries=[],
             games=[],
+            practices=[],
             categories=[],
             annual_revenue_breakdown=[],
             annual_expense_breakdown=[]
@@ -689,6 +730,140 @@ def game_details(game_id):
         cur.close()
 
 
+@app.route('/practice_details/<int:practice_id>')
+@login_required
+@role_required('Admin', 'Coach')
+def practice_details(practice_id):
+    cur = mysql.connection.cursor()
+
+    try:
+        cur.execute("""
+            SELECT
+                practice_id,
+                title,
+                practice_date,
+                practice_time,
+                location,
+                contact_email,
+                notes,
+                status
+            FROM practices
+            WHERE practice_id = %s
+        """, (practice_id,))
+        practice_row = cur.fetchone()
+
+        if not practice_row:
+            return jsonify({'error': 'Practice not found'}), 404
+
+        practice = {
+            'practice_id': practice_row[0],
+            'title': practice_row[1],
+            'practice_date': str(practice_row[2]),
+            'practice_time': str(practice_row[3]),
+            'location': practice_row[4],
+            'contact_email': practice_row[5],
+            'notes': practice_row[6],
+            'status': practice_row[7]
+        }
+
+        cur.execute("""
+            SELECT
+                fe.entry_id,
+                fe.practice_id,
+                fe.entry_type,
+                fe.amount,
+                fe.description,
+                fe.entry_date,
+                fc.category_name,
+                fc.category_type
+            FROM financial_entries fe
+            JOIN financial_categories fc ON fe.category_id = fc.category_id
+            WHERE fe.practice_id = %s
+            ORDER BY fe.entry_date, fe.entry_id
+        """, (practice_id,))
+        actual_rows = cur.fetchall()
+
+        actual_entries = []
+        actual_revenue = 0.0
+        actual_expenses = 0.0
+
+        for row in actual_rows:
+            amount = float(row[3] or 0)
+            actual_entries.append({
+                'entry_id': row[0],
+                'practice_id': row[1],
+                'entry_type': row[2],
+                'amount': amount,
+                'description': row[4],
+                'entry_date': str(row[5]),
+                'category_name': row[6],
+                'category_type': row[7]
+            })
+            if row[2] == 'Revenue':
+                actual_revenue += amount
+            else:
+                actual_expenses += amount
+
+        cur.execute("""
+            SELECT
+                fp.projection_id,
+                fp.practice_id,
+                fp.projection_type,
+                fp.projected_amount,
+                fp.notes,
+                fp.projection_date,
+                fc.category_name,
+                fc.category_type
+            FROM financial_projections fp
+            JOIN financial_categories fc ON fp.category_id = fc.category_id
+            WHERE fp.practice_id = %s
+            ORDER BY fp.projection_date, fp.projection_id
+        """, (practice_id,))
+        projection_rows = cur.fetchall()
+
+        projected_entries = []
+        projected_revenue = 0.0
+        projected_expenses = 0.0
+
+        for row in projection_rows:
+            amount = float(row[3] or 0)
+            projected_entries.append({
+                'projection_id': row[0],
+                'practice_id': row[1],
+                'projection_type': row[2],
+                'projected_amount': amount,
+                'notes': row[4],
+                'projection_date': str(row[5]),
+                'category_name': row[6],
+                'category_type': row[7]
+            })
+            if row[2] == 'Revenue':
+                projected_revenue += amount
+            else:
+                projected_expenses += amount
+
+        return jsonify({
+            'practice': practice,
+            'actual_entries': actual_entries,
+            'projected_entries': projected_entries,
+            'actual_totals': {
+                'revenue': actual_revenue,
+                'expenses': actual_expenses,
+                'net': actual_revenue - actual_expenses
+            },
+            'projected_totals': {
+                'revenue': projected_revenue,
+                'expenses': projected_expenses,
+                'net': projected_revenue - projected_expenses
+            }
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cur.close()
+
+
 @app.route('/alumni')
 @app.route('/alumni.html')
 @login_required
@@ -776,6 +951,11 @@ def add_game():
     location = request.form.get('location', '').strip()
     game_type = request.form.get('game_type', '').strip()
     status = request.form.get('status', '').strip()
+    projected_cost = request.form.get('projected_cost')
+    actual_cost = request.form.get('actual_cost')
+    final_score = request.form.get('final_score', '').strip()
+    notes = request.form.get('notes', '').strip()
+    in_results = 1 if request.form.get('in_results') in ('1', 'true', 'True', 'yes', 'on') else 0
 
     if not opponent or not game_date or not location or not game_type or not status:
         flash('Please fill in all required game fields.', 'danger')
@@ -785,9 +965,23 @@ def add_game():
 
     try:
         cur.execute("""
-            INSERT INTO games (opponent, game_date, location, game_type, status)
-            VALUES (%s, %s, %s, %s, %s)
-        """, (opponent, game_date, location, game_type, status))
+            INSERT INTO games (
+                opponent, game_date, location, game_type, status,
+                projected_cost, actual_cost, final_score, notes, in_results
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            opponent,
+            game_date,
+            location,
+            game_type,
+            status,
+            projected_cost if projected_cost else None,
+            actual_cost if actual_cost else None,
+            final_score if final_score else None,
+            notes if notes else None,
+            in_results
+        ))
         mysql.connection.commit()
         flash('Game added successfully.', 'success')
     except Exception as e:
@@ -809,6 +1003,10 @@ def add_practice():
     location = request.form.get('location', '').strip()
     contact_email = request.form.get('contact_email', '').strip()
     notes = request.form.get('notes', '').strip()
+    status = request.form.get('status', 'Scheduled').strip()
+    projected_cost = request.form.get('projected_cost')
+    actual_cost = request.form.get('actual_cost')
+    in_results = 1 if request.form.get('in_results') in ('1', 'true', 'True', 'yes', 'on') else 0
 
     if not title or not practice_date or not practice_time or not location:
         flash('Please fill in all required practice fields.', 'danger')
@@ -818,9 +1016,23 @@ def add_practice():
 
     try:
         cur.execute("""
-            INSERT INTO practices (title, practice_date, practice_time, location, contact_email, notes)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """, (title, practice_date, practice_time, location, contact_email, notes))
+            INSERT INTO practices (
+                title, practice_date, practice_time, location, contact_email, notes,
+                status, projected_cost, actual_cost, in_results
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            title,
+            practice_date,
+            practice_time,
+            location,
+            contact_email if contact_email else None,
+            notes if notes else None,
+            status,
+            projected_cost if projected_cost else None,
+            actual_cost if actual_cost else None,
+            in_results
+        ))
         mysql.connection.commit()
         flash('Practice added successfully.', 'success')
     except Exception as e:
@@ -840,6 +1052,7 @@ def add_practice():
 @role_required('Admin', 'Coach')
 def add_financial_entry():
     game_id = request.form.get('game_id')
+    practice_id = request.form.get('practice_id')
     category_id = request.form.get('category_id')
     entry_type = request.form.get('entry_type')
     amount = request.form.get('amount')
@@ -854,14 +1067,17 @@ def add_financial_entry():
 
     try:
         cur.execute("""
-            INSERT INTO financial_entries (game_id, category_id, entry_type, amount, description, entry_date)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            INSERT INTO financial_entries (
+                game_id, practice_id, category_id, entry_type, amount, description, entry_date
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
         """, (
             game_id if game_id else None,
+            practice_id if practice_id else None,
             category_id,
             entry_type,
             amount,
-            description,
+            description if description else None,
             entry_date
         ))
         mysql.connection.commit()
@@ -880,6 +1096,7 @@ def add_financial_entry():
 @role_required('Admin', 'Coach')
 def add_financial_projection():
     game_id = request.form.get('game_id')
+    practice_id = request.form.get('practice_id')
     category_id = request.form.get('category_id')
     projection_type = request.form.get('projection_type')
     projected_amount = request.form.get('projected_amount')
@@ -894,14 +1111,17 @@ def add_financial_projection():
 
     try:
         cur.execute("""
-            INSERT INTO financial_projections (game_id, category_id, projection_type, projected_amount, notes, projection_date)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            INSERT INTO financial_projections (
+                game_id, practice_id, category_id, projection_type, projected_amount, notes, projection_date
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
         """, (
             game_id if game_id else None,
+            practice_id if practice_id else None,
             category_id,
             projection_type,
             projected_amount,
-            notes,
+            notes if notes else None,
             projection_date
         ))
         mysql.connection.commit()
@@ -957,8 +1177,6 @@ def delete_game(game_id):
 
     cur = mysql.connection.cursor()
     try:
-        cur.execute("DELETE FROM financial_entries WHERE game_id = %s", (game_id,))
-        cur.execute("DELETE FROM financial_projections WHERE game_id = %s", (game_id,))
         cur.execute("DELETE FROM games WHERE game_id = %s", (game_id,))
         mysql.connection.commit()
         flash('Game and all related financial data were deleted.', 'success')
@@ -971,6 +1189,28 @@ def delete_game(game_id):
     if next_page == 'schedule':
         return redirect(url_for('schedule'))
     return redirect(url_for('finances'))
+
+
+@app.route('/delete_practice/<int:practice_id>', methods=['POST'])
+@login_required
+@role_required('Admin', 'Coach')
+def delete_practice(practice_id):
+    next_page = request.form.get('next_page', 'schedule')
+
+    cur = mysql.connection.cursor()
+    try:
+        cur.execute("DELETE FROM practices WHERE practice_id = %s", (practice_id,))
+        mysql.connection.commit()
+        flash('Practice and all related financial data were deleted.', 'success')
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f'Could not delete practice: {e}', 'danger')
+    finally:
+        cur.close()
+
+    if next_page == 'finances':
+        return redirect(url_for('finances'))
+    return redirect(url_for('schedule'))
 
 
 # ---------------------------
