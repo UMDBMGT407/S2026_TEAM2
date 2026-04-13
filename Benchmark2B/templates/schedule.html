@@ -56,6 +56,19 @@
       font-size: 0.9rem;
       font-weight: 700;
     }
+
+    .result-box {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 1rem;
+    }
+
+    .result-box h6 {
+      margin-bottom: 0.35rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
   </style>
 </head>
 <body>
@@ -116,6 +129,12 @@
       </li>
 
       <li class="nav-item" role="presentation">
+        <button class="nav-link" id="results-tab" data-bs-toggle="tab" data-bs-target="#results-pane" type="button" role="tab">
+          Results
+        </button>
+      </li>
+
+      <li class="nav-item" role="presentation">
         <button class="nav-link" id="emails-tab" data-bs-toggle="tab" data-bs-target="#emails-pane" type="button" role="tab">
           Email Notifications
         </button>
@@ -134,8 +153,9 @@
         </div>
 
         <div class="row g-4">
-          {% if games %}
-            {% for game in games %}
+          {% set scheduled_games = games | selectattr('in_results', 'equalto', false) | list %}
+          {% if scheduled_games %}
+            {% for game in scheduled_games %}
             <div class="col-md-6">
               <div
                 class="card p-4 card-box h-100 schedule-card"
@@ -146,6 +166,10 @@
                 data-location="{{ game.location }}"
                 data-type="{{ game.game_type }}"
                 data-status="{{ game.status }}"
+                data-projected-cost="{{ game.projected_cost if game.projected_cost is not none else '' }}"
+                data-actual-cost="{{ game.actual_cost if game.actual_cost is not none else '' }}"
+                data-final-score="{{ game.final_score or '' }}"
+                data-notes="{{ game.notes or 'None' }}"
                 onclick="openEventDetailFromCard(this)"
               >
                 <div class="d-flex justify-content-between align-items-start mb-2">
@@ -158,6 +182,9 @@
                 <p class="mb-2"><strong>Date:</strong> {{ game.game_date }}</p>
                 <p class="mb-2"><strong>Location:</strong> {{ game.location }}</p>
                 <p class="mb-2"><strong>Status:</strong> {{ game.status }}</p>
+                <p class="mb-2"><strong>Projected Cost:</strong>
+                  {% if game.projected_cost is not none %}${{ "%.2f"|format(game.projected_cost) }}{% else %}Not entered{% endif %}
+                </p>
 
                 <div class="card-actions" onclick="event.stopPropagation();">
                   <button
@@ -171,9 +198,17 @@
                     data-location="{{ game.location }}"
                     data-type="{{ game.game_type }}"
                     data-status="{{ game.status }}"
+                    data-projected-cost="{{ game.projected_cost if game.projected_cost is not none else '' }}"
+                    data-actual-cost="{{ game.actual_cost if game.actual_cost is not none else '' }}"
+                    data-final-score="{{ game.final_score or '' }}"
+                    data-notes="{{ game.notes or 'None' }}"
                   >
                     View Details
                   </button>
+
+                  <form method="POST" action="{{ url_for('move_game_to_results', game_id=game.game_id) }}">
+                    <button type="submit" class="btn btn-outline-success btn-sm">Move to Results</button>
+                  </form>
 
                   <button
                     type="button"
@@ -191,7 +226,7 @@
           {% else %}
             <div class="col-12">
               <div class="empty-state">
-                <h4 class="mb-2">No games found</h4>
+                <h4 class="mb-2">No scheduled games found</h4>
                 <p class="mb-0">Use the Add Game button to create a new game.</p>
               </div>
             </div>
@@ -209,18 +244,23 @@
         </div>
 
         <div class="row g-4">
-          {% if practices %}
-            {% for practice in practices %}
+          {% set scheduled_practices = practices | selectattr('in_results', 'equalto', false) | list %}
+          {% if scheduled_practices %}
+            {% for practice in scheduled_practices %}
             <div class="col-md-6">
               <div
                 class="card p-4 card-box h-100 schedule-card"
                 data-event-type="practice"
+                data-practice-id="{{ practice.practice_id }}"
                 data-title="{{ practice.title }}"
                 data-date="{{ practice.practice_date }}"
                 data-time="{{ practice.practice_time }}"
                 data-location="{{ practice.location }}"
                 data-email="{{ practice.contact_email or 'N/A' }}"
                 data-notes="{{ practice.notes or 'None' }}"
+                data-status="{{ practice.status }}"
+                data-projected-cost="{{ practice.projected_cost if practice.projected_cost is not none else '' }}"
+                data-actual-cost="{{ practice.actual_cost if practice.actual_cost is not none else '' }}"
                 onclick="openEventDetailFromCard(this)"
               >
                 <div class="d-flex justify-content-between align-items-start mb-2">
@@ -232,6 +272,10 @@
                 <p class="mb-2"><strong>Time:</strong> {{ practice.practice_time }}</p>
                 <p class="mb-2"><strong>Location:</strong> {{ practice.location }}</p>
                 <p class="mb-2"><strong>Contact:</strong> {{ practice.contact_email or 'N/A' }}</p>
+                <p class="mb-2"><strong>Status:</strong> {{ practice.status }}</p>
+                <p class="mb-2"><strong>Projected Cost:</strong>
+                  {% if practice.projected_cost is not none %}${{ "%.2f"|format(practice.projected_cost) }}{% else %}Not entered{% endif %}
+                </p>
 
                 <div class="card-actions" onclick="event.stopPropagation();">
                   <button
@@ -239,14 +283,32 @@
                     class="btn btn-outline-primary btn-sm"
                     onclick="openEventDetailFromButton(this)"
                     data-event-type="practice"
+                    data-practice-id="{{ practice.practice_id }}"
                     data-title="{{ practice.title }}"
                     data-date="{{ practice.practice_date }}"
                     data-time="{{ practice.practice_time }}"
                     data-location="{{ practice.location }}"
                     data-email="{{ practice.contact_email or 'N/A' }}"
                     data-notes="{{ practice.notes or 'None' }}"
+                    data-status="{{ practice.status }}"
+                    data-projected-cost="{{ practice.projected_cost if practice.projected_cost is not none else '' }}"
+                    data-actual-cost="{{ practice.actual_cost if practice.actual_cost is not none else '' }}"
                   >
                     View Details
+                  </button>
+
+                  <form method="POST" action="{{ url_for('move_practice_to_results', practice_id=practice.practice_id) }}">
+                    <button type="submit" class="btn btn-outline-success btn-sm">Move to Results</button>
+                  </form>
+
+                  <button
+                    type="button"
+                    class="btn btn-outline-danger btn-sm"
+                    data-practice-id="{{ practice.practice_id }}"
+                    data-title="{{ practice.title }}"
+                    onclick="openDeletePracticeModalFromButton(this)"
+                  >
+                    Delete
                   </button>
                 </div>
               </div>
@@ -255,8 +317,132 @@
           {% else %}
             <div class="col-12">
               <div class="empty-state">
-                <h4 class="mb-2">No practices found</h4>
+                <h4 class="mb-2">No scheduled practices found</h4>
                 <p class="mb-0">Use the Add Practice button to create a new practice.</p>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- RESULTS TAB -->
+      <div class="tab-pane fade" id="results-pane" role="tabpanel">
+        <div class="card p-4 card-box mb-4">
+          <h3 class="mb-2">Completed Results</h3>
+          <p class="section-note mb-0">
+            Once a game or practice is completed, move it here and enter the actual cost. Games can also store the final score.
+          </p>
+        </div>
+
+        <div class="row g-4">
+          {% set result_games = games | selectattr('in_results', 'equalto', true) | list %}
+          {% set result_practices = practices | selectattr('in_results', 'equalto', true) | list %}
+
+          {% if result_games or result_practices %}
+
+            {% for game in result_games %}
+            <div class="col-md-6">
+              <div class="card p-4 card-box h-100">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <h3 class="mb-0">{{ game.opponent }}</h3>
+                  <span class="badge {% if game.game_type == 'Away' %}bg-primary{% else %}bg-danger{% endif %} event-type-badge">
+                    {{ game.game_type }}
+                  </span>
+                </div>
+
+                <p class="mb-2"><strong>Date:</strong> {{ game.game_date }}</p>
+                <p class="mb-2"><strong>Location:</strong> {{ game.location }}</p>
+                <p class="mb-2"><strong>Projected Cost:</strong>
+                  {% if game.projected_cost is not none %}${{ "%.2f"|format(game.projected_cost) }}{% else %}Not entered{% endif %}
+                </p>
+                <p class="mb-2"><strong>Actual Cost:</strong>
+                  {% if game.actual_cost is not none %}${{ "%.2f"|format(game.actual_cost) }}{% else %}Not entered{% endif %}
+                </p>
+                <p class="mb-3"><strong>Final Score:</strong> {{ game.final_score or 'Not entered' }}</p>
+
+                <form method="POST" action="{{ url_for('update_game_results', game_id=game.game_id) }}">
+                  <input type="hidden" name="in_results" value="1">
+                  <input type="hidden" name="status" value="Completed">
+
+                  <div class="row mb-3">
+                    <div class="col-md-6">
+                      <label class="form-label">Actual Cost</label>
+                      <input type="number" step="0.01" class="form-control" name="actual_cost" value="{{ game.actual_cost if game.actual_cost is not none else '' }}">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">Final Score</label>
+                      <input type="text" class="form-control" name="final_score" value="{{ game.final_score or '' }}" placeholder="Example: UMD 4 - Navy 2">
+                    </div>
+                  </div>
+
+                  <div class="card-actions">
+                    <button type="submit" class="btn btn-primary btn-sm">Save Result</button>
+                    <button
+                      type="button"
+                      class="btn btn-outline-danger btn-sm"
+                      data-game-id="{{ game.game_id }}"
+                      data-opponent="{{ game.opponent }}"
+                      onclick="openDeleteGameModalFromButton(this)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+            {% endfor %}
+
+            {% for practice in result_practices %}
+            <div class="col-md-6">
+              <div class="card p-4 card-box h-100">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <h3 class="mb-0">{{ practice.title }}</h3>
+                  <span class="badge bg-secondary event-type-badge">Practice</span>
+                </div>
+
+                <p class="mb-2"><strong>Date:</strong> {{ practice.practice_date }}</p>
+                <p class="mb-2"><strong>Time:</strong> {{ practice.practice_time }}</p>
+                <p class="mb-2"><strong>Location:</strong> {{ practice.location }}</p>
+                <p class="mb-2"><strong>Projected Cost:</strong>
+                  {% if practice.projected_cost is not none %}${{ "%.2f"|format(practice.projected_cost) }}{% else %}Not entered{% endif %}
+                </p>
+                <p class="mb-3"><strong>Actual Cost:</strong>
+                  {% if practice.actual_cost is not none %}${{ "%.2f"|format(practice.actual_cost) }}{% else %}Not entered{% endif %}
+                </p>
+
+                <form method="POST" action="{{ url_for('update_practice_results', practice_id=practice.practice_id) }}">
+                  <input type="hidden" name="in_results" value="1">
+                  <input type="hidden" name="status" value="Completed">
+
+                  <div class="row mb-3">
+                    <div class="col-md-12">
+                      <label class="form-label">Actual Cost</label>
+                      <input type="number" step="0.01" class="form-control" name="actual_cost" value="{{ practice.actual_cost if practice.actual_cost is not none else '' }}">
+                    </div>
+                  </div>
+
+                  <div class="card-actions">
+                    <button type="submit" class="btn btn-primary btn-sm">Save Result</button>
+                    <button
+                      type="button"
+                      class="btn btn-outline-danger btn-sm"
+                      data-practice-id="{{ practice.practice_id }}"
+                      data-title="{{ practice.title }}"
+                      onclick="openDeletePracticeModalFromButton(this)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+            {% endfor %}
+
+          {% else %}
+            <div class="col-12">
+              <div class="empty-state">
+                <h4 class="mb-2">No completed events yet</h4>
+                <p class="mb-0">Move a game or practice to results after it happens.</p>
               </div>
             </div>
           {% endif %}
@@ -375,6 +561,23 @@
               </div>
             </div>
 
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="practiceStatus" class="form-label">Status</label>
+                <select class="form-select" id="practiceStatus" name="status">
+                  <option value="Scheduled">Scheduled</option>
+                  <option value="Confirmed">Confirmed</option>
+                  <option value="Completed">Completed</option>
+                  <option value="Cancelled">Cancelled</option>
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label for="practiceProjectedCost" class="form-label">Projected Cost</label>
+                <input type="number" step="0.01" class="form-control" id="practiceProjectedCost" name="projected_cost" placeholder="Enter projected cost">
+              </div>
+            </div>
+
             <div class="mb-3">
               <label for="practiceNotes" class="form-label">Notes</label>
               <textarea class="form-control" id="practiceNotes" name="notes" rows="3" placeholder="Extra notes for players"></textarea>
@@ -399,294 +602,4 @@
 
         <div class="modal-header">
           <h5 class="modal-title" id="addGameModalLabel">Add New Game</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-
-        <form method="POST" action="{{ url_for('add_game') }}">
-          <div class="modal-body">
-
-            <div class="row mb-3">
-              <div class="col-md-6">
-                <label for="opponent" class="form-label">Opponent</label>
-                <input type="text" class="form-control" id="opponent" name="opponent" placeholder="Enter opponent name" required>
-              </div>
-
-              <div class="col-md-6">
-                <label for="location" class="form-label">Location</label>
-                <input type="text" class="form-control" id="location" name="location" placeholder="Enter location" required>
-              </div>
-            </div>
-
-            <div class="row mb-3">
-              <div class="col-md-4">
-                <label for="game_date" class="form-label">Date</label>
-                <input type="date" class="form-control" id="game_date" name="game_date" required>
-              </div>
-
-              <div class="col-md-4">
-                <label for="game_type" class="form-label">Game Type</label>
-                <select class="form-select" id="game_type" name="game_type" required>
-                  <option value="">Select type</option>
-                  <option value="Home">Home</option>
-                  <option value="Away">Away</option>
-                </select>
-              </div>
-
-              <div class="col-md-4">
-                <label for="status" class="form-label">Status</label>
-                <select class="form-select" id="status" name="status" required>
-                  <option value="">Select status</option>
-                  <option value="Scheduled">Scheduled</option>
-                  <option value="Confirmed">Confirmed</option>
-                  <option value="Completed">Completed</option>
-                  <option value="Cancelled">Cancelled</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label for="gameNotes" class="form-label">Notes</label>
-              <textarea class="form-control" id="gameNotes" rows="3" placeholder="Optional notes for players or staff"></textarea>
-            </div>
-
-          </div>
-
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-success">Save Game</button>
-          </div>
-        </form>
-
-      </div>
-    </div>
-  </div>
-
-  <!-- EVENT DETAIL MODAL -->
-  <div class="modal fade" id="eventDetailModal" tabindex="-1" aria-labelledby="eventDetailModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="eventDetailModalLabel">Event Details</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-
-        <div class="modal-body">
-          <div class="row g-3">
-            <div class="col-md-6">
-              <div class="detail-box">
-                <h6>Title</h6>
-                <div id="detailTitle"></div>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="detail-box">
-                <h6>Type</h6>
-                <div id="detailType"></div>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="detail-box">
-                <h6>Date</h6>
-                <div id="detailDate"></div>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="detail-box">
-                <h6>Time</h6>
-                <div id="detailTime"></div>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="detail-box">
-                <h6>Location</h6>
-                <div id="detailLocation"></div>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="detail-box">
-                <h6>Status</h6>
-                <div id="detailStatus"></div>
-              </div>
-            </div>
-            <div class="col-md-6" id="detailEmailWrap">
-              <div class="detail-box">
-                <h6>Contact Email</h6>
-                <div id="detailEmail"></div>
-              </div>
-            </div>
-            <div class="col-md-6" id="detailNotesWrap">
-              <div class="detail-box">
-                <h6>Notes</h6>
-                <div id="detailNotes"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="modal-footer" id="eventDetailFooter">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- SEND MESSAGE MODAL -->
-  <div class="modal fade" id="sendMessageModal" tabindex="-1" aria-labelledby="sendMessageModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-
-        <div class="modal-header">
-          <h5 class="modal-title" id="sendMessageModalLabel">Send Message</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-
-        <div class="modal-body">
-          <form>
-            <div class="row mb-3">
-              <div class="col-md-6">
-                <label for="messageSubject" class="form-label">Subject</label>
-                <input type="text" class="form-control" id="messageSubject" placeholder="Enter subject">
-              </div>
-
-              <div class="col-md-6">
-                <label for="messageRecipients" class="form-label">Recipients</label>
-                <select class="form-select" id="messageRecipients">
-                  <option selected>Select group</option>
-                  <option>All Players</option>
-                  <option>Coaches</option>
-                  <option>Injured Players</option>
-                  <option>Defense Players</option>
-                  <option>Forwards</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label for="messageBody" class="form-label">Message</label>
-              <textarea class="form-control" id="messageBody" rows="5" placeholder="Write the message here"></textarea>
-            </div>
-          </form>
-        </div>
-
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary">Send Message</button>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-  <!-- DELETE GAME MODAL -->
-  <div class="modal fade" id="deleteGameModal" tabindex="-1" aria-labelledby="deleteGameModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-
-        <div class="modal-header">
-          <h5 class="modal-title" id="deleteGameModalLabel">Delete Game</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-
-        <div class="modal-body">
-          <p class="mb-2">Are you sure you want to delete this game?</p>
-          <p class="mb-0"><strong id="deleteGameName"></strong></p>
-          <p class="text-danger mt-3 mb-0">
-            This will also delete all related financial data connected to this game.
-          </p>
-        </div>
-
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <form method="POST" id="deleteGameForm">
-            <input type="hidden" name="next_page" value="schedule">
-            <button type="submit" class="btn btn-danger">Delete Game</button>
-          </form>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-  <script>
-    function openEventDetailFromCard(card) {
-      const eventType = card.dataset.eventType;
-      const title = card.dataset.title || 'N/A';
-      const date = card.dataset.date || 'N/A';
-      const time = card.dataset.time || '';
-      const location = card.dataset.location || 'N/A';
-      const status = card.dataset.status || (eventType === 'practice' ? 'Scheduled' : 'N/A');
-      const type = eventType === 'game' ? (card.dataset.type || 'Game') : 'Practice';
-      const email = card.dataset.email || 'N/A';
-      const notes = card.dataset.notes || 'None';
-      const gameId = card.dataset.gameId || '';
-
-      document.getElementById('detailTitle').textContent = title;
-      document.getElementById('detailType').textContent = type;
-      document.getElementById('detailDate').textContent = date;
-      document.getElementById('detailTime').textContent = time || 'N/A';
-      document.getElementById('detailLocation').textContent = location;
-      document.getElementById('detailStatus').textContent = status;
-      document.getElementById('detailEmail').textContent = email;
-      document.getElementById('detailNotes').textContent = notes;
-
-      const emailWrap = document.getElementById('detailEmailWrap');
-      if (eventType === 'practice') {
-        emailWrap.style.display = '';
-      } else {
-        emailWrap.style.display = 'none';
-      }
-
-      const footer = document.getElementById('eventDetailFooter');
-      if (eventType === 'game' && gameId) {
-        footer.innerHTML = `
-          <button type="button" class="btn btn-outline-danger" onclick="openDeleteGameModalDirect('${gameId}', ${JSON.stringify(title)})">
-            Delete Game
-          </button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        `;
-      } else {
-        footer.innerHTML = `
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        `;
-      }
-
-      const modal = new bootstrap.Modal(document.getElementById('eventDetailModal'));
-      modal.show();
-    }
-
-    function openEventDetailFromButton(button) {
-      const fakeCard = {
-        dataset: button.dataset
-      };
-      openEventDetailFromCard(fakeCard);
-    }
-
-    function openDeleteGameModalFromButton(button) {
-      const gameId = button.dataset.gameId;
-      const opponentName = button.dataset.opponent;
-
-      document.getElementById('deleteGameName').textContent = opponentName;
-      document.getElementById('deleteGameForm').action = `/delete_game/${gameId}`;
-
-      const deleteModal = new bootstrap.Modal(document.getElementById('deleteGameModal'));
-      deleteModal.show();
-    }
-
-    function openDeleteGameModalDirect(gameId, opponentName) {
-      const eventDetailModalEl = document.getElementById('eventDetailModal');
-      const eventDetailModal = bootstrap.Modal.getInstance(eventDetailModalEl);
-      if (eventDetailModal) {
-        eventDetailModal.hide();
-      }
-
-      document.getElementById('deleteGameName').textContent = opponentName;
-      document.getElementById('deleteGameForm').action = `/delete_game/${gameId}`;
-
-      const deleteModal = new bootstrap.Modal(document.getElementById('deleteGameModal'));
-      deleteModal.show();
-    }
-  </script>
-</body>
-</html>
+          <button type="button" class="btn-close" data-bs-dismiss="
