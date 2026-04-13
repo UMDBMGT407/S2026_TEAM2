@@ -283,7 +283,7 @@
     <div class="card p-4 card-box mb-4">
       <h3 class="section-title">General Team Finances</h3>
       <p class="mini-note">
-        Click a row to review team-wide revenue or expense entries that are not tied to one specific game, such as donations, sponsorships, equipment purchases, and operating costs.
+        Click a row to review team-wide revenue or expense entries that are not tied to one specific game or practice, such as donations, sponsorships, equipment purchases, and operating costs.
       </p>
 
       <div class="table-responsive mt-3">
@@ -331,7 +331,7 @@
     <div class="card p-4 card-box mb-4">
       <h3 class="section-title">How to Use This Page</h3>
       <div class="info-note">
-        Use the annual summary to review overall revenue, expenses, and yearly financial patterns. Use the game comparison table to compare projected and actual results for each matchup. Use General Team Finances to track team-wide items such as donations, sponsorships, equipment, and other operating costs that are not linked to one specific game.
+        Use the annual summary to review overall revenue, expenses, and yearly financial patterns. Use the game comparison table to compare projected and actual results for each matchup. Use the add-entry and add-projection forms to link finances to a game, a practice, or leave both empty for general team-wide finances.
       </div>
     </div>
 
@@ -415,20 +415,32 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
 
-        <form method="POST" action="{{ url_for('add_financial_entry') }}" onsubmit="saveReturnGameId('entry_game_id')">
+        <form method="POST" action="{{ url_for('add_financial_entry') }}" onsubmit="saveReturnLinks()">
           <div class="modal-body">
 
             <div class="row mb-3">
               <div class="col-md-6">
                 <label for="entry_game_id" class="form-label">Game</label>
                 <select class="form-select" id="entry_game_id" name="game_id">
-                  <option value="">Not linked to a specific game</option>
+                  <option value="">Not linked to a game</option>
                   {% for game in games %}
                   <option value="{{ game.game_id }}">{{ game.label }}</option>
                   {% endfor %}
                 </select>
               </div>
 
+              <div class="col-md-6">
+                <label for="entry_practice_id" class="form-label">Practice</label>
+                <select class="form-select" id="entry_practice_id" name="practice_id">
+                  <option value="">Not linked to a practice</option>
+                  {% for practice in practices %}
+                  <option value="{{ practice.practice_id }}">{{ practice.label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+            <div class="row mb-3">
               <div class="col-md-6">
                 <label for="entry_type" class="form-label">Entry Type</label>
                 <select class="form-select" id="entry_type" name="entry_type" required>
@@ -437,9 +449,7 @@
                   <option value="Expense">Expense</option>
                 </select>
               </div>
-            </div>
 
-            <div class="row mb-3">
               <div class="col-md-6">
                 <label for="entry_category_id" class="form-label">Category</label>
                 <select class="form-select" id="entry_category_id" name="category_id" required>
@@ -451,23 +461,27 @@
                   {% endfor %}
                 </select>
               </div>
-
-              <div class="col-md-6">
-                <label for="entry_amount" class="form-label">Amount</label>
-                <input type="number" step="0.01" class="form-control" id="entry_amount" name="amount" required>
-              </div>
             </div>
 
             <div class="row mb-3">
               <div class="col-md-6">
-                <label for="entry_date" class="form-label">Entry Date</label>
-                <input type="date" class="form-control" id="entry_date" name="entry_date" required>
+                <label for="entry_amount" class="form-label">Amount</label>
+                <input type="number" step="0.01" class="form-control" id="entry_amount" name="amount" required>
               </div>
 
               <div class="col-md-6">
-                <label for="entry_description" class="form-label">Description</label>
-                <input type="text" class="form-control" id="entry_description" name="description" placeholder="Optional description">
+                <label for="entry_date" class="form-label">Entry Date</label>
+                <input type="date" class="form-control" id="entry_date" name="entry_date" required>
               </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="entry_description" class="form-label">Description</label>
+              <input type="text" class="form-control" id="entry_description" name="description" placeholder="Optional description">
+            </div>
+
+            <div class="small text-muted">
+              Leave both Game and Practice empty to save this as a general team finance entry.
             </div>
 
           </div>
@@ -492,20 +506,32 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
 
-        <form method="POST" action="{{ url_for('add_financial_projection') }}" onsubmit="saveReturnGameId('projection_game_id')">
+        <form method="POST" action="{{ url_for('add_financial_projection') }}" onsubmit="saveReturnLinks()">
           <div class="modal-body">
 
             <div class="row mb-3">
               <div class="col-md-6">
                 <label for="projection_game_id" class="form-label">Game</label>
                 <select class="form-select" id="projection_game_id" name="game_id">
-                  <option value="">Not linked to a specific game</option>
+                  <option value="">Not linked to a game</option>
                   {% for game in games %}
                   <option value="{{ game.game_id }}">{{ game.label }}</option>
                   {% endfor %}
                 </select>
               </div>
 
+              <div class="col-md-6">
+                <label for="projection_practice_id" class="form-label">Practice</label>
+                <select class="form-select" id="projection_practice_id" name="practice_id">
+                  <option value="">Not linked to a practice</option>
+                  {% for practice in practices %}
+                  <option value="{{ practice.practice_id }}">{{ practice.label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+            <div class="row mb-3">
               <div class="col-md-6">
                 <label for="projection_type" class="form-label">Projection Type</label>
                 <select class="form-select" id="projection_type" name="projection_type" required>
@@ -514,9 +540,7 @@
                   <option value="Expense">Expense</option>
                 </select>
               </div>
-            </div>
 
-            <div class="row mb-3">
               <div class="col-md-6">
                 <label for="projection_category_id" class="form-label">Category</label>
                 <select class="form-select" id="projection_category_id" name="category_id" required>
@@ -528,23 +552,27 @@
                   {% endfor %}
                 </select>
               </div>
-
-              <div class="col-md-6">
-                <label for="projected_amount" class="form-label">Projected Amount</label>
-                <input type="number" step="0.01" class="form-control" id="projected_amount" name="projected_amount" required>
-              </div>
             </div>
 
             <div class="row mb-3">
               <div class="col-md-6">
-                <label for="projection_date" class="form-label">Projection Date</label>
-                <input type="date" class="form-control" id="projection_date" name="projection_date" required>
+                <label for="projected_amount" class="form-label">Projected Amount</label>
+                <input type="number" step="0.01" class="form-control" id="projected_amount" name="projected_amount" required>
               </div>
 
               <div class="col-md-6">
-                <label for="projection_notes" class="form-label">Notes</label>
-                <input type="text" class="form-control" id="projection_notes" name="notes" placeholder="Optional notes">
+                <label for="projection_date" class="form-label">Projection Date</label>
+                <input type="date" class="form-control" id="projection_date" name="projection_date" required>
               </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="projection_notes" class="form-label">Notes</label>
+              <input type="text" class="form-control" id="projection_notes" name="notes" placeholder="Optional notes">
+            </div>
+
+            <div class="small text-muted">
+              Leave both Game and Practice empty to save this as a general team projection.
             </div>
 
           </div>
@@ -638,7 +666,6 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    const generalEntriesData = {{ general_entries|tojson }};
     const annualRevenueBreakdown = {{ annual_revenue_breakdown|tojson }};
     const annualExpenseBreakdown = {{ annual_expense_breakdown|tojson }};
 
@@ -928,6 +955,7 @@
       }
 
       document.getElementById('entry_game_id').value = gameId;
+      document.getElementById('entry_practice_id').value = '';
       localStorage.setItem('returnGameId', gameId);
 
       const actualModal = new bootstrap.Modal(document.getElementById('addActualEntryModal'));
@@ -936,6 +964,9 @@
 
     function openGeneralEntryModal() {
       document.getElementById('entry_game_id').value = '';
+      document.getElementById('entry_practice_id').value = '';
+      document.getElementById('projection_game_id').value = '';
+      document.getElementById('projection_practice_id').value = '';
       localStorage.removeItem('returnGameId');
 
       const actualModal = new bootstrap.Modal(document.getElementById('addActualEntryModal'));
@@ -950,6 +981,7 @@
       }
 
       document.getElementById('projection_game_id').value = gameId;
+      document.getElementById('projection_practice_id').value = '';
       localStorage.setItem('returnGameId', gameId);
 
       const projectionModal = new bootstrap.Modal(document.getElementById('addProjectionModal'));
@@ -991,10 +1023,13 @@
       modal.show();
     }
 
-    function saveReturnGameId(selectId) {
-      const value = document.getElementById(selectId).value;
-      if (value) {
-        localStorage.setItem('returnGameId', value);
+    function saveReturnLinks() {
+      const entryGame = document.getElementById('entry_game_id') ? document.getElementById('entry_game_id').value : '';
+      const projectionGame = document.getElementById('projection_game_id') ? document.getElementById('projection_game_id').value : '';
+      const valueToStore = entryGame || projectionGame;
+
+      if (valueToStore) {
+        localStorage.setItem('returnGameId', valueToStore);
       } else {
         localStorage.removeItem('returnGameId');
       }
