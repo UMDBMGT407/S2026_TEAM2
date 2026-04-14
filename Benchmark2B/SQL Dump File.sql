@@ -269,3 +269,28 @@ INSERT INTO financial_projections (
 (18, NULL, 3, 8, 'Expense', 60.00, 'Projected supplies - Mar 16 practice', '2026-03-16');
 
 ALTER TABLE financial_projections AUTO_INCREMENT = 19;
+
+-- =========================
+-- FOR ALUMNI 
+-- =========================
+CREATE TABLE alumni (
+    alumni_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    grad_year INT,
+    phone VARCHAR(20),
+    occupation VARCHAR(100),
+    notes TEXT
+);
+
+-- =========================
+-- FOR ALUMNI DONATIONS 
+-- =========================
+CREATE TABLE donations (
+    donation_id INT AUTO_INCREMENT PRIMARY KEY,
+    alumni_id INT NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    donation_date DATE NOT NULL,
+    message TEXT,
+    FOREIGN KEY (alumni_id) REFERENCES alumni(alumni_id)
+);
