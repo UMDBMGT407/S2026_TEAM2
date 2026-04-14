@@ -278,9 +278,10 @@ CREATE TABLE alumni (
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     grad_year INT,
+    position VARCHAR(100),
     phone VARCHAR(20),
     occupation VARCHAR(100),
-    notes TEXT
+    donation_status VARCHAR(50)
 );
 
 -- =========================
