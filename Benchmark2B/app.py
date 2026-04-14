@@ -1049,14 +1049,21 @@ def practice_details(practice_id):
     finally:
         cur.close()
 
-
 @app.route('/alumni')
 @app.route('/alumni.html')
 @login_required
 @role_required('Admin', 'Coach')
 def alumni():
-    return render_template('alumni.html')
+    alumni = get_all_alumni()
+    donations = get_all_donations()
+    total_donations = sum(d['amount'] for d in donations)
 
+    return render_template(
+        'alumni.html',
+        alumni=alumni,
+        donations=donations,
+        total_donations=total_donations
+    )
 
 @app.route('/newsletters')
 @app.route('/newsletters.html')
