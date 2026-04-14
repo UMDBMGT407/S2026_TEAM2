@@ -285,6 +285,16 @@ CREATE TABLE alumni (
 );
 
 -- =========================
+-- ALUMNI SEED DATA
+-- =========================
+INSERT INTO alumni (name, email, grad_year, position, phone, occupation, donation_status) VALUES
+('Marco Rossi', 'marco.rossi@umd.edu', 2022, 'Defense', '555-111-2222', 'Financial Analyst', 'Donated'),
+('Jake Thompson', 'jake.thompson@umd.edu', 2021, 'Forward', '555-222-3333', 'Marketing Coordinator', 'Donated'),
+('Liam Connor', 'liam.connor@umd.edu', 2020, 'Goalie', '555-333-4444', 'Operations Manager', 'Donated'),
+('Jake Lake', 'jake.lake@umd.edu', 2019, 'Defense', '555-444-5555', 'Engineer', 'Has Not Donated'),
+('Chris Delgado', 'chris.delgado@umd.edu', 2018, 'Forward', '555-555-6666', 'Business Consultant', 'Has Not Donated');
+
+-- =========================
 -- FOR ALUMNI DONATIONS 
 -- =========================
 CREATE TABLE donations (
@@ -295,3 +305,11 @@ CREATE TABLE donations (
     message TEXT,
     FOREIGN KEY (alumni_id) REFERENCES alumni(alumni_id)
 );
+
+-- =========================
+-- DONATION SEED DATA
+-- =========================
+INSERT INTO donations (alumni_id, amount, donation_date, message) VALUES
+(1, 1500.00, '2026-03-28', 'Happy to support the team.'),
+(2, 2000.00, '2026-03-29', 'Proud alum donation.'),
+(3, 750.00, '2026-03-30', 'Keep it going!');
