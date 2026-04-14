@@ -291,7 +291,7 @@ def build_practice_comparisons(actual_practices, projected_practices):
 def get_all_alumni():
     cur = mysql.connection.cursor()
     cur.execute("""
-        SELECT alumni_id, name, email, grad_year, phone, occupation, notes
+        SELECT alumni_id, name, email, grad_year, position, phone, occupation, donation_status
         FROM alumni
         ORDER BY grad_year DESC, name
     """)
@@ -304,13 +304,13 @@ def get_all_alumni():
             'name': row[1],
             'email': row[2],
             'grad_year': row[3],
-            'phone': row[4],
-            'occupation': row[5],
-            'notes': row[6]
+            'position': row[4],
+            'phone': row[5],
+            'occupation': row[6],
+            'donation_status': row[7]
         }
         for row in rows
     ]
-
 
 def get_all_donations():
     cur = mysql.connection.cursor()
