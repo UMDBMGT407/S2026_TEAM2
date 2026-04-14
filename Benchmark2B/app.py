@@ -288,6 +288,53 @@ def build_practice_comparisons(actual_practices, projected_practices):
 
     return comparisons
 
+def get_all_alumni():
+    cur = mysql.connection.cursor()
+    cur.execute("""
+        SELECT alumni_id, name, email, grad_year, phone, occupation, notes
+        FROM alumni
+        ORDER BY grad_year DESC, name
+    """)
+    rows = cur.fetchall()
+    cur.close()
+
+    return [
+        {
+            'alumni_id': row[0],
+            'name': row[1],
+            'email': row[2],
+            'grad_year': row[3],
+            'phone': row[4],
+            'occupation': row[5],
+            'notes': row[6]
+        }
+        for row in rows
+    ]
+
+
+def get_all_donations():
+    cur = mysql.connection.cursor()
+    cur.execute("""
+        SELECT d.donation_id, a.name, a.grad_year, d.amount, d.donation_date, d.message
+        FROM donations d
+        JOIN alumni a ON d.alumni_id = a.alumni_id
+        ORDER BY d.donation_date DESC, d.donation_id DESC
+    """)
+    rows = cur.fetchall()
+    cur.close()
+
+    return [
+        {
+            'donation_id': row[0],
+            'name': row[1],
+            'grad_year': row[2],
+            'amount': float(row[3]),
+            'donation_date': row[4],
+            'message': row[5]
+        }
+        for row in rows
+    ]
+
 
 # ---------------------------
 # ROOT / PUBLIC ROUTES
