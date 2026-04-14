@@ -224,75 +224,85 @@
     </div>
   </main>
 
-  <div class="modal fade" id="addAlumniModal" tabindex="-1" aria-labelledby="addAlumniModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="addAlumniModalLabel">Add New Alumni</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
+<div class="modal fade" id="addAlumniModal" tabindex="-1" aria-labelledby="addAlumniModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addAlumniModalLabel">Add New Alumni</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
 
-        <div class="modal-body">
-          <form>
-            <div class="row mb-3">
-              <div class="col-md-6">
-                <label for="alumniFirstName" class="form-label">First Name</label>
-                <input type="text" class="form-control" id="alumniFirstName" placeholder="Enter first name">
-              </div>
+      <div class="modal-body">
+        <form action="{{ url_for('add_alumni') }}" method="POST">
 
-              <div class="col-md-6">
-                <label for="alumniLastName" class="form-label">Last Name</label>
-                <input type="text" class="form-control" id="alumniLastName" placeholder="Enter last name">
-              </div>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">First Name</label>
+              <input type="text" class="form-control" name="first_name" required>
             </div>
 
-            <div class="row mb-3">
-              <div class="col-md-6">
-                <label for="alumniClassYear" class="form-label">Class Year</label>
-                <input type="number" class="form-control" id="alumniClassYear" placeholder="Enter class year">
-              </div>
+            <div class="col-md-6">
+              <label class="form-label">Last Name</label>
+              <input type="text" class="form-control" name="last_name" required>
+            </div>
+          </div>
 
-              <div class="col-md-6">
-                <label for="alumniPosition" class="form-label">Former Position</label>
-                <select class="form-select" id="alumniPosition">
-                  <option selected>Select position</option>
-                  <option>Forward</option>
-                  <option>Defense</option>
-                  <option>Goalie</option>
-                </select>
-              </div>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Class Year</label>
+              <input type="number" class="form-control" name="grad_year">
             </div>
 
-            <div class="row mb-3">
-              <div class="col-md-6">
-                <label for="alumniEmail" class="form-label">Email</label>
-                <input type="email" class="form-control" id="alumniEmail" placeholder="Enter email">
-              </div>
-
-              <div class="col-md-6">
-                <label for="alumniOccupation" class="form-label">Occupation</label>
-                <input type="text" class="form-control" id="alumniOccupation" placeholder="Enter occupation">
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label for="alumniDonationStatus" class="form-label">Donation Status</label>
-              <select class="form-select" id="alumniDonationStatus">
-                <option selected>Select status</option>
-                <option>Donated</option>
-                <option>Has Not Donated</option>
+            <div class="col-md-6">
+              <label class="form-label">Former Position</label>
+              <select class="form-select" name="position">
+                <option selected>Select position</option>
+                <option>Forward</option>
+                <option>Defense</option>
+                <option>Goalie</option>
               </select>
             </div>
-          </form>
-        </div>
+          </div>
 
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-success">Save Alumni</button>
-        </div>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-control" name="email">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Occupation</label>
+              <input type="text" class="form-control" name="occupation">
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Phone Number</label>
+              <input type="text" class="form-control" name="phone">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Donation Status</label>
+            <select class="form-select" name="donation_status">
+              <option selected>Select status</option>
+              <option>Donated</option>
+              <option>Has Not Donated</option>
+            </select>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-success">Save Alumni</button>
+          </div>
+
+        </form>
       </div>
+
     </div>
   </div>
+</div>
 
   <div class="modal fade" id="newsletterModal" tabindex="-1" aria-labelledby="newsletterModalLabel" aria-hidden="true">
     <div class="modal-dialog">
