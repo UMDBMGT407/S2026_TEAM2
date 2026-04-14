@@ -118,6 +118,8 @@
                   <th>Class Year</th>
                   <th>Donation Status</th>
                   <th>Total Donated</th>
+                  <th>Message</th>
+
                 </tr>
               </thead>
               <tbody>
@@ -127,6 +129,7 @@
                   <td>{{ d.grad_year }}</td>
                   <td><span class="badge bg-success">Donated</span></td>
                   <td>${{ d.amount }}</td>
+                  <td>{{ d.message }}</td>
                 </tr>
                 {% endfor %}
               </tbody>
