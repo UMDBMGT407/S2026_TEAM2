@@ -225,11 +225,30 @@
 
           <div class="mb-3">
             <label class="form-label">Donation Status</label>
-            <select class="form-select" name="donation_status">
+            <select class="form-select" name="donation_status" id="donationStatus" onchange="toggleDonationFields()">
               <option selected>Select status</option>
               <option>Donated</option>
               <option>Has Not Donated</option>
             </select>
+          </div>
+
+                    
+          <div id="donationFields" style="display: none;">
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Donation Amount</label>
+                <input type="number" step="0.01" class="form-control" name="amount">
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Donation Date</label>
+                <input type="date" class="form-control" name="donation_date">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Donation Message</label>
+              <textarea class="form-control" name="message" rows="3"></textarea>
+            </div>
           </div>
 
           <div class="modal-footer">
@@ -270,5 +289,18 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+function toggleDonationFields() {
+    const status = document.getElementById("donationStatus").value;
+    const fields = document.getElementById("donationFields");
+
+    if (status === "Donated") {
+        fields.style.display = "block";
+    } else {
+        fields.style.display = "none";
+    }
+}
+  </script>
+  
 </body>
 </html>
