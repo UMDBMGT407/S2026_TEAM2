@@ -1480,13 +1480,12 @@ def add_alumni():
     occupation = request.form.get('occupation')
     phone = request.form.get('phone')
     donation_status = request.form.get('donation_status')
-    notes = request.form.get('notes') #DETERMINE IF WE NEED NOTES   
 
     cur = mysql.connection.cursor()
     cur.execute("""
-        INSERT INTO alumni (name, email, grad_year, phone, occupation, notes)
-        VALUES (%s, %s, %s, %s, %s, %s)
-    """, (name, email, grad_year, phone, occupation, notes))
+        INSERT INTO alumni (name, email, grad_year, position, phone, occupation, donation_status)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
+    """, (name, email, grad_year, position, phone, occupation, donation_status))
     mysql.connection.commit()
     cur.close()
 
