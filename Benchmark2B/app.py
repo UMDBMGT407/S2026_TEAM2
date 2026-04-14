@@ -13,7 +13,7 @@ app.secret_key = 'bmgt407_hockey_secret_key'
 # ---------------------------
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'your passwd'
+app.config['MYSQL_PASSWORD'] = 'AcciaioAcciaio'
 app.config['MYSQL_DB'] = 'user_management'
 
 mysql = MySQL(app)
@@ -435,6 +435,7 @@ def finances():
                 COALESCE(SUM(CASE WHEN projection_type = 'Revenue' THEN projected_amount ELSE 0 END), 0),
                 COALESCE(SUM(CASE WHEN projection_type = 'Expense' THEN projected_amount ELSE 0 END), 0)
             FROM financial_projections
+            WHERE game_id IS NOT NULL OR practice_id IS NOT NULL
         """)
         projected_row = cur.fetchone()
         projections = {
@@ -1308,6 +1309,10 @@ def add_financial_entry():
     if practice_id == '':
         practice_id = None
 
+    if game_id and practice_id:
+        flash('An entry cannot be linked to both a game and a practice.', 'danger')
+        return redirect(url_for('finances'))
+
     cur = mysql.connection.cursor()
 
     try:
@@ -1362,6 +1367,14 @@ def add_financial_projection():
         game_id = None
     if practice_id == '':
         practice_id = None
+
+    if not game_id and not practice_id:
+        flash('Projections must be linked to a game or a practice.', 'danger')
+        return redirect(url_for('finances'))
+
+    if game_id and practice_id:
+        flash('A projection cannot be linked to both a game and a practice.', 'danger')
+        return redirect(url_for('finances'))
 
     cur = mysql.connection.cursor()
 
