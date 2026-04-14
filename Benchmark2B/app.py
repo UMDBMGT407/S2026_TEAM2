@@ -1470,6 +1470,7 @@ def add_financial_projection():
 @login_required
 @role_required('Admin', 'Coach')
 def add_alumni():
+    # --- Alumni basic info ---
     first_name = request.form['first_name']
     last_name = request.form['last_name']
     name = f"{first_name} {last_name}"
@@ -1481,13 +1482,44 @@ def add_alumni():
     phone = request.form.get('phone')
     donation_status = request.form.get('donation_status')
 
+    # --- Donation fields ---
+    amount = request.form.get('amount')
+    donation_date = request.form.get('donation_date')
+    message = request.form.get('message')
+
     cur = mysql.connection.cursor()
-    cur.execute("""
-        INSERT INTO alumni (name, email, grad_year, position, phone, occupation, donation_status)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
-    """, (name, email, grad_year, position, phone, occupation, donation_status))
-    mysql.connection.commit()
-    cur.close()
+
+    try:
+        # --- Insert alumni ---
+        cur.execute("""
+            INSERT INTO alumni (name, email, grad_year, position, phone, occupation, donation_status)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (name, email, grad_year, position, phone, occupation, donation_status))
+
+        alumni_id = cur.lastrowid
+
+        # --- Insert donation ONLY if donated ---
+        if donation_status == "Donated":
+            if not amount or not donation_date:
+                flash('Please enter donation amount and date.', 'danger')
+                mysql.connection.rollback()
+                cur.close()
+                return redirect(url_for('alumni'))
+
+            cur.execute("""
+                INSERT INTO donations (alumni_id, amount, donation_date, message)
+                VALUES (%s, %s, %s, %s)
+            """, (alumni_id, amount, donation_date, message))
+
+        mysql.connection.commit()
+        flash('Alumni added successfully.', 'success')
+
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f'Error adding alumni: {e}', 'danger')
+
+    finally:
+        cur.close()
 
     return redirect(url_for('alumni'))
 
