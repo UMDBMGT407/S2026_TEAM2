@@ -7,6 +7,76 @@
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/newstyle.css') }}">
+  <!-- ADD GENERAL ENTRY MODAL -->
+<div class="modal fade" id="addGeneralEntryModal" tabindex="-1" aria-labelledby="addGeneralEntryModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="addGeneralEntryModalLabel">Add General Team Entry</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <form method="POST" action="{{ url_for('add_financial_entry') }}">
+        <div class="modal-body">
+
+          <div class="locked-field-note mb-3">
+            This entry is for general team finances only. It is not linked to a game or practice.
+          </div>
+
+          <!-- hidden empty values so backend receives no game/practice -->
+          <input type="hidden" name="game_id" value="">
+          <input type="hidden" name="practice_id" value="">
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="general_entry_type" class="form-label">Entry Type</label>
+              <select class="form-select" id="general_entry_type" name="entry_type" required>
+                <option value="">Select type</option>
+                <option value="Revenue">Revenue</option>
+                <option value="Expense">Expense</option>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label for="general_entry_category_id" class="form-label">Category</label>
+              <select class="form-select" id="general_entry_category_id" name="category_id" required>
+                <option value="">Select category</option>
+                {% for category in categories %}
+                <option value="{{ category.category_id }}">{{ category.category_name }} ({{ category.category_type }})</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="general_entry_amount" class="form-label">Amount</label>
+              <input type="number" step="0.01" class="form-control" id="general_entry_amount" name="amount" required>
+            </div>
+
+            <div class="col-md-6">
+              <label for="general_entry_date" class="form-label">Entry Date</label>
+              <input type="date" class="form-control" id="general_entry_date" name="entry_date" required>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="general_entry_description" class="form-label">Description</label>
+            <input type="text" class="form-control" id="general_entry_description" name="description" placeholder="Optional description">
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-success">Save Entry</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
@@ -109,8 +179,10 @@
       padding: 0.45em 0.7em;
     }
 
-    .action-grid .btn {
-      height: 100%;
+    .locked-field-note {
+      font-size: 0.85rem;
+      color: #6c757d;
+      margin-top: 0.5rem;
     }
   </style>
 </head>
@@ -138,20 +210,10 @@
       {% endif %}
     {% endwith %}
 
-    <div class="row g-3 mb-4 action-grid">
-      <div class="col-md-4">
+    <div class="row mb-4">
+      <div class="col-md-12">
         <button type="button" class="btn btn-dark w-100" data-bs-toggle="modal" data-bs-target="#annualSummaryModal">
           View Annual Summary
-        </button>
-      </div>
-      <div class="col-md-4">
-        <button type="button" class="btn btn-success w-100" onclick="openGeneralEntryModal()">
-          Add Actual Entry
-        </button>
-      </div>
-      <div class="col-md-4">
-        <button type="button" class="btn btn-primary w-100" onclick="openGeneralProjectionModal()">
-          Add Projection
         </button>
       </div>
     </div>
@@ -187,7 +249,7 @@
         <div class="card p-4 card-box text-center summary-card">
           <h3>Projected Expenses</h3>
           <p class="display-6 text-warning">${{ "%.2f"|format(projections.projected_expenses) }}</p>
-          <p class="mb-0">Expected future spending</p>
+          <p class="mb-0">Games and practices only</p>
         </div>
       </div>
     </div>
@@ -197,7 +259,7 @@
         <div class="card p-4 card-box h-100 text-center summary-card">
           <h3>Projected Revenue</h3>
           <p class="display-6 text-success">${{ "%.2f"|format(projections.projected_revenue) }}</p>
-          <p class="mb-0">Expected future income</p>
+          <p class="mb-0">Games and practices only</p>
         </div>
       </div>
 
@@ -214,9 +276,9 @@
     </div>
 
     <div class="card p-4 card-box mb-4">
-      <h3 class="section-title">Game Budget Comparison</h3>
+      <h3 class="section-title">Games</h3>
       <p class="mini-note">
-        Click a row to open full financial details for that game.
+        Click a game row to open that game only. Inside the modal, you can add actual entries and projections locked to that game.
       </p>
 
       <div class="table-responsive mt-3">
@@ -266,9 +328,9 @@
     </div>
 
     <div class="card p-4 card-box mb-4">
-      <h3 class="section-title">Practice Budget Comparison</h3>
+      <h3 class="section-title">Practices</h3>
       <p class="mini-note">
-        Click a row to open full financial details for that practice.
+        Click a practice row to open that practice only. Inside the modal, you can add actual entries and projections locked to that practice.
       </p>
 
       <div class="table-responsive mt-3">
@@ -318,10 +380,19 @@
     </div>
 
     <div class="card p-4 card-box mb-4">
-      <h3 class="section-title">General Team Finances</h3>
-      <p class="mini-note">
-        Click a row to review entries not linked to a specific game or practice.
-      </p>
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-2">
+        <div>
+          <h3 class="section-title mb-1">General Team Finances</h3>
+          <p class="mini-note mb-0">
+            This section contains actual entries only. No general projections.
+          </p>
+        </div>
+        <div>
+          <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addGeneralEntryModal">
+  Add General Entry
+</button>
+        </div>
+      </div>
 
       <div class="table-responsive mt-3">
         <table class="table table-striped table-bordered align-middle">
@@ -368,7 +439,7 @@
     <div class="card p-4 card-box mb-4">
       <h3 class="section-title">How to Use This Page</h3>
       <div class="info-note">
-        Review the top summary cards for the overall financial position. Click a game or practice row to open detailed actual and projected entries. Use the add entry and add projection buttons to record finances linked to a game, a practice, or leave both fields empty for general team finances.
+        Games and practices include actual entries and projections. General team finances includes actual entries only. When you open a modal from a game or practice, it is locked to that selected item.
       </div>
     </div>
 
@@ -448,12 +519,12 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
 
-        <form method="POST" action="{{ url_for('add_financial_entry') }}" onsubmit="saveReturnLinks()">
+        <form method="POST" action="{{ url_for('add_financial_entry') }}" onsubmit="enableLockedFieldsBeforeSubmit()">
           <div class="modal-body">
 
             <div class="row mb-3">
               <div class="col-md-6">
-                <label for="entry_game_id" class="form-label">Game</label>
+                <label class="form-label">Selected Game</label>
                 <select class="form-select" id="entry_game_id" name="game_id">
                   <option value="">Not linked to a game</option>
                   {% for game in games %}
@@ -463,7 +534,7 @@
               </div>
 
               <div class="col-md-6">
-                <label for="entry_practice_id" class="form-label">Practice</label>
+                <label class="form-label">Selected Practice</label>
                 <select class="form-select" id="entry_practice_id" name="practice_id">
                   <option value="">Not linked to a practice</option>
                   {% for practice in practices %}
@@ -473,7 +544,11 @@
               </div>
             </div>
 
-            <div class="row mb-3">
+            <div class="locked-field-note" id="actualEntryLockNote">
+              Use this form to add an actual financial entry.
+            </div>
+
+            <div class="row mb-3 mt-2">
               <div class="col-md-6">
                 <label for="entry_type" class="form-label">Entry Type</label>
                 <select class="form-select" id="entry_type" name="entry_type" required>
@@ -511,10 +586,6 @@
               <input type="text" class="form-control" id="entry_description" name="description" placeholder="Optional description">
             </div>
 
-            <div class="small text-muted">
-              Leave both Game and Practice empty to save this as a general team finance entry.
-            </div>
-
           </div>
 
           <div class="modal-footer">
@@ -537,12 +608,12 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
 
-        <form method="POST" action="{{ url_for('add_financial_projection') }}" onsubmit="saveReturnLinks()">
+        <form method="POST" action="{{ url_for('add_financial_projection') }}" onsubmit="enableLockedProjectionFieldsBeforeSubmit()">
           <div class="modal-body">
 
             <div class="row mb-3">
               <div class="col-md-6">
-                <label for="projection_game_id" class="form-label">Game</label>
+                <label class="form-label">Selected Game</label>
                 <select class="form-select" id="projection_game_id" name="game_id">
                   <option value="">Not linked to a game</option>
                   {% for game in games %}
@@ -552,7 +623,7 @@
               </div>
 
               <div class="col-md-6">
-                <label for="projection_practice_id" class="form-label">Practice</label>
+                <label class="form-label">Selected Practice</label>
                 <select class="form-select" id="projection_practice_id" name="practice_id">
                   <option value="">Not linked to a practice</option>
                   {% for practice in practices %}
@@ -562,7 +633,11 @@
               </div>
             </div>
 
-            <div class="row mb-3">
+            <div class="locked-field-note" id="projectionLockNote">
+              This form is used only for games and practices.
+            </div>
+
+            <div class="row mb-3 mt-2">
               <div class="col-md-6">
                 <label for="projection_type" class="form-label">Projection Type</label>
                 <select class="form-select" id="projection_type" name="projection_type" required>
@@ -598,10 +673,6 @@
             <div class="mb-3">
               <label for="projection_notes" class="form-label">Notes</label>
               <input type="text" class="form-control" id="projection_notes" name="notes" placeholder="Optional notes">
-            </div>
-
-            <div class="small text-muted">
-              Leave both Game and Practice empty to save this as a general team projection.
             </div>
 
           </div>
@@ -641,7 +712,7 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="teamEntryDetailModalLabel">Team Finance Entry</h5>
+          <h5 class="modal-title" id="teamEntryDetailModalLabel">General Team Finance Entry</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
 
@@ -723,7 +794,7 @@
 
   <script>
     const annualRevenueBreakdown = {{ annual_revenue_breakdown|tojson }};
-    const annualExpenseBreakdown = {{ annual_expense_breakdown|tojson }};
+    const annualExpenseBreakdown = {{ annualExpenseBreakdown|default(annual_expense_breakdown)|tojson }};
 
     let revenuePieChart = null;
     let expensePieChart = null;
@@ -731,16 +802,6 @@
     function money(value) {
       const num = Number(value || 0);
       return `$${num.toFixed(2)}`;
-    }
-
-    function saveReturnState(type, id) {
-      if (type && id) {
-        localStorage.setItem('financeReturnType', type);
-        localStorage.setItem('financeReturnId', id);
-      } else {
-        localStorage.removeItem('financeReturnType');
-        localStorage.removeItem('financeReturnId');
-      }
     }
 
     function buildStatusBadge(categoryType, projected, actual) {
@@ -828,7 +889,7 @@
           <td>${entry.description || ''}</td>
           <td class="${entry.entry_type === 'Revenue' ? 'text-success' : 'text-danger'}">${money(entry.amount)}</td>
           <td>
-            <form method="POST" action="/delete_financial_entry/${entry.entry_id}" onsubmit="return confirmDeleteAndReturn('${type}', ${parentId});">
+            <form method="POST" action="/delete_financial_entry/${entry.entry_id}" onsubmit="return confirm('Delete this item?');">
               <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
             </form>
           </td>
@@ -848,7 +909,7 @@
           <td>${entry.notes || ''}</td>
           <td class="${entry.projection_type === 'Revenue' ? 'text-success' : 'text-warning'}">${money(entry.projected_amount)}</td>
           <td>
-            <form method="POST" action="/delete_financial_projection/${entry.projection_id}" onsubmit="return confirmDeleteAndReturn('${type}', ${parentId});">
+            <form method="POST" action="/delete_financial_projection/${entry.projection_id}" onsubmit="return confirm('Delete this item?');">
               <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
             </form>
           </td>
@@ -857,8 +918,6 @@
     }
 
     async function openGameDetail(gameId) {
-      saveReturnState('game', gameId);
-
       const modalEl = document.getElementById('detailModal');
       const modal = new bootstrap.Modal(modalEl);
       const content = document.getElementById('detailContent');
@@ -1010,8 +1069,6 @@
     }
 
     async function openPracticeDetail(practiceId) {
-      saveReturnState('practice', practiceId);
-
       const modalEl = document.getElementById('detailModal');
       const modal = new bootstrap.Modal(modalEl);
       const content = document.getElementById('detailContent');
@@ -1162,13 +1219,47 @@
       }
     }
 
+    function setSelectState(selectId, value, disabled) {
+      const select = document.getElementById(selectId);
+      select.value = value || '';
+      select.disabled = disabled;
+    }
+
+    function resetActualEntryModal() {
+      document.getElementById('addActualEntryModalLabel').textContent = 'Add Actual Financial Entry';
+      document.getElementById('actualEntryLockNote').textContent = 'Use this form to add an actual financial entry.';
+      setSelectState('entry_game_id', '', false);
+      setSelectState('entry_practice_id', '', false);
+      document.getElementById('entry_type').value = '';
+      document.getElementById('entry_category_id').value = '';
+      document.getElementById('entry_amount').value = '';
+      document.getElementById('entry_date').value = '';
+      document.getElementById('entry_description').value = '';
+    }
+
+    function resetProjectionModal() {
+      document.getElementById('addProjectionModalLabel').textContent = 'Add Financial Projection';
+      document.getElementById('projectionLockNote').textContent = 'This form is used only for games and practices.';
+      setSelectState('projection_game_id', '', false);
+      setSelectState('projection_practice_id', '', false);
+      document.getElementById('projection_type').value = '';
+      document.getElementById('projection_category_id').value = '';
+      document.getElementById('projected_amount').value = '';
+      document.getElementById('projection_date').value = '';
+      document.getElementById('projection_notes').value = '';
+    }
+
+  
+
     function openActualEntryModalForGame(gameId) {
       const detailModal = bootstrap.Modal.getInstance(document.getElementById('detailModal'));
       if (detailModal) detailModal.hide();
 
-      document.getElementById('entry_game_id').value = gameId;
-      document.getElementById('entry_practice_id').value = '';
-      saveReturnState('game', gameId);
+      resetActualEntryModal();
+      document.getElementById('addActualEntryModalLabel').textContent = 'Add Actual Entry for Game';
+      document.getElementById('actualEntryLockNote').textContent = 'This form is locked to the selected game.';
+      setSelectState('entry_game_id', gameId, true);
+      setSelectState('entry_practice_id', '', true);
 
       new bootstrap.Modal(document.getElementById('addActualEntryModal')).show();
     }
@@ -1177,9 +1268,11 @@
       const detailModal = bootstrap.Modal.getInstance(document.getElementById('detailModal'));
       if (detailModal) detailModal.hide();
 
-      document.getElementById('entry_game_id').value = '';
-      document.getElementById('entry_practice_id').value = practiceId;
-      saveReturnState('practice', practiceId);
+      resetActualEntryModal();
+      document.getElementById('addActualEntryModalLabel').textContent = 'Add Actual Entry for Practice';
+      document.getElementById('actualEntryLockNote').textContent = 'This form is locked to the selected practice.';
+      setSelectState('entry_game_id', '', true);
+      setSelectState('entry_practice_id', practiceId, true);
 
       new bootstrap.Modal(document.getElementById('addActualEntryModal')).show();
     }
@@ -1188,9 +1281,11 @@
       const detailModal = bootstrap.Modal.getInstance(document.getElementById('detailModal'));
       if (detailModal) detailModal.hide();
 
-      document.getElementById('projection_game_id').value = gameId;
-      document.getElementById('projection_practice_id').value = '';
-      saveReturnState('game', gameId);
+      resetProjectionModal();
+      document.getElementById('addProjectionModalLabel').textContent = 'Add Projection for Game';
+      document.getElementById('projectionLockNote').textContent = 'This form is locked to the selected game.';
+      setSelectState('projection_game_id', gameId, true);
+      setSelectState('projection_practice_id', '', true);
 
       new bootstrap.Modal(document.getElementById('addProjectionModal')).show();
     }
@@ -1199,30 +1294,28 @@
       const detailModal = bootstrap.Modal.getInstance(document.getElementById('detailModal'));
       if (detailModal) detailModal.hide();
 
-      document.getElementById('projection_game_id').value = '';
-      document.getElementById('projection_practice_id').value = practiceId;
-      saveReturnState('practice', practiceId);
+      resetProjectionModal();
+      document.getElementById('addProjectionModalLabel').textContent = 'Add Projection for Practice';
+      document.getElementById('projectionLockNote').textContent = 'This form is locked to the selected practice.';
+      setSelectState('projection_game_id', '', true);
+      setSelectState('projection_practice_id', practiceId, true);
 
       new bootstrap.Modal(document.getElementById('addProjectionModal')).show();
     }
 
-    function openGeneralEntryModal() {
-      document.getElementById('entry_game_id').value = '';
-      document.getElementById('entry_practice_id').value = '';
-      saveReturnState(null, null);
-      new bootstrap.Modal(document.getElementById('addActualEntryModal')).show();
+    function enableLockedFieldsBeforeSubmit() {
+      document.getElementById('entry_game_id').disabled = false;
+      document.getElementById('entry_practice_id').disabled = false;
+      return true;
     }
 
-    function openGeneralProjectionModal() {
-      document.getElementById('projection_game_id').value = '';
-      document.getElementById('projection_practice_id').value = '';
-      saveReturnState(null, null);
-      new bootstrap.Modal(document.getElementById('addProjectionModal')).show();
+    function enableLockedProjectionFieldsBeforeSubmit() {
+      document.getElementById('projection_game_id').disabled = false;
+      document.getElementById('projection_practice_id').disabled = false;
+      return true;
     }
 
     function openDeleteGameModal(gameId, opponentName) {
-      saveReturnState(null, null);
-
       const detailModal = bootstrap.Modal.getInstance(document.getElementById('detailModal'));
       if (detailModal) detailModal.hide();
 
@@ -1233,8 +1326,6 @@
     }
 
     function openDeletePracticeModal(practiceId, practiceName) {
-      saveReturnState(null, null);
-
       const detailModal = bootstrap.Modal.getInstance(document.getElementById('detailModal'));
       if (detailModal) detailModal.hide();
 
@@ -1260,24 +1351,6 @@
       document.getElementById('teamEntryDeleteForm').action = `/delete_financial_entry/${entryId}`;
 
       new bootstrap.Modal(document.getElementById('teamEntryDetailModal')).show();
-    }
-
-    function saveReturnLinks() {
-      const entryGame = document.getElementById('entry_game_id').value;
-      const entryPractice = document.getElementById('entry_practice_id').value;
-      const projectionGame = document.getElementById('projection_game_id').value;
-      const projectionPractice = document.getElementById('projection_practice_id').value;
-
-      if (entryGame) saveReturnState('game', entryGame);
-      else if (entryPractice) saveReturnState('practice', entryPractice);
-      else if (projectionGame) saveReturnState('game', projectionGame);
-      else if (projectionPractice) saveReturnState('practice', projectionPractice);
-      else saveReturnState(null, null);
-    }
-
-    function confirmDeleteAndReturn(type, id) {
-      saveReturnState(type, id);
-      return confirm('Delete this item?');
     }
 
     function buildRevenuePieChart() {
@@ -1351,22 +1424,10 @@
       buildExpensePieChart();
     });
 
-    window.addEventListener('load', function () {
-      const savedType = localStorage.getItem('financeReturnType');
-      const savedId = localStorage.getItem('financeReturnId');
+    document.getElementById('addActualEntryModal').addEventListener('hidden.bs.modal', resetActualEntryModal);
+    document.getElementById('addProjectionModal').addEventListener('hidden.bs.modal', resetProjectionModal);
 
-      if (savedType && savedId) {
-        setTimeout(() => {
-          if (savedType === 'game') {
-            openGameDetail(savedId);
-          } else if (savedType === 'practice') {
-            openPracticeDetail(savedId);
-          }
-          localStorage.removeItem('financeReturnType');
-          localStorage.removeItem('financeReturnId');
-        }, 300);
-      }
-    });
+    // removed auto-open popup on page load
   </script>
 </body>
 </html>
