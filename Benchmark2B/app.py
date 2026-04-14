@@ -1057,12 +1057,20 @@ def alumni():
     alumni = get_all_alumni()
     donations = get_all_donations()
     total_donations = sum(d['amount'] for d in donations)
+    if donations:
+        top_donor = max(d['amount'] for d in donations)
+        avg_donation = round(total_donations / len(donations), 2)
+    else:
+        top_donor = 0
+        avg_donation = 0
 
     return render_template(
         'alumni.html',
         alumni=alumni,
         donations=donations,
-        total_donations=total_donations
+        total_donations=total_donations,
+        top_donor=top_donor,
+        avg_donation=avg_donation
     )
 
 @app.route('/newsletters')
