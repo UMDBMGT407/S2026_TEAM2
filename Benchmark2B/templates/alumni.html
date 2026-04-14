@@ -42,7 +42,7 @@
       <div class="col-md-4">
         <div class="card p-4 card-box text-center">
           <h3>Total Donations</h3>
-          <p class="display-6 text-success">$15,200</p>
+          <p class="display-6 text-success">${{ total_donations }}</p>
           <p class="mb-0">Aligned with finance report</p>
         </div>
       </div>
@@ -50,7 +50,7 @@
       <div class="col-md-4">
         <div class="card p-4 card-box text-center">
           <h3>Active Alumni</h3>
-          <p class="display-6 text-primary">42</p>
+          <p class="display-6 text-primary">{{ alumni|length }}</p>
           <p class="mb-0">Registered in the portal</p>
         </div>
       </div>
@@ -58,100 +58,55 @@
       <div class="col-md-4">
         <div class="card p-4 card-box text-center">
           <h3>Newsletter Subscribers</h3>
-          <p class="display-6 text-dark">36</p>
+          <p class="display-6 text-dark">36</p> <!-- Placeholder for actual subscriber count -->
           <p class="mb-0">Subscribed to updates</p>
         </div>
       </div>
     </div>
 
-    <ul class="nav nav-tabs mb-4" id="alumniTabs" role="tablist">
-      <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="records-tab" data-bs-toggle="tab" data-bs-target="#records-pane" type="button" role="tab">
+    <ul class="nav nav-tabs mb-4" id="alumniTabs">
+      <li class="nav-item">
+        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#records-pane">
           Alumni Records
         </button>
       </li>
-
-      <li class="nav-item" role="presentation">
-        <button class="nav-link" id="donations-tab" data-bs-toggle="tab" data-bs-target="#donations-pane" type="button" role="tab">
+      <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#donations-pane">
           Donation Summary
         </button>
       </li>
     </ul>
 
     <div class="tab-content">
-      <div class="tab-pane fade show active" id="records-pane" role="tabpanel">
+
+      <div class="tab-pane fade show active" id="records-pane">
         <div class="row g-4">
-          <div class="col-md-6">
-            <div class="card p-4 card-box h-100">
-              <div class="d-flex align-items-center mb-3">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Alumni Profile" class="profile-img me-3">
-                <div>
-                  <h4 class="mb-1">Marco Rossi</h4>
-                  <p class="mb-0">Class of 2022 • Defense</p>
-                </div>
-              </div>
-              <p><strong>Email:</strong> mrossi@email.com</p>
-              <p><strong>Occupation:</strong> Financial Analyst</p>
-              <div class="donation-box">
-                <strong>Donated:</strong> $1,500
-              </div>
-            </div>
-          </div>
 
+          {% for a in alumni %}
           <div class="col-md-6">
             <div class="card p-4 card-box h-100">
               <div class="d-flex align-items-center mb-3">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Alumni Profile" class="profile-img me-3">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" class="profile-img me-3">
                 <div>
-                  <h4 class="mb-1">Jake Thompson</h4>
-                  <p class="mb-0">Class of 2021 • Forward</p>
+                  <h4 class="mb-1">{{ a.name }}</h4>
+                  <p class="mb-0">Class of {{ a.grad_year }}</p>
+                  <p class="mb-0"><em>{{ a.position }}</em></p>
                 </div>
               </div>
-              <p><strong>Email:</strong> jthompson@email.com</p>
-              <p><strong>Occupation:</strong> Marketing Coordinator</p>
-              <div class="donation-box">
-                <strong>Donated:</strong> $2,000
-              </div>
-            </div>
-          </div>
 
-          <div class="col-md-6">
-            <div class="card p-4 card-box h-100">
-              <div class="d-flex align-items-center mb-3">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Alumni Profile" class="profile-img me-3">
-                <div>
-                  <h4 class="mb-1">Liam Connor</h4>
-                  <p class="mb-0">Class of 2020 • Goalie</p>
-                </div>
-              </div>
-              <p><strong>Email:</strong> loconnor@email.com</p>
-              <p><strong>Occupation:</strong> Operations Manager</p>
-              <div class="donation-box">
-                <strong>Donated:</strong> $750
-              </div>
-            </div>
-          </div>
+              <p><strong>Email:</strong> {{ a.email }}</p>
+              <p><strong>Occupation:</strong> {{ a.occupation }}</p>
+              <p><strong>Phone:</strong> {{ a.phone }}</p>
+              <p><strong>Donation Status:</strong> {{ a.donation_status }}</p>
 
-          <div class="col-md-6">
-            <div class="card p-4 card-box h-100">
-              <div class="d-flex align-items-center mb-3">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Alumni Profile" class="profile-img me-3">
-                <div>
-                  <h4 class="mb-1">Jake Lake</h4>
-                  <p class="mb-0">Class of 2019 • Defense</p>
-                </div>
-              </div>
-              <p><strong>Email:</strong> jekkol@email.com</p>
-              <p><strong>Occupation:</strong> Engineer</p>
-              <div class="not-donated-box">
-                <strong>Status:</strong> Has not donated
-              </div>
             </div>
           </div>
+          {% endfor %}
+
         </div>
       </div>
 
-      <div class="tab-pane fade" id="donations-pane" role="tabpanel">
+      <div class="tab-pane fade" id="donations-pane">
         <div class="card p-4 card-box mb-4">
           <h3>Donation Summary</h3>
 
@@ -166,30 +121,14 @@
                 </tr>
               </thead>
               <tbody>
+                {% for d in donations %}
                 <tr>
-                  <td>Marco Rossi</td>
-                  <td>2022</td>
+                  <td>{{ d.name }}</td>
+                  <td>{{ d.grad_year }}</td>
                   <td><span class="badge bg-success">Donated</span></td>
-                  <td>$1,500</td>
+                  <td>${{ d.amount }}</td>
                 </tr>
-                <tr>
-                  <td>Jake Thompson</td>
-                  <td>2021</td>
-                  <td><span class="badge bg-success">Donated</span></td>
-                  <td>$2,000</td>
-                </tr>
-                <tr>
-                  <td>Liam Connor</td>
-                  <td>2020</td>
-                  <td><span class="badge bg-success">Donated</span></td>
-                  <td>$750</td>
-                </tr>
-                <tr>
-                  <td>Jake Lake</td>
-                  <td>2019</td>
-                  <td><span class="badge bg-danger">No Donation</span></td>
-                  <td>$0</td>
-                </tr>
+                {% endfor %}
               </tbody>
             </table>
           </div>
@@ -199,7 +138,7 @@
           <div class="col-md-6">
             <div class="card p-4 card-box h-100">
               <h3>Donation Breakdown</h3>
-              <p><strong>Total Donations:</strong> $15,200</p>
+              <p><strong>Total Donations:</strong> ${{ total_donations }}</p>
               <p><strong>Top Donor Contribution:</strong> $2,500</p>
               <p><strong>Average Donation:</strong> $633</p>
             </div>
@@ -217,6 +156,7 @@
           </div>
         </div>
       </div>
+
     </div>
 
     <div class="mt-4">
