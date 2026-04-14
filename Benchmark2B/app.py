@@ -1463,6 +1463,35 @@ def add_financial_projection():
 
     return redirect(url_for('finances'))
 
+# --------------
+# ADD ALUMNI 
+# --------------
+@app.route('/add_alumni', methods=['POST'])
+@login_required
+@role_required('Admin', 'Coach')
+def add_alumni():
+    first_name = request.form['first_name']
+    last_name = request.form['last_name']
+    name = f"{first_name} {last_name}"
+
+    grad_year = request.form.get('grad_year')
+    position = request.form.get('position')
+    email = request.form.get('email')
+    occupation = request.form.get('occupation')
+    phone = request.form.get('phone')
+    donation_status = request.form.get('donation_status')
+    notes = request.form.get('notes') #DETERMINE IF WE NEED NOTES   
+
+    cur = mysql.connection.cursor()
+    cur.execute("""
+        INSERT INTO alumni (name, email, grad_year, phone, occupation, notes)
+        VALUES (%s, %s, %s, %s, %s, %s)
+    """, (name, email, grad_year, phone, occupation, notes))
+    mysql.connection.commit()
+    cur.close()
+
+    return redirect(url_for('alumni'))
+
 
 @app.route('/delete_financial_entry/<int:entry_id>', methods=['POST'])
 @login_required
