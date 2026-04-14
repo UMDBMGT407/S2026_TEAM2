@@ -288,11 +288,11 @@ CREATE TABLE alumni (
 -- ALUMNI SEED DATA
 -- =========================
 INSERT INTO alumni (name, email, grad_year, position, phone, occupation, donation_status) VALUES
-('Marco Rossi', 'marco.rossi@umd.edu', 2022, 'Defense', '555-111-2222', 'Financial Analyst', 'Donated'),
-('Jake Thompson', 'jake.thompson@umd.edu', 2021, 'Forward', '555-222-3333', 'Marketing Coordinator', 'Donated'),
-('Liam Connor', 'liam.connor@umd.edu', 2020, 'Goalie', '555-333-4444', 'Operations Manager', 'Donated'),
-('Jake Lake', 'jake.lake@umd.edu', 2019, 'Defense', '555-444-5555', 'Engineer', 'Has Not Donated'),
-('Chris Delgado', 'chris.delgado@umd.edu', 2018, 'Forward', '555-555-6666', 'Business Consultant', 'Has Not Donated');
+('Ethan Morales', 'ethan.morales@umd.edu', 2022, 'Forward', '301-555-1122', 'Data Analyst', 'Donated'),
+('Ryan Patel', 'ryan.patel@umd.edu', 2021, 'Defense', '301-555-2233', 'Consultant', 'Donated'),
+('Noah Kim', 'noah.kim@umd.edu', 2020, 'Goalie', '301-555-3344', 'Software Engineer', 'Donated'),
+('Lucas Bennett', 'lucas.bennett@umd.edu', 2019, 'Forward', '301-555-4455', 'Sales Manager', 'Has Not Donated'),
+('Daniel Cruz', 'daniel.cruz@umd.edu', 2018, 'Defense', '301-555-5566', 'Project Coordinator', 'Has Not Donated');
 
 -- =========================
 -- FOR ALUMNI DONATIONS 
