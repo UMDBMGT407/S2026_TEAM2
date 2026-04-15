@@ -19,11 +19,13 @@
           </a>
         </li>
 
-        <li class="nav-item">
-          <a class="nav-link {% if request.endpoint == 'admin_page' %}active{% endif %}" href="{{ url_for('admin_page') }}">
-            Dashboard
-          </a>
-        </li>
+        {% if current_user.is_authenticated and current_user.role == 'Admin' %}
+<li class="nav-item">
+  <a class="nav-link {% if request.endpoint == 'admin_page' %}active{% endif %}" href="{{ url_for('admin_page') }}">
+    Dashboard
+  </a>
+</li>
+{% endif %}
 
         <li class="nav-item">
           <a class="nav-link {% if request.endpoint == 'calendar' %}active{% endif %}" href="{{ url_for('calendar') }}">
