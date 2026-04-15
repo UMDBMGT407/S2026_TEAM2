@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Equipment Management</title>
-
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/newstyle.css') }}">
 </head>
@@ -15,20 +14,61 @@
   <section class="hero text-center">
     <div class="container">
       <h1>Equipment Management</h1>
-      <p class="mb-0">Manage team inventory and equipment orders</p>
+      <p class="mb-0">Manage team inventory and supplier orders with live database records.</p>
     </div>
   </section>
 
   <main class="container my-5">
-    <div class="row mb-4">
-      <div class="col-md-8">
-        <h2>Equipment Module</h2>
-        <p class="text-muted mb-0">Track inventory items, equipment orders, and stock levels.</p>
-      </div>
 
-      <div class="col-md-4 text-md-end mt-3 mt-md-0">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="row g-4 mb-4">
+      <div class="col-md-3">
+        <div class="card p-4 h-100">
+          <h6 class="text-muted">Inventory Items</h6>
+          <h2>{{ summary.total_items }}</h2>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card p-4 h-100">
+          <h6 class="text-muted">Total Units</h6>
+          <h2>{{ summary.total_units }}</h2>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card p-4 h-100">
+          <h6 class="text-muted">Low Stock Alerts</h6>
+          <h2>{{ summary.low_stock_count }}</h2>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card p-4 h-100">
+          <h6 class="text-muted">Open Orders</h6>
+          <h2>{{ summary.new_orders + summary.in_progress_orders }}</h2>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-4">
+      <div>
+        <h2 class="mb-1">Equipment Module</h2>
+        <p class="text-muted mb-0">Inventory reads from <code>inventory_items</code>. Orders write to <code>equipment_orders</code>.</p>
+      </div>
+      <div class="d-flex gap-2">
         <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#addItemModal">
           Add Item
+        </button>
+        <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#createOrderModal">
+          Place Order
         </button>
       </div>
     </div>
@@ -39,7 +79,6 @@
           Inventory
         </button>
       </li>
-
       <li class="nav-item" role="presentation">
         <button class="nav-link" id="orders-tab" data-bs-toggle="tab" data-bs-target="#orders-pane" type="button" role="tab">
           Orders
@@ -49,82 +88,82 @@
 
     <div class="tab-content">
       <div class="tab-pane fade show active" id="inventory-pane" role="tabpanel">
-        <div class="card p-4 card-box">
-          <div class="row mb-4">
-            <div class="col-md-6 mb-3 mb-md-0">
-              <input type="text" class="form-control" placeholder="Search equipment or category">
+        <div class="card p-4">
+          <form method="GET" action="{{ url_for('equipment') }}" class="row g-3 mb-4">
+            <div class="col-md-6">
+              <input type="text" class="form-control" name="search" placeholder="Search equipment or category" value="{{ search }}">
             </div>
-
-            <div class="col-md-3 mb-3 mb-md-0">
-              <select class="form-select">
-                <option selected>Category</option>
-                <option>Helmet</option>
-                <option>Jersey</option>
-                <option>Pads</option>
-                <option>Stick</option>
-              </select>
-            </div>
-
             <div class="col-md-3">
-              <select class="form-select">
-                <option selected>Type</option>
-                <option>New</option>
-                <option>Used</option>
-                <option>Replacement</option>
+              <select class="form-select" name="category">
+                <option value="">All Categories</option>
+                {% for category_option in ['Helmet','Jersey','Pads','Stick','Gloves','Goalie Gear','Other'] %}
+                  <option value="{{ category_option }}" {% if selected_category == category_option %}selected{% endif %}>{{ category_option }}</option>
+                {% endfor %}
               </select>
             </div>
-          </div>
+            <div class="col-md-2">
+              <select class="form-select" name="item_type">
+                <option value="">All Types</option>
+                {% for type_option in ['New','Used','Replacement'] %}
+                  <option value="{{ type_option }}" {% if selected_item_type == type_option %}selected{% endif %}>{{ type_option }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-1 d-grid">
+              <button class="btn btn-secondary" type="submit">Go</button>
+            </div>
+          </form>
 
           <div class="table-responsive">
             <table class="table table-striped table-bordered align-middle">
               <thead class="table-dark">
                 <tr>
-                  <th>Date</th>
+                  <th>ID</th>
                   <th>Category</th>
-                  <th>Description</th>
+                  <th>Item</th>
                   <th>Source</th>
                   <th>Type</th>
-                  <th>Amount</th>
+                  <th>Qty</th>
+                  <th>Reorder Level</th>
+                  <th>Unit Cost</th>
                   <th>Status</th>
                 </tr>
               </thead>
               <tbody>
+                {% for item in inventory_items %}
                 <tr>
-                  <td>03/01/2026</td>
-                  <td>Helmet</td>
-                  <td>Red Bauer Helmet</td>
-                  <td>Team Supplier</td>
-                  <td>New</td>
-                  <td>5</td>
-                  <td><span class="badge bg-success">In Stock</span></td>
+                  <td>{{ item.item_id }}</td>
+                  <td>{{ item.category }}</td>
+                  <td>
+                    <strong>{{ item.item_name }}</strong><br>
+                    <small class="text-muted">{{ item.description or 'No description provided' }}</small>
+                  </td>
+                  <td>{{ item.source or '-' }}</td>
+                  <td>{{ item.item_type }}</td>
+                  <td>{{ item.quantity }}</td>
+                  <td>{{ item.reorder_level }}</td>
+                  <td>
+                    {% if item.unit_cost is not none %}
+                      ${{ '%.2f'|format(item.unit_cost) }}
+                    {% else %}
+                      -
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if item.status == 'In Stock' %}
+                      <span class="badge bg-success">In Stock</span>
+                    {% elif item.status == 'Low Stock' %}
+                      <span class="badge bg-warning text-dark">Low Stock</span>
+                    {% else %}
+                      <span class="badge bg-danger">Out of Stock</span>
+                    {% endif %}
+                  </td>
                 </tr>
+                {% else %}
                 <tr>
-                  <td>03/03/2026</td>
-                  <td>Jersey</td>
-                  <td>Home Jerseys</td>
-                  <td>Campus Sports Store</td>
-                  <td>Replacement</td>
-                  <td>12</td>
-                  <td><span class="badge bg-success">In Stock</span></td>
+                  <td colspan="9" class="text-center text-muted">No inventory items found.</td>
                 </tr>
-                <tr>
-                  <td>03/05/2026</td>
-                  <td>Pads</td>
-                  <td>Shoulder Pads</td>
-                  <td>Online Order</td>
-                  <td>New</td>
-                  <td>8</td>
-                  <td><span class="badge bg-warning text-dark">Low Stock</span></td>
-                </tr>
-                <tr>
-                  <td>03/06/2026</td>
-                  <td>Stick</td>
-                  <td>Practice Sticks</td>
-                  <td>Team Supplier</td>
-                  <td>Used</td>
-                  <td>10</td>
-                  <td><span class="badge bg-success">In Stock</span></td>
-                </tr>
+                {% endfor %}
               </tbody>
             </table>
           </div>
@@ -132,9 +171,8 @@
       </div>
 
       <div class="tab-pane fade" id="orders-pane" role="tabpanel">
-        <div class="card p-4 card-box mb-4">
+        <div class="card p-4 mb-4">
           <h3>Current Orders</h3>
-
           <div class="table-responsive mt-3">
             <table class="table table-striped table-bordered align-middle">
               <thead class="table-dark">
@@ -143,35 +181,54 @@
                   <th>Item</th>
                   <th>Supplier</th>
                   <th>Date Ordered</th>
+                  <th>Estimated Delivery</th>
                   <th>Quantity</th>
+                  <th>Total Cost</th>
                   <th>Status</th>
+                  <th>Notes</th>
                 </tr>
               </thead>
               <tbody>
+                {% for order in orders %}
                 <tr>
-                  <td>ORD-101</td>
-                  <td>Shoulder Pads</td>
-                  <td>Online Order</td>
-                  <td>03/05/2026</td>
-                  <td>8</td>
-                  <td><span class="badge bg-warning text-dark">Pending</span></td>
+                  <td>ORD-{{ order.order_id }}</td>
+                  <td>{{ order.item_name }}</td>
+                  <td>{{ order.supplier_name }}</td>
+                  <td>{{ order.order_date or '-' }}</td>
+                  <td>{{ order.estimated_delivery_date or '-' }}</td>
+                  <td>{{ order.quantity }}</td>
+                  <td>
+                    {% if order.total_cost is not none %}
+                      ${{ '%.2f'|format(order.total_cost) }}
+                    {% else %}
+                      -
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if order.order_status == 'New Order' %}
+                      <span class="badge bg-primary">New Order</span>
+                    {% elif order.order_status == 'In Progress' %}
+                      <span class="badge bg-warning text-dark">In Progress</span>
+                    {% elif order.order_status == 'Shipped' %}
+                      <span class="badge bg-info text-dark">Shipped</span>
+                    {% elif order.order_status == 'Received' %}
+                      <span class="badge bg-success">Received</span>
+                    {% else %}
+                      <span class="badge bg-secondary">Cancelled</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <small>
+                      <strong>Customer:</strong> {{ order.customer_notes or '-' }}<br>
+                      <strong>Vendor:</strong> {{ order.vendor_notes or '-' }}
+                    </small>
+                  </td>
                 </tr>
+                {% else %}
                 <tr>
-                  <td>ORD-102</td>
-                  <td>Goalie Gloves</td>
-                  <td>Team Supplier</td>
-                  <td>03/07/2026</td>
-                  <td>2</td>
-                  <td><span class="badge bg-info text-dark">Shipped</span></td>
+                  <td colspan="9" class="text-center text-muted">No orders found.</td>
                 </tr>
-                <tr>
-                  <td>ORD-103</td>
-                  <td>Practice Jerseys</td>
-                  <td>Campus Sports Store</td>
-                  <td>03/08/2026</td>
-                  <td>15</td>
-                  <td><span class="badge bg-success">Received</span></td>
-                </tr>
+                {% endfor %}
               </tbody>
             </table>
           </div>
@@ -179,21 +236,22 @@
 
         <div class="row g-4">
           <div class="col-md-6">
-            <div class="card p-4 card-box h-100">
+            <div class="card p-4 h-100">
               <h3>Order Summary</h3>
-              <p><strong>Pending Orders:</strong> 2</p>
-              <p><strong>Shipped Orders:</strong> 1</p>
-              <p><strong>Received This Month:</strong> 3</p>
+              <p><strong>New Orders:</strong> {{ summary.new_orders }}</p>
+              <p><strong>In Progress:</strong> {{ summary.in_progress_orders }}</p>
+              <p><strong>Received:</strong> {{ summary.received_orders }}</p>
             </div>
           </div>
-
           <div class="col-md-6">
-            <div class="card p-4 card-box h-100">
+            <div class="card p-4 h-100">
               <h3>Low Stock Alerts</h3>
               <ul class="mb-0">
-                <li>Shoulder Pads below preferred stock level</li>
-                <li>Goalie gloves should be reordered soon</li>
-                <li>Replacement helmets recommended before next game</li>
+                {% for item in inventory_items if item.status != 'In Stock' %}
+                  <li>{{ item.item_name }} ({{ item.quantity }} left)</li>
+                {% else %}
+                  <li>No current low stock alerts.</li>
+                {% endfor %}
               </ul>
             </div>
           </div>
@@ -206,84 +264,108 @@
     </div>
   </main>
 
-  <div class="modal fade" id="addItemModal" tabindex="-1" aria-labelledby="addItemModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+  <!-- Add Item Modal -->
+  <div class="modal fade" id="addItemModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
       <div class="modal-content">
-
-        <div class="modal-header">
-          <h5 class="modal-title" id="addItemModalLabel">Add New Equipment Item</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-
-        <div class="modal-body">
-          <form>
-            <div class="row mb-3">
-              <div class="col-md-6">
-                <label for="itemCategory" class="form-label">Category</label>
-                <select class="form-select" id="itemCategory">
-                  <option selected>Select category</option>
-                  <option>Helmet</option>
-                  <option>Jersey</option>
-                  <option>Pads</option>
-                  <option>Stick</option>
-                  <option>Gloves</option>
-                </select>
+        <form method="POST" action="{{ url_for('add_inventory_item') }}">
+          <div class="modal-header">
+            <h5 class="modal-title">Add Inventory Item</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Item Name</label>
+              <input type="text" class="form-control" name="item_name" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Category</label>
+              <select class="form-select" name="category" required>
+                <option value="Helmet">Helmet</option>
+                <option value="Jersey">Jersey</option>
+                <option value="Pads">Pads</option>
+                <option value="Stick">Stick</option>
+                <option value="Gloves">Gloves</option>
+                <option value="Goalie Gear">Goalie Gear</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Type</label>
+              <select class="form-select" name="item_type" required>
+                <option value="New">New</option>
+                <option value="Used">Used</option>
+                <option value="Replacement">Replacement</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Description</label>
+              <input type="text" class="form-control" name="description">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Source</label>
+              <input type="text" class="form-control" name="source">
+            </div>
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Quantity</label>
+                <input type="number" class="form-control" name="quantity" min="0" value="0" required>
               </div>
-
-              <div class="col-md-6">
-                <label for="itemDescription" class="form-label">Description</label>
-                <input type="text" class="form-control" id="itemDescription" placeholder="Enter item description">
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Reorder Level</label>
+                <input type="number" class="form-control" name="reorder_level" min="0" value="3" required>
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Unit Cost</label>
+                <input type="number" class="form-control" name="unit_cost" min="0" step="0.01">
               </div>
             </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-danger" type="submit">Save Item</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 
-            <div class="row mb-3">
-              <div class="col-md-4">
-                <label for="itemSource" class="form-label">Source</label>
-                <input type="text" class="form-control" id="itemSource" placeholder="Enter supplier or source">
-              </div>
-
-              <div class="col-md-4">
-                <label for="itemType" class="form-label">Type</label>
-                <select class="form-select" id="itemType">
-                  <option selected>Select type</option>
-                  <option>New</option>
-                  <option>Used</option>
-                  <option>Replacement</option>
-                </select>
-              </div>
-
-              <div class="col-md-4">
-                <label for="itemAmount" class="form-label">Amount</label>
-                <input type="number" class="form-control" id="itemAmount" placeholder="Enter amount">
-              </div>
+  <!-- Create Order Modal -->
+  <div class="modal fade" id="createOrderModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form method="POST" action="{{ url_for('create_equipment_order') }}">
+          <div class="modal-header">
+            <h5 class="modal-title">Create Supplier Order</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Item</label>
+              <select class="form-select" name="item_id" required>
+                {% for item in inventory_items %}
+                  <option value="{{ item.item_id }}">{{ item.item_name }} ({{ item.category }})</option>
+                {% endfor %}
+              </select>
             </div>
-
-            <div class="row mb-3">
-              <div class="col-md-4">
-                <label for="itemDate" class="form-label">Date</label>
-                <input type="date" class="form-control" id="itemDate">
-              </div>
-
-              <div class="col-md-8">
-                <label for="itemNotes" class="form-label">Notes</label>
-                <input type="text" class="form-control" id="itemNotes" placeholder="Extra notes">
-              </div>
+            <div class="mb-3">
+              <label class="form-label">Supplier</label>
+              <select class="form-select" name="supplier_user_id" required>
+                <option value="4">Supplier User (supplier@umd.edu)</option>
+              </select>
             </div>
-
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="createOrderCheck">
-              <label class="form-check-label" for="createOrderCheck">
-                Create a related order for this item
-              </label>
+            <div class="mb-3">
+              <label class="form-label">Quantity</label>
+              <input type="number" class="form-control" name="quantity" min="1" required>
             </div>
-          </form>
-        </div>
-
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-success">Save Item</button>
-        </div>
-
+            <div class="mb-3">
+              <label class="form-label">Customer Notes</label>
+              <textarea class="form-control" name="customer_notes" rows="3"></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-dark" type="submit">Place Order</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
