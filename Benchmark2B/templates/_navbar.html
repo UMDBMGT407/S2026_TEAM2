@@ -43,7 +43,7 @@
           </a>
         </li>
 
-        {% if current_user.role in ['Admin', 'Coach'] %}
+        {% if current_user.is_authenticated and current_user.role in ['Admin', 'Coach'] %}
         <li class="nav-item">
           <a class="nav-link {% if request.endpoint == 'equipment' %}active{% endif %}" href="{{ url_for('equipment') }}">
             Equipment
@@ -69,7 +69,7 @@
         </li>
         {% endif %}
 
-        {% if current_user.role in ['Admin', 'Supplier'] %}
+        {% if current_user.is_authenticated and current_user.role in ['Admin', 'Supplier'] %}
         <li class="nav-item">
           <a class="nav-link {% if request.endpoint == 'supplier_page' %}active{% endif %}" href="{{ url_for('supplier_page') }}">
             Supplier
@@ -77,9 +77,11 @@
         </li>
         {% endif %}
 
+        {% if current_user.is_authenticated %}
         <li class="nav-item">
           <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
         </li>
+        {% endif %}
 
       </ul>
     </div>
