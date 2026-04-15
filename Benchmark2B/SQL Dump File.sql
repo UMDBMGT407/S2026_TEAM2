@@ -307,6 +307,75 @@ CREATE TABLE donations (
 );
 
 -- =========================
+-- EQUIPMENT / SUPPLIER MODULE
+-- =========================
+
+DROP TABLE IF EXISTS equipment_orders;
+DROP TABLE IF EXISTS inventory_items;
+
+CREATE TABLE inventory_items (
+    item_id INT AUTO_INCREMENT PRIMARY KEY,
+    item_name VARCHAR(150) NOT NULL,
+    category VARCHAR(100) NOT NULL,
+    item_type ENUM('New', 'Used', 'Replacement') NOT NULL DEFAULT 'New',
+    description VARCHAR(255),
+    source VARCHAR(150),
+    quantity INT NOT NULL DEFAULT 0,
+    reorder_level INT NOT NULL DEFAULT 3,
+    unit_cost DECIMAL(10,2) DEFAULT NULL,
+    status ENUM('In Stock', 'Low Stock', 'Out of Stock') NOT NULL DEFAULT 'In Stock',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE equipment_orders (
+    order_id INT AUTO_INCREMENT PRIMARY KEY,
+    item_id INT NOT NULL,
+    supplier_user_id INT NOT NULL,
+    quantity INT NOT NULL,
+    order_status ENUM('New Order', 'In Progress', 'Shipped', 'Received', 'Cancelled') NOT NULL DEFAULT 'New Order',
+    order_date DATE DEFAULT NULL,
+    estimated_delivery_date DATE DEFAULT NULL,
+    total_cost DECIMAL(10,2) DEFAULT NULL,
+    customer_notes VARCHAR(255) DEFAULT NULL,
+    vendor_notes VARCHAR(255) DEFAULT NULL,
+    received_to_inventory BOOLEAN NOT NULL DEFAULT FALSE,
+    created_by_user_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (item_id) REFERENCES inventory_items(item_id) ON DELETE CASCADE,
+    FOREIGN KEY (supplier_user_id) REFERENCES users(id) ON DELETE RESTRICT,
+    FOREIGN KEY (created_by_user_id) REFERENCES users(id) ON DELETE RESTRICT
+);
+
+CREATE INDEX idx_inventory_category ON inventory_items(category);
+CREATE INDEX idx_inventory_status ON inventory_items(status);
+CREATE INDEX idx_equipment_orders_status ON equipment_orders(order_status);
+CREATE INDEX idx_equipment_orders_supplier ON equipment_orders(supplier_user_id);
+
+-- =========================
+-- EQUIPMENT / SUPPLIER SEED DATA
+-- =========================
+
+INSERT INTO inventory_items
+(item_id, item_name, category, item_type, description, source, quantity, reorder_level, unit_cost, status)
+VALUES
+(1, 'Red Bauer Helmet', 'Helmet', 'New', 'Primary varsity helmet', 'Team Supplier', 5, 3, 89.99, 'In Stock'),
+(2, 'Home Jerseys', 'Jersey', 'Replacement', 'White game jerseys', 'Campus Sports Store', 12, 5, 65.00, 'In Stock'),
+(3, 'Shoulder Pads', 'Pads', 'New', 'Senior and JV shoulder pads', 'Online Order', 2, 4, 74.50, 'Low Stock'),
+(4, 'Practice Sticks', 'Stick', 'Used', 'Shared practice sticks', 'Team Supplier', 10, 4, 45.00, 'In Stock');
+
+ALTER TABLE inventory_items AUTO_INCREMENT = 5;
+
+INSERT INTO equipment_orders
+(order_id, item_id, supplier_user_id, quantity, order_status, order_date, estimated_delivery_date, total_cost, customer_notes, vendor_notes, received_to_inventory, created_by_user_id)
+VALUES
+(1, 3, 4, 8, 'New Order', '2026-04-10', NULL, NULL, 'Need before next away game.', NULL, FALSE, 1),
+(2, 1, 4, 4, 'In Progress', '2026-04-08', '2026-04-18', 359.96, 'Match current helmet model.', 'Awaiting final shipping pickup.', FALSE, 1),
+(3, 2, 4, 15, 'Received', '2026-04-01', '2026-04-07', 975.00, 'Practice jersey refresh.', 'Delivered and signed for.', TRUE, 1);
+
+ALTER TABLE equipment_orders AUTO_INCREMENT = 4;
+
+
+-- =========================
 -- DONATION SEED DATA
 -- =========================
 INSERT INTO donations (alumni_id, amount, donation_date, message) VALUES
