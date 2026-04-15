@@ -99,10 +99,23 @@
                 </div>
               </div>
 
-              <p><strong>Email:</strong> {{ a.email }}</p>
-              <p><strong>Occupation:</strong> {{ a.occupation }}</p>
-              <p><strong>Phone:</strong> {{ a.phone }}</p>
-              <p><strong>Donation Status:</strong> {{ a.donation_status }}</p>
+<p><strong>Email:</strong> {{ a.email }}</p>
+<p><strong>Occupation:</strong> {{ a.occupation }}</p>
+<p><strong>Phone:</strong> {{ a.phone }}</p>
+<p><strong>Donation Status:</strong> {{ a.donation_status }}</p>
+
+<div class="d-flex gap-2 mt-3">
+  <button type="button" class="btn btn-sm btn-outline-primary"
+          data-bs-toggle="modal"
+          data-bs-target="#editAlumniModal{{ a.alumni_id }}">
+    Edit
+  </button>
+
+  <form method="POST" action="/delete_alumni/{{ a.alumni_id }}"
+        onsubmit="return confirm('Are you sure you want to delete {{ a.name }}?')">
+    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+  </form>
+</div>
             </div>
           </div>
           {% endfor %}
