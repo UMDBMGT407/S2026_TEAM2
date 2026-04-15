@@ -2192,6 +2192,43 @@ def delete_user(user_id):
         mysql.connection.rollback()
         return jsonify(error=str(e)), 400
 
+@app.route('/change_password', methods=['POST'])
+@login_required
+def change_password():
+    current_password = request.form.get('current_password', '')
+    new_password = request.form.get('new_password', '').strip()
+    confirm_password = request.form.get('confirm_password', '').strip()
+
+    if not current_password or not new_password or not confirm_password:
+        flash('All password fields are required.', 'danger')
+        return redirect(url_for('home'))
+
+    if new_password != confirm_password:
+        flash('New passwords do not match.', 'danger')
+        return redirect(url_for('home'))
+
+    if len(new_password) < 6:
+        flash('New password must be at least 6 characters.', 'danger')
+        return redirect(url_for('home'))
+
+    if not check_password_hash(current_user.password, current_password):
+        flash('Current password is incorrect.', 'danger')
+        return redirect(url_for('home'))
+
+    cur = mysql.connection.cursor()
+    try:
+        hashed = generate_password_hash(new_password)
+        cur.execute("UPDATE users SET password = %s WHERE id = %s",
+                    (hashed, current_user.id))
+        mysql.connection.commit()
+        flash('Password changed successfully.', 'success')
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f'Could not change password: {e}', 'danger')
+    finally:
+        cur.close()
+
+    return redirect(url_for('home'))
 
 # ---------------------------
 # ERROR HANDLERS
