@@ -2042,11 +2042,22 @@ def add_alumni():
                 VALUES (%s, %s, %s, %s)
             """, (alumni_id, amount, donation_date, message))
 
+            cur.execute("""
+                SELECT category_id FROM financial_categories
+                WHERE category_name = 'Donation' AND category_type = 'Revenue'
+                LIMIT 1
+            """)
+            donation_category = cur.fetchone()
+            if not donation_category:
+                raise Exception("Donation category not found in financial_categories table.")
+            donation_category_id = donation_category[0]
+
             description = f"Alumni donation from {name}"
             cur.execute("""
-                INSERT INTO financial_entries (game_id, practice_id, category_id, entry_type, amount, description, entry_date)
+                INSERT INTO financial_entries
+                (game_id, practice_id, category_id, entry_type, amount, description, entry_date)
                 VALUES (NULL, NULL, %s, 'Revenue', %s, %s, %s)
-            """, (2, amount, description, donation_date))
+            """, (donation_category_id, amount, description, donation_date))
 
         mysql.connection.commit()
         flash('Alumni added successfully.', 'success')
