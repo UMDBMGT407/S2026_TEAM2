@@ -155,12 +155,17 @@
         </div>
 
         <div class="col-md-3 text-md-end">
-          <div class="d-inline-block text-start">
+          <div class="d-flex justify-content-md-end align-items-center gap-3 flex-wrap">
+            <div class="text-start">
             <div class="fw-semibold">Account Name</div>
-            <div>Supplier</div>
+              <div>Supplier</div>
+            </div>
+            <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">
+            Logout
+            </a>
           </div>
         </div>
-
+        
       </div>
     </div>
   </header>
