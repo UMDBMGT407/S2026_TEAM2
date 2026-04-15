@@ -2257,6 +2257,9 @@ def get_users():
 @login_required
 @role_required('Admin')
 def delete_user(user_id):
+    if str(user_id) == str(current_user.id):
+        return jsonify(error='You cannot delete your own account.'), 400
+
     try:
         cur = mysql.connection.cursor()
         cur.execute("DELETE FROM users WHERE id = %s", (user_id,))
