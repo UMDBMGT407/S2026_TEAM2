@@ -5,6 +5,10 @@ USE user_management;
 
 SET FOREIGN_KEY_CHECKS = 0;
 
+DROP TABLE IF EXISTS donations;
+DROP TABLE IF EXISTS alumni;
+DROP TABLE IF EXISTS equipment_orders;
+DROP TABLE IF EXISTS inventory_items;
 DROP TABLE IF EXISTS financial_projections;
 DROP TABLE IF EXISTS financial_entries;
 DROP TABLE IF EXISTS financial_categories;
@@ -12,6 +16,8 @@ DROP TABLE IF EXISTS practices;
 DROP TABLE IF EXISTS games;
 DROP TABLE IF EXISTS players;
 DROP TABLE IF EXISTS users;
+
+SET FOREIGN_KEY_CHECKS = 1;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
