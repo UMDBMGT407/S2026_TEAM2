@@ -883,9 +883,12 @@ def create_equipment_order():
 @login_required
 @role_required('Admin', 'Supplier')
 def supplier_page():
-    supplier_user_id = current_user.id if current_user.role == 'Supplier' else 4
+    if current_user.role == 'Supplier':
+        supplier_user_id = current_user.id
+        orders = get_equipment_orders_for_supplier(supplier_user_id)
+    else:
+        orders = get_equipment_orders_for_admin()
 
-    orders = get_equipment_orders_for_supplier(supplier_user_id)
     summary = get_equipment_summary()
 
     return render_template(
