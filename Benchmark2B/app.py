@@ -765,7 +765,9 @@ def schedule():
 @login_required
 @role_required('Admin', 'Coach', 'Player')
 def calendar():
-    return render_template('calendar.html')
+    games = get_all_games()
+    practices = get_all_practices()
+    return render_template('calendar.html', games=games, practices=practices)
 
 
 @app.route('/roster')
