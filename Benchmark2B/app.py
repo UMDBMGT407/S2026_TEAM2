@@ -297,6 +297,7 @@ def get_all_players():
     try:
         cur.execute("""
             SELECT
+                p.player_id,
                 p.jersey_number,
                 u.name,
                 p.position,
@@ -313,13 +314,14 @@ def get_all_players():
 
         return [
             {
-                'jersey_number': row[0],
-                'name': row[1],
-                'position': row[2],
-                'year': row[3],
-                'injured': bool(row[4]),
-                'email': row[5],
-                'phone': row[6],
+                'player_id': row[0],
+                'jersey_number': row[1],
+                'name': row[2],
+                'position': row[3],
+                'year': row[4],
+                'injured': bool(row[5]),
+                'email': row[6],
+                'phone': row[7],
             }
             for row in rows
         ]
@@ -1535,6 +1537,65 @@ def newsletters():
 # ---------------------------
 # ADD PLAYER
 # ---------------------------
+@app.route('/update_player/<int:player_id>', methods=['POST'])
+@login_required
+@role_required('Admin', 'Coach')
+def update_player(player_id):
+    name = request.form.get('name', '').strip()
+    jersey_number = request.form.get('jersey_number', '').strip()
+    position = request.form.get('position', '').strip()
+    year = request.form.get('year', '').strip()
+    injured = 1 if request.form.get('injured') in ('1', 'true', 'True', 'yes', 'on') else 0
+    email = request.form.get('email', '').strip()
+    phone = request.form.get('phone', '').strip()
+
+    if not name or not position or not year or not email:
+        flash('Please fill in all required fields.', 'danger')
+        return redirect(url_for('roster'))
+
+    if jersey_number == '':
+        jersey_number = None
+
+    cur = mysql.connection.cursor()
+
+    try:
+        cur.execute("SELECT user_id FROM players WHERE player_id = %s", (player_id,))
+        row = cur.fetchone()
+
+        if not row:
+            flash('Player not found.', 'danger')
+            cur.close()
+            return redirect(url_for('roster'))
+
+        user_id = row[0]
+
+        cur.execute("""
+            UPDATE users
+            SET name = %s,
+                email = %s
+            WHERE id = %s
+        """, (name, email, user_id))
+
+        cur.execute("""
+            UPDATE players
+            SET jersey_number = %s,
+                position = %s,
+                year = %s,
+                injured = %s,
+                phone = %s
+            WHERE player_id = %s
+        """, (jersey_number, position, year, injured, phone, player_id))
+
+        mysql.connection.commit()
+        flash('Player updated successfully.', 'success')
+
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f'Could not update player: {e}', 'danger')
+    finally:
+        cur.close()
+
+    return redirect(url_for('roster'))
 @app.route('/add_player', methods=['POST'])
 @login_required
 @role_required('Admin', 'Coach')
@@ -1581,7 +1642,6 @@ def add_player():
         cur.close()
 
     return redirect(url_for('roster'))
-
 
 # ---------------------------
 # ADD GAME / PRACTICE
