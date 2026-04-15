@@ -569,8 +569,18 @@ def root():
 @app.route('/index')
 @app.route('/index.html')
 def public_page():
-    return render_template('index.html')
+    games = get_all_games()
+    players = get_all_players()
 
+    upcoming_games = [g for g in games if not g['in_results']]
+    public_players = players[:8]
+
+    return render_template(
+        'index.html',
+        upcoming_games=upcoming_games,
+        public_players=public_players
+
+    )
 
 # ---------------------------
 # AUTH ROUTES
