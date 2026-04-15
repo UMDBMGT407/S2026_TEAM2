@@ -999,6 +999,166 @@
       modal.show();
     }
   </script>
+<!-- EDIT GAME MODAL -->
+<div class="modal fade" id="editGameModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Game</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="editGameForm" method="POST" action="">
+        <div class="modal-body">
 
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Opponent</label>
+              <input type="text" class="form-control" name="opponent" id="editGameOpponent" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Location</label>
+              <input type="text" class="form-control" name="location" id="editGameLocation" required>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <label class="form-label">Date</label>
+              <input type="date" class="form-control" name="game_date" id="editGameDate" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Game Type</label>
+              <select class="form-select" name="game_type" id="editGameType">
+                <option value="Home">Home</option>
+                <option value="Away">Away</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Status</label>
+              <select class="form-select" name="status" id="editGameStatus">
+                <option value="Scheduled">Scheduled</option>
+                <option value="Confirmed">Confirmed</option>
+                <option value="Completed">Completed</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Projected Cost</label>
+              <input type="number" step="0.01" class="form-control" name="projected_cost" id="editGameProjectedCost">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Notes</label>
+            <textarea class="form-control" name="notes" id="editGameNotes" rows="3"></textarea>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-warning">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT PRACTICE MODAL -->
+<div class="modal fade" id="editPracticeModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Practice</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="editPracticeForm" method="POST" action="">
+        <div class="modal-body">
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Title</label>
+              <input type="text" class="form-control" name="title" id="editPracticeTitle" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Location</label>
+              <input type="text" class="form-control" name="location" id="editPracticeLocation" required>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <label class="form-label">Date</label>
+              <input type="date" class="form-control" name="practice_date" id="editPracticeDate" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Time</label>
+              <input type="time" class="form-control" name="practice_time" id="editPracticeTime" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Status</label>
+              <select class="form-select" name="status" id="editPracticeStatus">
+                <option value="Scheduled">Scheduled</option>
+                <option value="Confirmed">Confirmed</option>
+                <option value="Completed">Completed</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Contact Email</label>
+              <input type="email" class="form-control" name="contact_email" id="editPracticeEmail">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Projected Cost</label>
+              <input type="number" step="0.01" class="form-control" name="projected_cost" id="editPracticeProjectedCost">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Notes</label>
+            <textarea class="form-control" name="notes" id="editPracticeNotes" rows="3"></textarea>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-warning">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openEditGameModal(btn) {
+    document.getElementById('editGameForm').action = '/edit_game/' + btn.getAttribute('data-game-id');
+    document.getElementById('editGameOpponent').value = btn.getAttribute('data-opponent');
+    document.getElementById('editGameDate').value = btn.getAttribute('data-date');
+    document.getElementById('editGameLocation').value = btn.getAttribute('data-location');
+    document.getElementById('editGameType').value = btn.getAttribute('data-type');
+    document.getElementById('editGameStatus').value = btn.getAttribute('data-status');
+    document.getElementById('editGameProjectedCost').value = btn.getAttribute('data-projected-cost');
+    document.getElementById('editGameNotes').value = btn.getAttribute('data-notes');
+    new bootstrap.Modal(document.getElementById('editGameModal')).show();
+  }
+
+  function openEditPracticeModal(btn) {
+    document.getElementById('editPracticeForm').action = '/edit_practice/' + btn.getAttribute('data-practice-id');
+    document.getElementById('editPracticeTitle').value = btn.getAttribute('data-title');
+    document.getElementById('editPracticeDate').value = btn.getAttribute('data-date');
+    document.getElementById('editPracticeTime').value = btn.getAttribute('data-time');
+    document.getElementById('editPracticeLocation').value = btn.getAttribute('data-location');
+    document.getElementById('editPracticeStatus').value = btn.getAttribute('data-status');
+    document.getElementById('editPracticeEmail').value = btn.getAttribute('data-email');
+    document.getElementById('editPracticeProjectedCost').value = btn.getAttribute('data-projected-cost');
+    document.getElementById('editPracticeNotes').value = btn.getAttribute('data-notes');
+    new bootstrap.Modal(document.getElementById('editPracticeModal')).show();
+  }
+</script>
 </body>
 </html>
