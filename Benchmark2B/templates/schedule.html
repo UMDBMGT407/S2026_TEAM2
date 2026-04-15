@@ -293,40 +293,57 @@
                   {% if practice.projected_cost is not none %}${{ "%.2f"|format(practice.projected_cost) }}{% else %}Not entered{% endif %}
                 </p>
 
-                <div class="card-actions" onclick="event.stopPropagation();">
-                  <button
-                    type="button"
-                    class="btn btn-outline-primary btn-sm"
-                    onclick="openEventDetailFromButton(this)"
-                    data-event-type="practice"
-                    data-practice-id="{{ practice.practice_id }}"
-                    data-title="{{ practice.title }}"
-                    data-date="{{ practice.practice_date }}"
-                    data-time="{{ practice.practice_time }}"
-                    data-location="{{ practice.location }}"
-                    data-email="{{ practice.contact_email or 'N/A' }}"
-                    data-notes="{{ practice.notes or 'None' }}"
-                    data-status="{{ practice.status }}"
-                    data-projected-cost="{{ practice.projected_cost if practice.projected_cost is not none else '' }}"
-                    data-actual-cost="{{ practice.actual_cost if practice.actual_cost is not none else '' }}"
-                  >
-                    View Details
-                  </button>
+             <div class="card-actions" onclick="event.stopPropagation();">
+  <button
+    type="button"
+    class="btn btn-outline-primary btn-sm"
+    onclick="openEventDetailFromButton(this)"
+    data-event-type="practice"
+    data-practice-id="{{ practice.practice_id }}"
+    data-title="{{ practice.title }}"
+    data-date="{{ practice.practice_date }}"
+    data-time="{{ practice.practice_time }}"
+    data-location="{{ practice.location }}"
+    data-email="{{ practice.contact_email or 'N/A' }}"
+    data-notes="{{ practice.notes or 'None' }}"
+    data-status="{{ practice.status }}"
+    data-projected-cost="{{ practice.projected_cost if practice.projected_cost is not none else '' }}"
+    data-actual-cost="{{ practice.actual_cost if practice.actual_cost is not none else '' }}"
+  >
+    View Details
+  </button>
 
-                  <form method="POST" action="{{ url_for('move_practice_to_results', practice_id=practice.practice_id) }}">
-                    <button type="submit" class="btn btn-outline-success btn-sm">Move to Results</button>
-                  </form>
+  <button
+    type="button"
+    class="btn btn-outline-warning btn-sm"
+    data-practice-id="{{ practice.practice_id }}"
+    data-title="{{ practice.title }}"
+    data-date="{{ practice.practice_date }}"
+    data-time="{{ practice.practice_time }}"
+    data-location="{{ practice.location }}"
+    data-email="{{ practice.contact_email or '' }}"
+    data-notes="{{ practice.notes or '' }}"
+    data-status="{{ practice.status }}"
+    data-projected-cost="{{ practice.projected_cost if practice.projected_cost is not none else '' }}"
+    onclick="openEditPracticeModal(this)"
+  >
+    Edit
+  </button>
 
-                  <button
-                    type="button"
-                    class="btn btn-outline-danger btn-sm"
-                    data-practice-id="{{ practice.practice_id }}"
-                    data-title="{{ practice.title }}"
-                    onclick="openDeletePracticeModalFromButton(this)"
-                  >
-                    Delete
-                  </button>
-                </div>
+  <form method="POST" action="{{ url_for('move_practice_to_results', practice_id=practice.practice_id) }}">
+    <button type="submit" class="btn btn-outline-success btn-sm">Move to Results</button>
+  </form>
+
+  <button
+    type="button"
+    class="btn btn-outline-danger btn-sm"
+    data-practice-id="{{ practice.practice_id }}"
+    data-title="{{ practice.title }}"
+    onclick="openDeletePracticeModalFromButton(this)"
+  >
+    Delete
+  </button>
+</div>
               </div>
             </div>
             {% endfor %}
