@@ -2021,6 +2021,24 @@ def edit_alumni(alumni_id):
 
     return redirect(url_for('alumni'))
 
+@app.route('/delete_alumni/<int:alumni_id>', methods=['POST'])
+@login_required
+@role_required('Admin', 'Coach')
+def delete_alumni(alumni_id):
+    cur = mysql.connection.cursor()
+    try:
+        cur.execute("DELETE FROM donations WHERE alumni_id = %s", (alumni_id,))
+        cur.execute("DELETE FROM alumni WHERE alumni_id = %s", (alumni_id,))
+        mysql.connection.commit()
+        flash('Alumni record deleted successfully.', 'success')
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f'Could not delete alumni: {e}', 'danger')
+    finally:
+        cur.close()
+
+    return redirect(url_for('alumni'))
+
 @app.route('/delete_financial_entry/<int:entry_id>', methods=['POST'])
 @login_required
 @role_required('Admin', 'Coach')
