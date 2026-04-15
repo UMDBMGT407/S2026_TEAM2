@@ -121,44 +121,56 @@
         </div>
       </div>
 
-      <div class="tab-pane fade" id="past-pane" role="tabpanel">
-        <div class="card p-4 card-box">
-          <h3 class="mb-3">Archived Newsletters</h3>
+     <div class="tab-pane fade" id="past-pane" role="tabpanel">
+  <div class="card p-4 card-box">
+    <h3 class="mb-3">Archived Newsletters</h3>
 
-          <div class="table-responsive">
-            <table class="table table-striped table-bordered align-middle">
-              <thead class="table-dark">
-                <tr>
-                  <th>Date</th>
-                  <th>Title</th>
-                  <th>Attachment</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>03/2026</td>
-                  <td>Spring Schedule Update</td>
-                  <td>spring_schedule.pdf</td>
-                  <td><span class="badge bg-success">Sent</span></td>
-                </tr>
-                <tr>
-                  <td>02/2026</td>
-                  <td>Team Fundraising News</td>
-                  <td>fundraising_flyer.pdf</td>
-                  <td><span class="badge bg-success">Sent</span></td>
-                </tr>
-                <tr>
-                  <td>01/2026</td>
-                  <td>Season Kickoff Announcement</td>
-                  <td>None</td>
-                  <td><span class="badge bg-success">Sent</span></td>
-                </tr>
-              </tbody>
-            </table>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
           </div>
-        </div>
-      </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="table-responsive">
+      <table class="table table-striped table-bordered align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>Date</th>
+            <th>Title</th>
+            <th>Content</th>
+            <th>Author</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for n in newsletters %}
+          <tr>
+            <td>{{ n.created_at.strftime('%m/%Y') }}</td>
+            <td>{{ n.title }}</td>
+            <td>{{ n.content[:100] }}{% if n.content|length > 100 %}...{% endif %}</td>
+            <td>{{ n.author }}</td>
+            <td>
+              <form method="POST" action="/delete_newsletter/{{ n.newsletter_id }}"
+                    onsubmit="return confirm('Delete this newsletter?')">
+                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="5" class="text-center">No newsletters created yet.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
     </div>
 
     <div class="mt-4">
