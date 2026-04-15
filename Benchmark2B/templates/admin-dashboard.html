@@ -22,36 +22,48 @@
 
   <main class="container my-5">
     <div class="row g-4">
+
       <div class="col-md-4">
         <div class="card p-4 card-box text-center">
           <h3>Active Players</h3>
-          <p class="display-6">15</p>
-          <p>3 injured • 12 active</p>
+          <p class="display-6">{{ stats.total_players }}</p>
+          <p>{{ stats.injured_players }} injured &bull; {{ stats.active_players }} active</p>
         </div>
       </div>
 
       <div class="col-md-4">
         <div class="card p-4 card-box text-center">
           <h3>Upcoming Games</h3>
-          <p class="display-6">3</p>
-          <p>Next game this Friday</p>
+          <p class="display-6">{{ stats.upcoming_games }}</p>
+          <p>
+            {% if stats.next_game_date %}
+              Next: {{ stats.next_game_opponent }} on {{ stats.next_game_date.strftime('%A, %b %d') }}
+            {% else %}
+              No upcoming games scheduled
+            {% endif %}
+          </p>
         </div>
       </div>
 
       <div class="col-md-4">
         <div class="card p-4 card-box text-center">
           <h3>Inventory Items</h3>
-          <p class="display-6">32</p>
-          <p>2 pending orders</p>
+          <p class="display-6">{{ stats.total_inventory_items }}</p>
+          <p>{{ stats.pending_orders }} pending order{{ 's' if stats.pending_orders != 1 else '' }}</p>
         </div>
       </div>
+
     </div>
 
     <div class="row g-4 mt-1">
+
       <div class="col-md-4">
         <div class="card p-4 card-box text-center">
           <h3>Total Revenue</h3>
-          <p class="display-6 text-success">$15,200</p>
+          <p class="display-6 text-success">${{ "%.0f"|format(stats.total_revenue) | int | string | replace(",", "") }}
+            {%- set rev = stats.total_revenue | int -%}
+            ${{ "{:,.0f}".format(stats.total_revenue) }}
+          </p>
           <p>Alumni donations and ticket sales</p>
         </div>
       </div>
@@ -59,29 +71,32 @@
       <div class="col-md-4">
         <div class="card p-4 card-box text-center">
           <h3>Available Funds</h3>
-          <p class="display-6 text-success">$5,350</p>
-          <p>Alumni donations and ticket sales</p>
+          <p class="display-6 text-success">${{ "{:,.0f}".format(stats.net_balance) }}</p>
+          <p>Revenue minus expenses</p>
         </div>
       </div>
 
       <div class="col-md-4">
         <div class="card p-4 card-box text-center">
           <h3>Total Expenses</h3>
-          <p class="display-6 text-danger">$9,850</p>
+          <p class="display-6 text-danger">${{ "{:,.0f}".format(stats.total_expenses) }}</p>
           <p>Equipment and facility costs</p>
         </div>
       </div>
+
     </div>
 
     <div class="row g-4 mt-1">
+
       <div class="col-md-12">
         <div class="card p-4 card-box h-100">
           <h3>Recent Activity</h3>
           <ul class="mt-3">
-            <li>New player added to roster</li>
-            <li>Schedule updated for next week</li>
-            <li>Equipment order submitted</li>
-            <li>Alumni donation recorded</li>
+            {% for activity in stats.recent_activity %}
+              <li>{{ activity }}</li>
+            {% else %}
+              <li>No recent activity found.</li>
+            {% endfor %}
           </ul>
         </div>
       </div>
@@ -94,7 +109,7 @@
               <a href="{{ url_for('roster') }}" class="module-link roster-bg">Roster / Player Information</a>
             </div>
             <div class="col-12">
-              <a href="{{ url_for('schedule') }}" class="module-link schedule-bg">Scheduling & Notifications</a>
+              <a href="{{ url_for('schedule') }}" class="module-link schedule-bg">Scheduling &amp; Notifications</a>
             </div>
             <div class="col-12">
               <a href="{{ url_for('equipment') }}" class="module-link equipment-bg">Inventory Management</a>
@@ -118,20 +133,21 @@
 
           <div class="mb-3 p-4 rounded" style="background:#a61919; color:white;">
             <h4>Predicted Spend</h4>
-            <p class="display-6 text-center">$17,850</p>
+            <p class="display-6 text-center">${{ "{:,.0f}".format(stats.projected_expenses) }}</p>
           </div>
 
           <div class="mb-3 p-4 rounded" style="background:#b8a315; color:white;">
             <h4>Actual Spend</h4>
-            <p class="display-6 text-center">$9,850</p>
+            <p class="display-6 text-center">${{ "{:,.0f}".format(stats.total_expenses) }}</p>
           </div>
 
           <div class="p-4 rounded" style="background:black; color:white;">
             <h4>Variance</h4>
-            <p class="display-6 text-center">$8,000</p>
+            <p class="display-6 text-center">${{ "{:,.0f}".format(stats.budget_variance) }}</p>
           </div>
         </div>
       </div>
+
     </div>
   </main>
 
