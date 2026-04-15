@@ -69,6 +69,228 @@ def role_required(*roles):
         return decorated_view
     return wrapper
 
+# ---------------------------
+# EQUIPMENT / SUPPLIER HELPERS
+# ---------------------------
+def compute_inventory_status(quantity, reorder_level):
+    try:
+        quantity = int(quantity)
+        reorder_level = int(reorder_level)
+    except (TypeError, ValueError):
+        return 'Out of Stock'
+
+    if quantity <= 0:
+        return 'Out of Stock'
+    if quantity <= reorder_level:
+        return 'Low Stock'
+    return 'In Stock'
+
+
+def get_inventory_items(search='', category='', item_type=''):
+    cur = mysql.connection.cursor()
+    try:
+        sql = """
+            SELECT
+                item_id,
+                item_name,
+                category,
+                item_type,
+                description,
+                source,
+                quantity,
+                reorder_level,
+                unit_cost,
+                status,
+                created_at
+            FROM inventory_items
+            WHERE 1=1
+        """
+        params = []
+
+        if search:
+            sql += " AND (item_name LIKE %s OR description LIKE %s OR category LIKE %s OR source LIKE %s)"
+            like_value = f"%{search}%"
+            params.extend([like_value, like_value, like_value, like_value])
+
+        if category:
+            sql += " AND category = %s"
+            params.append(category)
+
+        if item_type:
+            sql += " AND item_type = %s"
+            params.append(item_type)
+
+        sql += " ORDER BY created_at DESC, item_name ASC"
+
+        cur.execute(sql, tuple(params))
+        rows = cur.fetchall()
+
+        return [
+            {
+                'item_id': row[0],
+                'item_name': row[1],
+                'category': row[2],
+                'item_type': row[3],
+                'description': row[4],
+                'source': row[5],
+                'quantity': row[6],
+                'reorder_level': row[7],
+                'unit_cost': float(row[8]) if row[8] is not None else None,
+                'status': row[9],
+                'created_at': row[10]
+            }
+            for row in rows
+        ]
+    finally:
+        cur.close()
+
+
+def get_equipment_orders_for_admin():
+    cur = mysql.connection.cursor()
+    try:
+        cur.execute("""
+            SELECT
+                eo.order_id,
+                eo.item_id,
+                ii.item_name,
+                ii.category,
+                eo.quantity,
+                eo.order_status,
+                eo.order_date,
+                eo.estimated_delivery_date,
+                eo.total_cost,
+                eo.customer_notes,
+                eo.vendor_notes,
+                u.name AS supplier_name,
+                u.email AS supplier_email,
+                eo.received_to_inventory
+            FROM equipment_orders eo
+            JOIN inventory_items ii ON eo.item_id = ii.item_id
+            JOIN users u ON eo.supplier_user_id = u.id
+            ORDER BY
+                CASE eo.order_status
+                    WHEN 'New Order' THEN 1
+                    WHEN 'In Progress' THEN 2
+                    WHEN 'Shipped' THEN 3
+                    WHEN 'Received' THEN 4
+                    WHEN 'Cancelled' THEN 5
+                    ELSE 6
+                END,
+                eo.created_at DESC,
+                eo.order_id DESC
+        """)
+        rows = cur.fetchall()
+
+        return [
+            {
+                'order_id': row[0],
+                'item_id': row[1],
+                'item_name': row[2],
+                'category': row[3],
+                'quantity': row[4],
+                'order_status': row[5],
+                'order_date': row[6],
+                'estimated_delivery_date': row[7],
+                'total_cost': float(row[8]) if row[8] is not None else None,
+                'customer_notes': row[9],
+                'vendor_notes': row[10],
+                'supplier_name': row[11],
+                'supplier_email': row[12],
+                'received_to_inventory': bool(row[13])
+            }
+            for row in rows
+        ]
+    finally:
+        cur.close()
+
+
+def get_equipment_orders_for_supplier(supplier_user_id):
+    cur = mysql.connection.cursor()
+    try:
+        cur.execute("""
+            SELECT
+                eo.order_id,
+                eo.item_id,
+                ii.item_name,
+                ii.category,
+                eo.quantity,
+                eo.order_status,
+                eo.order_date,
+                eo.estimated_delivery_date,
+                eo.total_cost,
+                eo.customer_notes,
+                eo.vendor_notes,
+                eo.received_to_inventory
+            FROM equipment_orders eo
+            JOIN inventory_items ii ON eo.item_id = ii.item_id
+            WHERE eo.supplier_user_id = %s
+            ORDER BY
+                CASE eo.order_status
+                    WHEN 'New Order' THEN 1
+                    WHEN 'In Progress' THEN 2
+                    WHEN 'Shipped' THEN 3
+                    WHEN 'Received' THEN 4
+                    WHEN 'Cancelled' THEN 5
+                    ELSE 6
+                END,
+                eo.created_at DESC,
+                eo.order_id DESC
+        """, (supplier_user_id,))
+        rows = cur.fetchall()
+
+        return [
+            {
+                'order_id': row[0],
+                'item_id': row[1],
+                'item_name': row[2],
+                'category': row[3],
+                'quantity': row[4],
+                'order_status': row[5],
+                'order_date': row[6],
+                'estimated_delivery_date': row[7],
+                'total_cost': float(row[8]) if row[8] is not None else None,
+                'customer_notes': row[9],
+                'vendor_notes': row[10],
+                'received_to_inventory': bool(row[11])
+            }
+            for row in rows
+        ]
+    finally:
+        cur.close()
+
+
+def get_equipment_summary():
+    cur = mysql.connection.cursor()
+    try:
+        cur.execute("SELECT COUNT(*) FROM inventory_items")
+        total_items = cur.fetchone()[0]
+
+        cur.execute("SELECT COALESCE(SUM(quantity), 0) FROM inventory_items")
+        total_units = cur.fetchone()[0]
+
+        cur.execute("SELECT COUNT(*) FROM inventory_items WHERE status = 'Low Stock'")
+        low_stock_count = cur.fetchone()[0]
+
+        cur.execute("SELECT COUNT(*) FROM equipment_orders WHERE order_status = 'New Order'")
+        new_orders = cur.fetchone()[0]
+
+        cur.execute("SELECT COUNT(*) FROM equipment_orders WHERE order_status = 'In Progress'")
+        in_progress_orders = cur.fetchone()[0]
+
+        cur.execute("SELECT COUNT(*) FROM equipment_orders WHERE order_status = 'Received'")
+        received_orders = cur.fetchone()[0]
+
+        return {
+            'total_items': total_items,
+            'total_units': total_units,
+            'low_stock_count': low_stock_count,
+            'new_orders': new_orders,
+            'in_progress_orders': in_progress_orders,
+            'received_orders': received_orders
+        }
+    finally:
+        cur.close()
+        
 
 def get_all_players():
     cur = mysql.connection.cursor()
@@ -452,8 +674,235 @@ def roster():
 @login_required
 @role_required('Admin', 'Coach')
 def equipment():
-    return render_template('equipment.html')
+    search = request.args.get('search', '').strip()
+    category = request.args.get('category', '').strip()
+    item_type = request.args.get('item_type', '').strip()
 
+    inventory_items = get_inventory_items(search, category, item_type)
+    orders = get_equipment_orders_for_admin()
+    summary = get_equipment_summary()
+
+    return render_template(
+        'equipment.html',
+        inventory_items=inventory_items,
+        orders=orders,
+        summary=summary,
+        search=search,
+        selected_category=category,
+        selected_item_type=item_type
+    )
+    
+# ---------------------------
+# EQUIPMENT ACTIONS
+# ---------------------------
+@app.route('/add_inventory_item', methods=['POST'])
+@login_required
+@role_required('Admin', 'Coach')
+def add_inventory_item():
+    item_name = request.form.get('item_name', '').strip()
+    category = request.form.get('category', '').strip()
+    item_type = request.form.get('item_type', '').strip()
+    description = request.form.get('description', '').strip()
+    source = request.form.get('source', '').strip()
+    quantity = request.form.get('quantity', '0').strip()
+    reorder_level = request.form.get('reorder_level', '3').strip()
+    unit_cost = request.form.get('unit_cost', '').strip()
+
+    if not item_name or not category or not item_type:
+        flash('Item name, category, and type are required.', 'danger')
+        return redirect(url_for('equipment'))
+
+    try:
+        quantity_int = int(quantity)
+        reorder_level_int = int(reorder_level)
+        unit_cost_value = float(unit_cost) if unit_cost else None
+        status = compute_inventory_status(quantity_int, reorder_level_int)
+
+        cur = mysql.connection.cursor()
+        cur.execute("""
+            INSERT INTO inventory_items
+            (item_name, category, item_type, description, source, quantity, reorder_level, unit_cost, status)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            item_name, category, item_type, description, source,
+            quantity_int, reorder_level_int, unit_cost_value, status
+        ))
+        mysql.connection.commit()
+        flash('Inventory item added successfully.', 'success')
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f'Could not add inventory item: {e}', 'danger')
+    finally:
+        cur.close()
+
+    return redirect(url_for('equipment'))
+
+
+@app.route('/create_equipment_order', methods=['POST'])
+@login_required
+@role_required('Admin', 'Coach')
+def create_equipment_order():
+    item_id = request.form.get('item_id', '').strip()
+    supplier_user_id = request.form.get('supplier_user_id', '').strip()
+    quantity = request.form.get('quantity', '').strip()
+    customer_notes = request.form.get('customer_notes', '').strip()
+
+    if not item_id or not supplier_user_id or not quantity:
+        flash('Item, supplier, and quantity are required to place an order.', 'danger')
+        return redirect(url_for('equipment'))
+
+    try:
+        cur = mysql.connection.cursor()
+        cur.execute("""
+            INSERT INTO equipment_orders
+            (item_id, supplier_user_id, quantity, order_status, customer_notes, created_by_user_id, order_date)
+            VALUES (%s, %s, %s, 'New Order', %s, %s, CURDATE())
+        """, (item_id, supplier_user_id, quantity, customer_notes, current_user.id))
+        mysql.connection.commit()
+        flash('Equipment order created successfully.', 'success')
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f'Could not create order: {e}', 'danger')
+    finally:
+        cur.close()
+
+    return redirect(url_for('equipment'))
+
+@app.route('/supplier')
+@app.route('/supplier.html')
+@login_required
+@role_required('Admin', 'Supplier')
+def supplier_page():
+    supplier_user_id = current_user.id if current_user.role == 'Supplier' else 4
+
+    orders = get_equipment_orders_for_supplier(supplier_user_id)
+    summary = get_equipment_summary()
+
+    return render_template(
+        'supplier.html',
+        orders=orders,
+        summary=summary
+    )
+
+# ---------------------------
+# SUPPLIER ACTIONS
+# ---------------------------
+@app.route('/update_supplier_order/<int:order_id>', methods=['POST'])
+@login_required
+@role_required('Admin', 'Supplier')
+def update_supplier_order(order_id):
+    order_status = request.form.get('order_status', '').strip()
+    order_date = request.form.get('order_date') or None
+    estimated_delivery_date = request.form.get('estimated_delivery_date') or None
+    total_cost = request.form.get('total_cost', '').strip()
+    vendor_notes = request.form.get('vendor_notes', '').strip()
+
+    allowed_statuses = ['New Order', 'In Progress', 'Shipped', 'Received', 'Cancelled']
+    if order_status not in allowed_statuses:
+        flash('Invalid order status selected.', 'danger')
+        return redirect(url_for('supplier_page'))
+
+    try:
+        cur = mysql.connection.cursor()
+
+        if current_user.role == 'Supplier':
+            cur.execute("""
+                SELECT item_id, quantity, order_status, received_to_inventory
+                FROM equipment_orders
+                WHERE order_id = %s AND supplier_user_id = %s
+            """, (order_id, current_user.id))
+        else:
+            cur.execute("""
+                SELECT item_id, quantity, order_status, received_to_inventory
+                FROM equipment_orders
+                WHERE order_id = %s
+            """, (order_id,))
+
+        order_row = cur.fetchone()
+
+        if not order_row:
+            flash('Order not found or not assigned to this supplier.', 'danger')
+            cur.close()
+            return redirect(url_for('supplier_page'))
+
+        item_id, order_qty, old_status, received_to_inventory = order_row
+        total_cost_value = float(total_cost) if total_cost else None
+
+        cur.execute("""
+            UPDATE equipment_orders
+            SET order_status = %s,
+                order_date = %s,
+                estimated_delivery_date = %s,
+                total_cost = %s,
+                vendor_notes = %s
+            WHERE order_id = %s
+        """, (
+            order_status,
+            order_date,
+            estimated_delivery_date,
+            total_cost_value,
+            vendor_notes,
+            order_id
+        ))
+
+        if order_status == 'Received' and not received_to_inventory:
+            cur.execute("""
+                UPDATE inventory_items
+                SET quantity = quantity + %s
+                WHERE item_id = %s
+            """, (order_qty, item_id))
+
+            cur.execute("""
+                SELECT quantity, reorder_level
+                FROM inventory_items
+                WHERE item_id = %s
+            """, (item_id,))
+            inv_row = cur.fetchone()
+
+            if inv_row:
+                new_status = compute_inventory_status(inv_row[0], inv_row[1])
+                cur.execute("""
+                    UPDATE inventory_items
+                    SET status = %s
+                    WHERE item_id = %s
+                """, (new_status, item_id))
+
+            cur.execute("""
+                UPDATE equipment_orders
+                SET received_to_inventory = TRUE
+                WHERE order_id = %s
+            """, (order_id,))
+
+        mysql.connection.commit()
+        flash('Order updated successfully.', 'success')
+
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f'Could not update order: {e}', 'danger')
+    finally:
+        cur.close()
+
+    return redirect(url_for('supplier_page'))
+
+@app.route('/equipment_suppliers')
+@login_required
+@role_required('Admin', 'Coach')
+def equipment_suppliers():
+    cur = mysql.connection.cursor()
+    cur.execute("""
+        SELECT id, name, email
+        FROM users
+        WHERE role = 'Supplier'
+        ORDER BY name
+    """)
+    rows = cur.fetchall()
+    cur.close()
+
+    suppliers = [
+        {'id': row[0], 'name': row[1], 'email': row[2]}
+        for row in rows
+    ]
+    return jsonify(suppliers)
 
 @app.route('/finances')
 @app.route('/finances.html')
@@ -1080,13 +1529,6 @@ def alumni():
 def newsletters():
     return render_template('newsletters.html')
 
-
-@app.route('/supplier')
-@app.route('/supplier.html')
-@login_required
-@role_required('Admin', 'Supplier')
-def supplier_page():
-    return render_template('supplier.html')
 
 
 # ---------------------------
