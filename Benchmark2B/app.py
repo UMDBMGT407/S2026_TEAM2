@@ -1533,7 +1533,77 @@ def alumni():
 @login_required
 @role_required('Admin', 'Coach')
 def newsletters():
-    return render_template('newsletters.html')
+    cur = mysql.connection.cursor()
+    try:
+        cur.execute("""
+            SELECT n.newsletter_id, n.title, n.content, u.name, n.created_at
+            FROM newsletters n
+            JOIN users u ON n.created_by = u.id
+            ORDER BY n.created_at DESC
+        """)
+        rows = cur.fetchall()
+        newsletters_list = [
+            {
+                'newsletter_id': row[0],
+                'title': row[1],
+                'content': row[2],
+                'author': row[3],
+                'created_at': row[4]
+            }
+            for row in rows
+        ]
+        return render_template('newsletters.html', newsletters=newsletters_list)
+    except Exception as e:
+        flash(f'Could not load newsletters: {e}', 'danger')
+        return render_template('newsletters.html', newsletters=[])
+    finally:
+        cur.close()
+
+
+@app.route('/add_newsletter', methods=['POST'])
+@login_required
+@role_required('Admin', 'Coach')
+def add_newsletter():
+    title = request.form.get('title', '').strip()
+    content = request.form.get('content', '').strip()
+
+    if not title or not content:
+        flash('Title and content are required.', 'danger')
+        return redirect(url_for('newsletters'))
+
+    cur = mysql.connection.cursor()
+    try:
+        cur.execute("""
+            INSERT INTO newsletters (title, content, created_by)
+            VALUES (%s, %s, %s)
+        """, (title, content, current_user.id))
+        mysql.connection.commit()
+        flash('Newsletter created successfully.', 'success')
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f'Could not create newsletter: {e}', 'danger')
+    finally:
+        cur.close()
+
+    return redirect(url_for('newsletters'))
+
+
+@app.route('/delete_newsletter/<int:newsletter_id>', methods=['POST'])
+@login_required
+@role_required('Admin', 'Coach')
+def delete_newsletter(newsletter_id):
+    cur = mysql.connection.cursor()
+    try:
+        cur.execute("DELETE FROM newsletters WHERE newsletter_id = %s", (newsletter_id,))
+        mysql.connection.commit()
+        flash('Newsletter deleted.', 'success')
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f'Could not delete newsletter: {e}', 'danger')
+    finally:
+        cur.close()
+
+    return redirect(url_for('newsletters'))
 
 
 # ---------------------------
