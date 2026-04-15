@@ -290,7 +290,7 @@ def get_equipment_summary():
         }
     finally:
         cur.close()
-        
+
 
 def get_all_players():
     cur = mysql.connection.cursor()
@@ -630,7 +630,103 @@ def logout():
 @app.route('/home')
 @login_required
 def home():
-    return render_template('admin-dashboard.html')
+    cur = mysql.connection.cursor()
+    try:
+        # --- Players ---
+        cur.execute("SELECT COUNT(*) FROM players")
+        total_players = cur.fetchone()[0]
+
+        cur.execute("SELECT COUNT(*) FROM players WHERE injured = TRUE")
+        injured_players = cur.fetchone()[0]
+
+        active_players = total_players - injured_players
+
+        # --- Upcoming Games ---
+        cur.execute("""
+            SELECT COUNT(*) FROM games
+            WHERE game_date >= CURDATE() AND status != 'Cancelled'
+        """)
+        upcoming_games = cur.fetchone()[0]
+
+        cur.execute("""
+            SELECT opponent, game_date FROM games
+            WHERE game_date >= CURDATE() AND status != 'Cancelled'
+            ORDER BY game_date ASC LIMIT 1
+        """)
+        next_game_row = cur.fetchone()
+        next_game_opponent = next_game_row[0] if next_game_row else None
+        next_game_date = next_game_row[1] if next_game_row else None
+
+        # --- Inventory ---
+        cur.execute("SELECT COUNT(*) FROM inventory_items")
+        total_inventory_items = cur.fetchone()[0]
+
+        cur.execute("""
+            SELECT COUNT(*) FROM equipment_orders
+            WHERE order_status IN ('New Order', 'In Progress')
+        """)
+        pending_orders = cur.fetchone()[0]
+
+        # --- Financials ---
+        cur.execute("""
+            SELECT
+                COALESCE(SUM(CASE WHEN entry_type = 'Revenue' THEN amount ELSE 0 END), 0),
+                COALESCE(SUM(CASE WHEN entry_type = 'Expense' THEN amount ELSE 0 END), 0),
+                COALESCE(SUM(CASE WHEN entry_type = 'Revenue' THEN amount ELSE -amount END), 0)
+            FROM financial_entries
+        """)
+        fin_row = cur.fetchone()
+        total_revenue = float(fin_row[0])
+        total_expenses = float(fin_row[1])
+        net_balance = float(fin_row[2])
+
+        # --- Projected Expenses ---
+        cur.execute("""
+            SELECT COALESCE(SUM(projected_amount), 0)
+            FROM financial_projections WHERE projection_type = 'Expense'
+        """)
+        projected_expenses = float(cur.fetchone()[0])
+
+        budget_variance = projected_expenses - total_expenses
+
+        # --- Recent Activity (last 4 financial entry descriptions) ---
+        cur.execute("""
+            SELECT description FROM financial_entries
+            WHERE description IS NOT NULL AND description != ''
+            ORDER BY entry_date DESC, entry_id DESC LIMIT 4
+        """)
+        recent_activity = [row[0] for row in cur.fetchall()]
+
+        stats = {
+            'total_players': total_players,
+            'injured_players': injured_players,
+            'active_players': active_players,
+            'upcoming_games': upcoming_games,
+            'next_game_opponent': next_game_opponent,
+            'next_game_date': next_game_date,
+            'total_inventory_items': total_inventory_items,
+            'pending_orders': pending_orders,
+            'total_revenue': total_revenue,
+            'total_expenses': total_expenses,
+            'net_balance': net_balance,
+            'projected_expenses': projected_expenses,
+            'budget_variance': budget_variance,
+            'recent_activity': recent_activity,
+        }
+
+        return render_template('admin-dashboard.html', stats=stats)
+
+    except Exception as e:
+        flash(f'Could not load dashboard data: {e}', 'danger')
+        return render_template('admin-dashboard.html', stats={
+            'total_players': 0, 'injured_players': 0, 'active_players': 0,
+            'upcoming_games': 0, 'next_game_opponent': None, 'next_game_date': None,
+            'total_inventory_items': 0, 'pending_orders': 0,
+            'total_revenue': 0, 'total_expenses': 0, 'net_balance': 0,
+            'projected_expenses': 0, 'budget_variance': 0, 'recent_activity': []
+        })
+    finally:
+        cur.close()
 
 
 @app.route('/admin')
@@ -639,7 +735,7 @@ def home():
 @login_required
 @role_required('Admin')
 def admin_page():
-    return render_template('admin-dashboard.html')
+    return redirect(url_for('home'))
 
 
 @app.route('/schedule')
@@ -691,7 +787,7 @@ def equipment():
         selected_category=category,
         selected_item_type=item_type
     )
-    
+
 # ---------------------------
 # EQUIPMENT ACTIONS
 # ---------------------------
@@ -1220,19 +1316,9 @@ def game_details(game_id):
     try:
         cur.execute("""
             SELECT
-                game_id,
-                opponent,
-                game_date,
-                location,
-                game_type,
-                status,
-                projected_cost,
-                actual_cost,
-                final_score,
-                notes,
-                in_results
-            FROM games
-            WHERE game_id = %s
+                game_id, opponent, game_date, location, game_type, status,
+                projected_cost, actual_cost, final_score, notes, in_results
+            FROM games WHERE game_id = %s
         """, (game_id,))
         game_row = cur.fetchone()
 
@@ -1240,34 +1326,21 @@ def game_details(game_id):
             return jsonify({'error': 'Game not found'}), 404
 
         game = {
-            'game_id': game_row[0],
-            'opponent': game_row[1],
-            'game_date': str(game_row[2]),
-            'location': game_row[3],
-            'game_type': game_row[4],
-            'status': game_row[5],
+            'game_id': game_row[0], 'opponent': game_row[1],
+            'game_date': str(game_row[2]), 'location': game_row[3],
+            'game_type': game_row[4], 'status': game_row[5],
             'projected_cost': float(game_row[6]) if game_row[6] is not None else None,
             'actual_cost': float(game_row[7]) if game_row[7] is not None else None,
-            'final_score': game_row[8],
-            'notes': game_row[9],
+            'final_score': game_row[8], 'notes': game_row[9],
             'in_results': bool(game_row[10])
         }
 
         cur.execute("""
-            SELECT
-                fe.entry_id,
-                fe.game_id,
-                fe.practice_id,
-                fe.entry_type,
-                fe.amount,
-                fe.description,
-                fe.entry_date,
-                fc.category_name,
-                fc.category_type
+            SELECT fe.entry_id, fe.game_id, fe.practice_id, fe.entry_type, fe.amount,
+                   fe.description, fe.entry_date, fc.category_name, fc.category_type
             FROM financial_entries fe
             JOIN financial_categories fc ON fe.category_id = fc.category_id
-            WHERE fe.game_id = %s
-            ORDER BY fe.entry_date, fe.entry_id
+            WHERE fe.game_id = %s ORDER BY fe.entry_date, fe.entry_id
         """, (game_id,))
         actual_rows = cur.fetchall()
 
@@ -1278,15 +1351,9 @@ def game_details(game_id):
         for row in actual_rows:
             amount = float(row[4] or 0)
             actual_entries.append({
-                'entry_id': row[0],
-                'game_id': row[1],
-                'practice_id': row[2],
-                'entry_type': row[3],
-                'amount': amount,
-                'description': row[5],
-                'entry_date': str(row[6]),
-                'category_name': row[7],
-                'category_type': row[8]
+                'entry_id': row[0], 'game_id': row[1], 'practice_id': row[2],
+                'entry_type': row[3], 'amount': amount, 'description': row[5],
+                'entry_date': str(row[6]), 'category_name': row[7], 'category_type': row[8]
             })
             if row[3] == 'Revenue':
                 actual_revenue += amount
@@ -1294,20 +1361,11 @@ def game_details(game_id):
                 actual_expenses += amount
 
         cur.execute("""
-            SELECT
-                fp.projection_id,
-                fp.game_id,
-                fp.practice_id,
-                fp.projection_type,
-                fp.projected_amount,
-                fp.notes,
-                fp.projection_date,
-                fc.category_name,
-                fc.category_type
+            SELECT fp.projection_id, fp.game_id, fp.practice_id, fp.projection_type,
+                   fp.projected_amount, fp.notes, fp.projection_date, fc.category_name, fc.category_type
             FROM financial_projections fp
             JOIN financial_categories fc ON fp.category_id = fc.category_id
-            WHERE fp.game_id = %s
-            ORDER BY fp.projection_date, fp.projection_id
+            WHERE fp.game_id = %s ORDER BY fp.projection_date, fp.projection_id
         """, (game_id,))
         projection_rows = cur.fetchall()
 
@@ -1318,15 +1376,9 @@ def game_details(game_id):
         for row in projection_rows:
             amount = float(row[4] or 0)
             projected_entries.append({
-                'projection_id': row[0],
-                'game_id': row[1],
-                'practice_id': row[2],
-                'projection_type': row[3],
-                'projected_amount': amount,
-                'notes': row[5],
-                'projection_date': str(row[6]),
-                'category_name': row[7],
-                'category_type': row[8]
+                'projection_id': row[0], 'game_id': row[1], 'practice_id': row[2],
+                'projection_type': row[3], 'projected_amount': amount, 'notes': row[5],
+                'projection_date': str(row[6]), 'category_name': row[7], 'category_type': row[8]
             })
             if row[3] == 'Revenue':
                 projected_revenue += amount
@@ -1337,16 +1389,8 @@ def game_details(game_id):
             'game': game,
             'actual_entries': actual_entries,
             'projected_entries': projected_entries,
-            'actual_totals': {
-                'revenue': actual_revenue,
-                'expenses': actual_expenses,
-                'net': actual_revenue - actual_expenses
-            },
-            'projected_totals': {
-                'revenue': projected_revenue,
-                'expenses': projected_expenses,
-                'net': projected_revenue - projected_expenses
-            }
+            'actual_totals': {'revenue': actual_revenue, 'expenses': actual_expenses, 'net': actual_revenue - actual_expenses},
+            'projected_totals': {'revenue': projected_revenue, 'expenses': projected_expenses, 'net': projected_revenue - projected_expenses}
         })
 
     except Exception as e:
@@ -1363,20 +1407,9 @@ def practice_details(practice_id):
 
     try:
         cur.execute("""
-            SELECT
-                practice_id,
-                title,
-                practice_date,
-                practice_time,
-                location,
-                contact_email,
-                notes,
-                status,
-                projected_cost,
-                actual_cost,
-                in_results
-            FROM practices
-            WHERE practice_id = %s
+            SELECT practice_id, title, practice_date, practice_time, location,
+                   contact_email, notes, status, projected_cost, actual_cost, in_results
+            FROM practices WHERE practice_id = %s
         """, (practice_id,))
         practice_row = cur.fetchone()
 
@@ -1384,34 +1417,21 @@ def practice_details(practice_id):
             return jsonify({'error': 'Practice not found'}), 404
 
         practice = {
-            'practice_id': practice_row[0],
-            'title': practice_row[1],
-            'practice_date': str(practice_row[2]),
-            'practice_time': str(practice_row[3]),
-            'location': practice_row[4],
-            'contact_email': practice_row[5],
-            'notes': practice_row[6],
-            'status': practice_row[7],
+            'practice_id': practice_row[0], 'title': practice_row[1],
+            'practice_date': str(practice_row[2]), 'practice_time': str(practice_row[3]),
+            'location': practice_row[4], 'contact_email': practice_row[5],
+            'notes': practice_row[6], 'status': practice_row[7],
             'projected_cost': float(practice_row[8]) if practice_row[8] is not None else None,
             'actual_cost': float(practice_row[9]) if practice_row[9] is not None else None,
             'in_results': bool(practice_row[10])
         }
 
         cur.execute("""
-            SELECT
-                fe.entry_id,
-                fe.game_id,
-                fe.practice_id,
-                fe.entry_type,
-                fe.amount,
-                fe.description,
-                fe.entry_date,
-                fc.category_name,
-                fc.category_type
+            SELECT fe.entry_id, fe.game_id, fe.practice_id, fe.entry_type, fe.amount,
+                   fe.description, fe.entry_date, fc.category_name, fc.category_type
             FROM financial_entries fe
             JOIN financial_categories fc ON fe.category_id = fc.category_id
-            WHERE fe.practice_id = %s
-            ORDER BY fe.entry_date, fe.entry_id
+            WHERE fe.practice_id = %s ORDER BY fe.entry_date, fe.entry_id
         """, (practice_id,))
         actual_rows = cur.fetchall()
 
@@ -1422,15 +1442,9 @@ def practice_details(practice_id):
         for row in actual_rows:
             amount = float(row[4] or 0)
             actual_entries.append({
-                'entry_id': row[0],
-                'game_id': row[1],
-                'practice_id': row[2],
-                'entry_type': row[3],
-                'amount': amount,
-                'description': row[5],
-                'entry_date': str(row[6]),
-                'category_name': row[7],
-                'category_type': row[8]
+                'entry_id': row[0], 'game_id': row[1], 'practice_id': row[2],
+                'entry_type': row[3], 'amount': amount, 'description': row[5],
+                'entry_date': str(row[6]), 'category_name': row[7], 'category_type': row[8]
             })
             if row[3] == 'Revenue':
                 actual_revenue += amount
@@ -1438,20 +1452,11 @@ def practice_details(practice_id):
                 actual_expenses += amount
 
         cur.execute("""
-            SELECT
-                fp.projection_id,
-                fp.game_id,
-                fp.practice_id,
-                fp.projection_type,
-                fp.projected_amount,
-                fp.notes,
-                fp.projection_date,
-                fc.category_name,
-                fc.category_type
+            SELECT fp.projection_id, fp.game_id, fp.practice_id, fp.projection_type,
+                   fp.projected_amount, fp.notes, fp.projection_date, fc.category_name, fc.category_type
             FROM financial_projections fp
             JOIN financial_categories fc ON fp.category_id = fc.category_id
-            WHERE fp.practice_id = %s
-            ORDER BY fp.projection_date, fp.projection_id
+            WHERE fp.practice_id = %s ORDER BY fp.projection_date, fp.projection_id
         """, (practice_id,))
         projection_rows = cur.fetchall()
 
@@ -1462,15 +1467,9 @@ def practice_details(practice_id):
         for row in projection_rows:
             amount = float(row[4] or 0)
             projected_entries.append({
-                'projection_id': row[0],
-                'game_id': row[1],
-                'practice_id': row[2],
-                'projection_type': row[3],
-                'projected_amount': amount,
-                'notes': row[5],
-                'projection_date': str(row[6]),
-                'category_name': row[7],
-                'category_type': row[8]
+                'projection_id': row[0], 'game_id': row[1], 'practice_id': row[2],
+                'projection_type': row[3], 'projected_amount': amount, 'notes': row[5],
+                'projection_date': str(row[6]), 'category_name': row[7], 'category_type': row[8]
             })
             if row[3] == 'Revenue':
                 projected_revenue += amount
@@ -1481,22 +1480,15 @@ def practice_details(practice_id):
             'practice': practice,
             'actual_entries': actual_entries,
             'projected_entries': projected_entries,
-            'actual_totals': {
-                'revenue': actual_revenue,
-                'expenses': actual_expenses,
-                'net': actual_revenue - actual_expenses
-            },
-            'projected_totals': {
-                'revenue': projected_revenue,
-                'expenses': projected_expenses,
-                'net': projected_revenue - projected_expenses
-            }
+            'actual_totals': {'revenue': actual_revenue, 'expenses': actual_expenses, 'net': actual_revenue - actual_expenses},
+            'projected_totals': {'revenue': projected_revenue, 'expenses': projected_expenses, 'net': projected_revenue - projected_expenses}
         })
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     finally:
         cur.close()
+
 
 @app.route('/alumni')
 @app.route('/alumni.html')
@@ -1528,7 +1520,6 @@ def alumni():
 @role_required('Admin', 'Coach')
 def newsletters():
     return render_template('newsletters.html')
-
 
 
 # ---------------------------
@@ -1608,15 +1599,7 @@ def add_game():
 
     try:
         cur.execute("""
-            INSERT INTO games (
-                opponent,
-                game_date,
-                location,
-                game_type,
-                status,
-                projected_cost,
-                notes
-            )
+            INSERT INTO games (opponent, game_date, location, game_type, status, projected_cost, notes)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
         """, (opponent, game_date, location, game_type, status, projected_cost, notes))
         mysql.connection.commit()
@@ -1654,16 +1637,7 @@ def add_practice():
 
     try:
         cur.execute("""
-            INSERT INTO practices (
-                title,
-                practice_date,
-                practice_time,
-                location,
-                contact_email,
-                notes,
-                status,
-                projected_cost
-            )
+            INSERT INTO practices (title, practice_date, practice_time, location, contact_email, notes, status, projected_cost)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """, (title, practice_date, practice_time, location, contact_email, notes, status, projected_cost))
         mysql.connection.commit()
@@ -1695,10 +1669,7 @@ def update_game_results(game_id):
     try:
         cur.execute("""
             UPDATE games
-            SET actual_cost = %s,
-                final_score = %s,
-                status = %s,
-                in_results = %s
+            SET actual_cost = %s, final_score = %s, status = %s, in_results = %s
             WHERE game_id = %s
         """, (actual_cost, final_score, status, in_results, game_id))
         mysql.connection.commit()
@@ -1727,9 +1698,7 @@ def update_practice_results(practice_id):
     try:
         cur.execute("""
             UPDATE practices
-            SET actual_cost = %s,
-                status = %s,
-                in_results = %s
+            SET actual_cost = %s, status = %s, in_results = %s
             WHERE practice_id = %s
         """, (actual_cost, status, in_results, practice_id))
         mysql.connection.commit()
@@ -1750,10 +1719,7 @@ def move_game_to_results(game_id):
     cur = mysql.connection.cursor()
     try:
         cur.execute("""
-            UPDATE games
-            SET in_results = 1,
-                status = 'Completed'
-            WHERE game_id = %s
+            UPDATE games SET in_results = 1, status = 'Completed' WHERE game_id = %s
         """, (game_id,))
         mysql.connection.commit()
         flash('Game moved to results.', 'success')
@@ -1773,10 +1739,7 @@ def move_practice_to_results(practice_id):
     cur = mysql.connection.cursor()
     try:
         cur.execute("""
-            UPDATE practices
-            SET in_results = 1,
-                status = 'Completed'
-            WHERE practice_id = %s
+            UPDATE practices SET in_results = 1, status = 'Completed' WHERE practice_id = %s
         """, (practice_id,))
         mysql.connection.commit()
         flash('Practice moved to results.', 'success')
@@ -1821,25 +1784,9 @@ def add_financial_entry():
 
     try:
         cur.execute("""
-            INSERT INTO financial_entries (
-                game_id,
-                practice_id,
-                category_id,
-                entry_type,
-                amount,
-                description,
-                entry_date
-            )
+            INSERT INTO financial_entries (game_id, practice_id, category_id, entry_type, amount, description, entry_date)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
-        """, (
-            game_id,
-            practice_id,
-            category_id,
-            entry_type,
-            amount,
-            description,
-            entry_date
-        ))
+        """, (game_id, practice_id, category_id, entry_type, amount, description, entry_date))
         mysql.connection.commit()
         flash('Financial entry added successfully.', 'success')
     except Exception as e:
@@ -1884,25 +1831,9 @@ def add_financial_projection():
 
     try:
         cur.execute("""
-            INSERT INTO financial_projections (
-                game_id,
-                practice_id,
-                category_id,
-                projection_type,
-                projected_amount,
-                notes,
-                projection_date
-            )
+            INSERT INTO financial_projections (game_id, practice_id, category_id, projection_type, projected_amount, notes, projection_date)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
-        """, (
-            game_id,
-            practice_id,
-            category_id,
-            projection_type,
-            projected_amount,
-            notes,
-            projection_date
-        ))
+        """, (game_id, practice_id, category_id, projection_type, projected_amount, notes, projection_date))
         mysql.connection.commit()
         flash('Financial projection added successfully.', 'success')
     except Exception as e:
@@ -1913,9 +1844,10 @@ def add_financial_projection():
 
     return redirect(url_for('finances'))
 
-# --------------
+
+# ---------------------------
 # ADD ALUMNI
-# --------------
+# ---------------------------
 @app.route('/add_alumni', methods=['POST'])
 @login_required
 @role_required('Admin', 'Coach')
@@ -1967,15 +1899,7 @@ def add_alumni():
 
             description = f"Alumni donation from {name}"
             cur.execute("""
-                INSERT INTO financial_entries (
-                    game_id,
-                    practice_id,
-                    category_id,
-                    entry_type,
-                    amount,
-                    description,
-                    entry_date
-                )
+                INSERT INTO financial_entries (game_id, practice_id, category_id, entry_type, amount, description, entry_date)
                 VALUES (NULL, NULL, %s, 'Revenue', %s, %s, %s)
             """, (2, amount, description, donation_date))
 
