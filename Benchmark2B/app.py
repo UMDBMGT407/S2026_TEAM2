@@ -13,7 +13,7 @@ app.secret_key = 'bmgt407_hockey_secret_key'
 # ---------------------------
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'your passwd'
+app.config['MYSQL_PASSWORD'] = 'AcciaioAcciaio'
 app.config['MYSQL_DB'] = 'user_management'
 
 mysql = MySQL(app)
@@ -1472,16 +1472,15 @@ def add_financial_projection():
     return redirect(url_for('finances'))
 
 # --------------
-# ADD ALUMNI 
+# ADD ALUMNI
 # --------------
 @app.route('/add_alumni', methods=['POST'])
 @login_required
 @role_required('Admin', 'Coach')
 def add_alumni():
-    # --- Alumni basic info ---
-    first_name = request.form['first_name']
-    last_name = request.form['last_name']
-    name = f"{first_name} {last_name}"
+    first_name = request.form.get('first_name', '').strip()
+    last_name = request.form.get('last_name', '').strip()
+    name = f"{first_name} {last_name}".strip()
 
     grad_year = request.form.get('grad_year')
     position = request.form.get('position')
@@ -1490,15 +1489,22 @@ def add_alumni():
     phone = request.form.get('phone')
     donation_status = request.form.get('donation_status')
 
-    # --- Donation fields ---
     amount = request.form.get('amount')
     donation_date = request.form.get('donation_date')
     message = request.form.get('message')
 
+    if not first_name or not last_name or not email:
+        flash('First name, last name, and email are required.', 'danger')
+        return redirect(url_for('alumni'))
+
+    if position == 'Select position':
+        position = None
+    if donation_status == 'Select status':
+        donation_status = None
+
     cur = mysql.connection.cursor()
 
     try:
-        # --- Insert alumni ---
         cur.execute("""
             INSERT INTO alumni (name, email, grad_year, position, phone, occupation, donation_status)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
@@ -1506,12 +1512,10 @@ def add_alumni():
 
         alumni_id = cur.lastrowid
 
-        # --- Insert donation ONLY if donated ---
-        if donation_status == "Donated":
+        if donation_status == 'Donated':
             if not amount or not donation_date:
-                flash('Please enter donation amount and date.', 'danger')
                 mysql.connection.rollback()
-                cur.close()
+                flash('Please enter donation amount and date.', 'danger')
                 return redirect(url_for('alumni'))
 
             cur.execute("""
@@ -1519,13 +1523,26 @@ def add_alumni():
                 VALUES (%s, %s, %s, %s)
             """, (alumni_id, amount, donation_date, message))
 
+            description = f"Alumni donation from {name}"
+            cur.execute("""
+                INSERT INTO financial_entries (
+                    game_id,
+                    practice_id,
+                    category_id,
+                    entry_type,
+                    amount,
+                    description,
+                    entry_date
+                )
+                VALUES (NULL, NULL, %s, 'Revenue', %s, %s, %s)
+            """, (2, amount, description, donation_date))
+
         mysql.connection.commit()
         flash('Alumni added successfully.', 'success')
 
     except Exception as e:
         mysql.connection.rollback()
         flash(f'Error adding alumni: {e}', 'danger')
-
     finally:
         cur.close()
 
