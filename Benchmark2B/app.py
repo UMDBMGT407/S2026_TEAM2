@@ -1984,6 +1984,42 @@ def add_alumni():
 
     return redirect(url_for('alumni'))
 
+@app.route('/edit_alumni/<int:alumni_id>', methods=['POST'])
+@login_required
+@role_required('Admin', 'Coach')
+def edit_alumni(alumni_id):
+    first_name = request.form.get('first_name', '').strip()
+    last_name = request.form.get('last_name', '').strip()
+    name = f"{first_name} {last_name}".strip()
+    grad_year = request.form.get('grad_year')
+    position = request.form.get('position')
+    email = request.form.get('email', '').strip()
+    occupation = request.form.get('occupation', '').strip()
+    phone = request.form.get('phone', '').strip()
+    donation_status = request.form.get('donation_status')
+
+    if not first_name or not last_name or not email:
+        flash('First name, last name, and email are required.', 'danger')
+        return redirect(url_for('alumni'))
+
+    cur = mysql.connection.cursor()
+    try:
+        cur.execute("""
+            UPDATE alumni
+            SET name = %s, email = %s, grad_year = %s, position = %s,
+                phone = %s, occupation = %s, donation_status = %s
+            WHERE alumni_id = %s
+        """, (name, email, grad_year, position, phone, occupation, donation_status, alumni_id))
+
+        mysql.connection.commit()
+        flash('Alumni record updated successfully.', 'success')
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f'Could not update alumni: {e}', 'danger')
+    finally:
+        cur.close()
+
+    return redirect(url_for('alumni'))
 
 @app.route('/delete_financial_entry/<int:entry_id>', methods=['POST'])
 @login_required
