@@ -38,13 +38,13 @@
           <input type="text" id="searchInput" class="form-control" placeholder="Search by name, position, or jersey number">
         </div>
 
-        <div class="col-md-4 text-md-end">
-          {% if current_user.role in ['Admin', 'Coach'] %}
-          <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#addPlayerModal">
-            Add Player
-          </button>
-          {% endif %}
-        </div>
+<div class="col-md-4 text-md-end">
+  {% if current_user.role in ['Admin', 'Coach'] %}
+  <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#addPlayerModal">
+    Add Player
+  </button>
+  {% endif %}
+</div>
       </div>
 
       <div class="table-responsive">
@@ -76,7 +76,8 @@
                 <td>{{ player['email'] }}</td>
                 <td>{{ player['phone'] }}</td>
                 {% if current_user.role in ['Admin', 'Coach'] %}
-               <td class="d-flex gap-2">
+            <td class="d-flex gap-2">
+  {% if current_user.role in ['Admin', 'Coach'] %}
   <button
     type="button"
     class="btn btn-sm btn-secondary"
@@ -89,6 +90,9 @@
         onsubmit="return confirm('Are you sure you want to delete {{ player['name'] }}? This cannot be undone.')">
     <button type="submit" class="btn btn-sm btn-danger">Delete</button>
   </form>
+  {% else %}
+  <span class="text-muted" style="font-size: 0.85rem;">View Only</span>
+  {% endif %}
 </td>
                 {% endif %}
               </tr>
