@@ -7,76 +7,6 @@
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/newstyle.css') }}">
-  <!-- ADD GENERAL ENTRY MODAL -->
-<div class="modal fade" id="addGeneralEntryModal" tabindex="-1" aria-labelledby="addGeneralEntryModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-
-      <div class="modal-header">
-        <h5 class="modal-title" id="addGeneralEntryModalLabel">Add General Team Entry</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-
-      <form method="POST" action="{{ url_for('add_financial_entry') }}">
-        <div class="modal-body">
-
-          <div class="locked-field-note mb-3">
-            This entry is for general team finances only. It is not linked to a game or practice.
-          </div>
-
-          <!-- hidden empty values so backend receives no game/practice -->
-          <input type="hidden" name="game_id" value="">
-          <input type="hidden" name="practice_id" value="">
-
-          <div class="row mb-3">
-            <div class="col-md-6">
-              <label for="general_entry_type" class="form-label">Entry Type</label>
-              <select class="form-select" id="general_entry_type" name="entry_type" required>
-                <option value="">Select type</option>
-                <option value="Revenue">Revenue</option>
-                <option value="Expense">Expense</option>
-              </select>
-            </div>
-
-            <div class="col-md-6">
-              <label for="general_entry_category_id" class="form-label">Category</label>
-              <select class="form-select" id="general_entry_category_id" name="category_id" required>
-                <option value="">Select category</option>
-                {% for category in categories %}
-                <option value="{{ category.category_id }}">{{ category.category_name }} ({{ category.category_type }})</option>
-                {% endfor %}
-              </select>
-            </div>
-          </div>
-
-          <div class="row mb-3">
-            <div class="col-md-6">
-              <label for="general_entry_amount" class="form-label">Amount</label>
-              <input type="number" step="0.01" class="form-control" id="general_entry_amount" name="amount" required>
-            </div>
-
-            <div class="col-md-6">
-              <label for="general_entry_date" class="form-label">Entry Date</label>
-              <input type="date" class="form-control" id="general_entry_date" name="entry_date" required>
-            </div>
-          </div>
-
-          <div class="mb-3">
-            <label for="general_entry_description" class="form-label">Description</label>
-            <input type="text" class="form-control" id="general_entry_description" name="description" placeholder="Optional description">
-          </div>
-
-        </div>
-
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-success">Save Entry</button>
-        </div>
-      </form>
-
-    </div>
-  </div>
-</div>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
@@ -389,8 +319,8 @@
         </div>
         <div>
           <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addGeneralEntryModal">
-  Add General Entry
-</button>
+            Add General Entry
+          </button>
         </div>
       </div>
 
@@ -448,6 +378,76 @@
     </div>
 
   </main>
+
+  <!-- ADD GENERAL ENTRY MODAL -->
+  <div class="modal fade" id="addGeneralEntryModal" tabindex="-1" aria-labelledby="addGeneralEntryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title" id="addGeneralEntryModalLabel">Add General Team Entry</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <form method="POST" action="{{ url_for('add_financial_entry') }}">
+          <div class="modal-body">
+
+            <div class="locked-field-note mb-3">
+              This entry is for general team finances only. It is not linked to a game or practice.
+            </div>
+
+            <input type="hidden" name="game_id" value="">
+            <input type="hidden" name="practice_id" value="">
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="general_entry_type" class="form-label">Entry Type</label>
+                <select class="form-select" id="general_entry_type" name="entry_type" required>
+                  <option value="">Select type</option>
+                  <option value="Revenue">Revenue</option>
+                  <option value="Expense">Expense</option>
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label for="general_entry_category_id" class="form-label">Category</label>
+                <select class="form-select" id="general_entry_category_id" name="category_id" required>
+                  <option value="">Select category</option>
+                  {% for category in categories %}
+                  <option value="{{ category.category_id }}">{{ category.category_name }} ({{ category.category_type }})</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="general_entry_amount" class="form-label">Amount</label>
+                <input type="number" step="0.01" class="form-control" id="general_entry_amount" name="amount" required>
+              </div>
+
+              <div class="col-md-6">
+                <label for="general_entry_date" class="form-label">Entry Date</label>
+                <input type="date" class="form-control" id="general_entry_date" name="entry_date" required>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="general_entry_description" class="form-label">Description</label>
+              <input type="text" class="form-control" id="general_entry_description" name="description" placeholder="Optional description">
+            </div>
+
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-success">Save Entry</button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
 
   <!-- ANNUAL SUMMARY MODAL -->
   <div class="modal fade" id="annualSummaryModal" tabindex="-1" aria-labelledby="annualSummaryModalLabel" aria-hidden="true">
@@ -794,7 +794,7 @@
 
   <script>
     const annualRevenueBreakdown = {{ annual_revenue_breakdown|tojson }};
-    const annualExpenseBreakdown = {{ annualExpenseBreakdown|default(annual_expense_breakdown)|tojson }};
+    const annualExpenseBreakdown = {{ annual_expense_breakdown|tojson }};
 
     let revenuePieChart = null;
     let expensePieChart = null;
@@ -877,7 +877,7 @@
       }).join('');
     }
 
-    function buildActualRows(entries, type, parentId) {
+    function buildActualRows(entries) {
       if (!entries || entries.length === 0) {
         return `<tr><td colspan="5" class="text-center">No actual entries found.</td></tr>`;
       }
@@ -897,7 +897,7 @@
       `).join('');
     }
 
-    function buildProjectionRows(entries, type, parentId) {
+    function buildProjectionRows(entries) {
       if (!entries || entries.length === 0) {
         return `<tr><td colspan="5" class="text-center">No projected entries found.</td></tr>`;
       }
@@ -1040,7 +1040,7 @@
                 </tr>
               </thead>
               <tbody>
-                ${buildActualRows(data.actual_entries, 'game', data.game.game_id)}
+                ${buildActualRows(data.actual_entries)}
               </tbody>
             </table>
           </div>
@@ -1058,7 +1058,7 @@
                 </tr>
               </thead>
               <tbody>
-                ${buildProjectionRows(data.projected_entries, 'game', data.game.game_id)}
+                ${buildProjectionRows(data.projected_entries)}
               </tbody>
             </table>
           </div>
@@ -1191,7 +1191,7 @@
                 </tr>
               </thead>
               <tbody>
-                ${buildActualRows(data.actual_entries, 'practice', data.practice.practice_id)}
+                ${buildActualRows(data.actual_entries)}
               </tbody>
             </table>
           </div>
@@ -1209,7 +1209,7 @@
                 </tr>
               </thead>
               <tbody>
-                ${buildProjectionRows(data.projected_entries, 'practice', data.practice.practice_id)}
+                ${buildProjectionRows(data.projected_entries)}
               </tbody>
             </table>
           </div>
@@ -1248,8 +1248,6 @@
       document.getElementById('projection_date').value = '';
       document.getElementById('projection_notes').value = '';
     }
-
-  
 
     function openActualEntryModalForGame(gameId) {
       const detailModal = bootstrap.Modal.getInstance(document.getElementById('detailModal'));
@@ -1427,7 +1425,19 @@
     document.getElementById('addActualEntryModal').addEventListener('hidden.bs.modal', resetActualEntryModal);
     document.getElementById('addProjectionModal').addEventListener('hidden.bs.modal', resetProjectionModal);
 
-    // removed auto-open popup on page load
+    document.addEventListener('DOMContentLoaded', function () {
+      const params = new URLSearchParams(window.location.search);
+      const openGame = params.get('open_game');
+      const openPractice = params.get('open_practice');
+
+      if (openGame) {
+        openGameDetail(openGame);
+      }
+
+      if (openPractice) {
+        openPracticeDetail(openPractice);
+      }
+    });
   </script>
 </body>
 </html>
