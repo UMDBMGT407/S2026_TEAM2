@@ -20,12 +20,12 @@
         </li>
 
         {% if current_user.is_authenticated and current_user.role == 'Admin' %}
-<li class="nav-item">
-  <a class="nav-link {% if request.endpoint == 'admin_page' %}active{% endif %}" href="{{ url_for('admin_page') }}">
-    Dashboard
-  </a>
-</li>
-{% endif %}
+        <li class="nav-item">
+          <a class="nav-link {% if request.endpoint == 'admin_page' %}active{% endif %}" href="{{ url_for('admin_page') }}">
+            Dashboard
+          </a>
+        </li>
+        {% endif %}
 
         <li class="nav-item">
           <a class="nav-link {% if request.endpoint == 'calendar' %}active{% endif %}" href="{{ url_for('calendar') }}">
@@ -71,7 +71,7 @@
         </li>
         {% endif %}
 
-        {% if current_user.is_authenticated and current_user.role in ['Admin', 'Supplier'] %}
+        {% if current_user.is_authenticated and current_user.role == 'Supplier' %}
         <li class="nav-item">
           <a class="nav-link {% if request.endpoint == 'supplier_page' %}active{% endif %}" href="{{ url_for('supplier_page') }}">
             Supplier
@@ -79,21 +79,22 @@
         </li>
         {% endif %}
 
-{% if current_user.is_authenticated %}
-<li class="nav-item">
-  <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
-    Change Password
-  </a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
-</li>
-{% endif %}
+        {% if current_user.is_authenticated %}
+        <li class="nav-item">
+          <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+            Change Password
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+        </li>
+        {% endif %}
 
       </ul>
     </div>
   </div>
 </nav>
+
 <!-- CHANGE PASSWORD MODAL -->
 <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
