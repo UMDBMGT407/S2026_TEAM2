@@ -189,25 +189,25 @@ Access: Admin, Coach
 
 View alumni cards - Alumni Records tab on load - Cards for each alumni showing name, class year, position, email, occupation, phone, and donation status
 Search alumni - Type in search box - Client-side filter by name, class year, or occupation
-Summary stats - Top cards - Shows total donations in dollars, active alumni count, and newsletter subscribers shown as 36
+Summary stats - Top cards - Shows total donations in dollars, active alumni count, and newsletter subscribers
 Add Alumni without donation - Click Add Alumni, fill form, select Has Not Donated, click Save Alumni - POST to /add_alumni, inserts alumni record only
 Add Alumni with donation - Select Donated so donation fields appear, fill amount and date and message, click Save Alumni - Inserts alumni record plus donation record plus financial entry as Revenue under Donation category
 Edit Alumni - Click Edit on an alumni card, modify fields, click Save Changes - POST to /edit_alumni/alumni_id, updates alumni record
 Delete Alumni - Click Delete on an alumni card and confirm - POST to /delete_alumni/alumni_id, deletes alumni and all linked donation records
 View Donation Summary tab - Click Donation Summary tab - Table of all donations with alumni name, year, amount, and message plus breakdown cards below
-Newsletter modal - Click Newsletters button - Opens newsletter subscription modal, UI only, no backend
+Newsletter modal - Click Newsletters button - Opens newsletter subscription modal, enter email, transfers over to /newsletter list, displays message of success action
 
 ---
 
 NEWSLETTER MANAGEMENT - /newsletters
 Access: Admin, Coach
 
-View subscribers - Subscribers tab - Static table of 4 sample subscribers, display only, not from database
+View subscribers - Subscribers tab - Displays subscriber records from the subscribers table, including email, date added, and status. This is dynamic and updates from the database.
 View past newsletters - Past Newsletters tab - Table of all newsletters from the database with date, title, content preview, and author
 Create Newsletter - Click Create Newsletter, enter title and content, click Save Newsletter - POST to /add_newsletter, inserts into newsletters table linked to current user, flash success shown
 Create Newsletter with missing fields - Submit with blank title or content - Flash error: Title and content are required.
 Delete Newsletter - Click Delete on a newsletter row and confirm - POST to /delete_newsletter/newsletter_id, removes record, flash: Newsletter deleted.
-Summary stats - Top cards - Total Subscribers shown as 36, Past Newsletters shown as 8, Latest Issue shown as Mar 2026, all static display values
+Summary stats - Top cards (All dynamic) - Total Subscribers from subscribers table/database, Past Newsletters shows number of newsletters in the database, Latest Issue shows the most recent newsletter month/year and title
 
 ---
 
