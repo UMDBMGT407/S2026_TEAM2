@@ -37,7 +37,7 @@
       <div class="col-md-4">
         <div class="card p-4 card-box text-center">
           <h3>Total Subscribers</h3>
-          <p class="display-6 text-primary">36</p>
+          <p class="display-6 text-primary">{{ subscribers|length }}</p>          
           <p class="mb-0">Public newsletter list</p>
         </div>
       </div>
@@ -91,27 +91,29 @@
                   <th>Status</th>
                 </tr>
               </thead>
+              
               <tbody>
-                <tr>
-                  <td>fan1@email.com</td>
-                  <td>01/15/2026</td>
-                  <td><span class="badge bg-success">Active</span></td>
-                </tr>
-                <tr>
-                  <td>alumni1@email.com</td>
-                  <td>02/02/2026</td>
-                  <td><span class="badge bg-success">Active</span></td>
-                </tr>
-                <tr>
-                  <td>supporter@email.com</td>
-                  <td>02/18/2026</td>
-                  <td><span class="badge bg-success">Active</span></td>
-                </tr>
-                <tr>
-                  <td>familymember@email.com</td>
-                  <td>03/01/2026</td>
-                  <td><span class="badge bg-warning text-dark">Pending</span></td>
-                </tr>
+                {% if subscribers %}
+                  {% for s in subscribers %}
+                  <tr>
+                    <td>{{ s.email }}</td>
+                    <td>{{ s.date_added.strftime('%m/%d/%Y') if s.date_added else '' }}</td>
+                    <td>
+                      {% if s.status == 'Active' %}
+                      <span class="badge bg-success">Active</span>
+                      {% elif s.status == 'Pending' %}
+                      <span class="badge bg-warning text-dark">Pending</span>
+                      {% else %}
+                      <span class="badge bg-secondary">{{ s.status }}</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                  {% else %}
+                  <tr>
+                    <td colspan="3" class="text-center">No subscribers found.</td>
+                  </tr>
+                  {% endif %}
               </tbody>
             </table>
           </div>
