@@ -732,27 +732,36 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    const EVENTS = [
-      { id: 1, type: 'game', title: 'Upcoming Game', date: '2026-03-18', time: '8:30 PM', opponent: 'Georgetown Club Hockey', location: 'UMD Ice Arena', gameType: 'Home', status: 'Scheduled', notes: '' },
-      { id: 2, type: 'game', title: 'Next Away Game', date: '2026-03-22', time: '6:00 PM', opponent: 'Navy Club Hockey', location: 'Navy Ice Rink', gameType: 'Away', status: 'Confirmed', notes: 'Bus departs at 3:30 PM.' },
-      { id: 3, type: 'game', title: 'Home Game', date: '2026-03-28', time: '7:30 PM', opponent: 'Towson', location: 'UMD Ice Arena', gameType: 'Home', status: 'Scheduled', notes: 'Season finale. Alumni night.' },
-      { id: 15, type: 'game', title: 'Away Game', date: '2026-04-07', time: '7:00 PM', opponent: 'Johns Hopkins', location: 'Johns Hopkins Rink', gameType: 'Away', status: 'Scheduled', notes: 'Carpools available.' },
-
-      { id: 4, type: 'practice', title: 'Practice 1', practiceTitle: 'Terps Ice Hockey Practice', date: '2026-03-12', time: '7:00 PM', location: 'Campus Ice Rink', emailContact: 'ice@rink.com', notes: 'Power play and defensive zone' },
-      { id: 5, type: 'practice', title: 'Practice 2', practiceTitle: 'Terps Ice Hockey Practice', date: '2026-03-14', time: '7:00 PM', location: 'Community Ice Arena', emailContact: 'ice@rink.com', notes: 'Scrimmage and line combinations' },
-      { id: 6, type: 'practice', title: 'Practice', practiceTitle: 'Terps Ice Hockey Practice', date: '2026-03-16', time: '6:30 PM', location: 'Campus Ice Rink', emailContact: 'ice@rink.com', notes: 'Game prep – penalty kill' },
-      { id: 7, type: 'practice', title: 'Practice', practiceTitle: 'Terps Ice Hockey Practice', date: '2026-03-19', time: '6:30 PM', location: 'Campus Ice Rink', emailContact: 'ice@rink.com', notes: 'Recovery and conditioning' },
-      { id: 8, type: 'practice', title: 'Practice', practiceTitle: 'Terps Ice Hockey Practice', date: '2026-03-24', time: '7:00 PM', location: 'Community Ice Arena', emailContact: 'ice@rink.com', notes: 'Special teams' },
-      { id: 9, type: 'practice', title: 'Practice', practiceTitle: 'Terps Ice Hockey Practice', date: '2026-03-26', time: '7:00 PM', location: 'Campus Ice Rink', emailContact: 'ice@rink.com', notes: 'Game-day walkthrough' },
-      { id: 16, type: 'practice', title: 'Practice', practiceTitle: 'Terps Ice Hockey Practice', date: '2026-04-02', time: '7:00 PM', location: 'Campus Ice Rink', emailContact: 'ice@rink.com', notes: 'Spring training kickoff' },
-      { id: 17, type: 'practice', title: 'Practice', practiceTitle: 'Terps Ice Hockey Practice', date: '2026-04-09', time: '7:00 PM', location: 'Community Ice Arena', emailContact: 'ice@rink.com', notes: 'Open ice' },
-
-      { id: 10, type: 'other', title: 'Team Meeting', date: '2026-03-10', time: '6:00 PM', location: 'Club Room 102', description: 'Season review and playoff discussion.' },
-      { id: 11, type: 'other', title: 'Fundraiser Dinner', date: '2026-03-20', time: '7:00 PM', location: 'Student Union Hall', description: 'Annual team fundraising dinner.' },
-      { id: 12, type: 'other', title: 'Equipment Check-in', date: '2026-03-08', time: '5:00 PM', location: 'Athletic Storage', description: 'Return borrowed equipment.' },
-      { id: 13, type: 'other', title: 'End-of-Season Banquet', date: '2026-04-04', time: '6:30 PM', location: 'Stamp Student Union', description: 'Celebrate the season. Awards and dinner.' },
-      { id: 14, type: 'other', title: 'Offseason Skate', date: '2026-04-11', time: '3:00 PM', location: 'Campus Ice Rink', description: 'Informal skate — all skill levels welcome.' }
-    ];
+const EVENTS = [
+  {% for game in games %}
+  {
+    id: {{ game.game_id }},
+    type: 'game',
+    title: '{{ game.opponent }}',
+    date: '{{ game.game_date }}',
+    time: '',
+    opponent: '{{ game.opponent }}',
+    location: '{{ game.location | replace("'", "\\'") }}',
+    gameType: '{{ game.game_type }}',
+    status: '{{ game.status }}',
+    notes: '{{ (game.notes or "") | replace("'", "\\'") }}'
+  },
+  {% endfor %}
+  {% for practice in practices %}
+  {
+    id: 'p{{ practice.practice_id }}',
+    type: 'practice',
+    title: '{{ practice.title | replace("'", "\\'") }}',
+    practiceTitle: '{{ practice.title | replace("'", "\\'") }}',
+    date: '{{ practice.practice_date }}',
+    time: '{{ practice.practice_time }}',
+    location: '{{ practice.location | replace("'", "\\'") }}',
+    emailContact: '{{ practice.contact_email or "" }}',
+    notes: '{{ (practice.notes or "") | replace("'", "\\'") }}',
+    status: '{{ practice.status }}'
+  },
+  {% endfor %}
+];
 
     const REV_CATS = ['Ticket Sales', 'Sponsorship', 'Donation', 'Other Revenue'];
     const EXP_CATS = ['Ref Fees', 'Ice Rental', 'Travel', 'Equipment', 'Facility', 'Other Expense'];
