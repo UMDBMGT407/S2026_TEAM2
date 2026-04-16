@@ -310,7 +310,6 @@ def get_all_players():
             ORDER BY p.jersey_number IS NULL, p.jersey_number, u.name
         """)
         rows = cur.fetchall()
-        cur.close()
 
         return [
             {
@@ -327,8 +326,9 @@ def get_all_players():
         ]
     except Exception:
         mysql.connection.rollback()
-        cur.close()
         return []
+    finally:
+        cur.close()
 
 
 def get_all_games():
@@ -351,7 +351,6 @@ def get_all_games():
             ORDER BY game_date
         """)
         rows = cur.fetchall()
-        cur.close()
 
         return [
             {
@@ -371,8 +370,9 @@ def get_all_games():
         ]
     except Exception:
         mysql.connection.rollback()
-        cur.close()
         return []
+    finally:
+        cur.close()
 
 
 def get_all_practices():
@@ -395,7 +395,6 @@ def get_all_practices():
             ORDER BY practice_date, practice_time
         """)
         rows = cur.fetchall()
-        cur.close()
 
         return [
             {
@@ -415,8 +414,9 @@ def get_all_practices():
         ]
     except Exception:
         mysql.connection.rollback()
-        cur.close()
         return []
+    finally:
+        cur.close()
 
 
 def build_game_comparisons(actual_games, projected_games):
@@ -512,52 +512,58 @@ def build_practice_comparisons(actual_practices, projected_practices):
 
     return comparisons
 
+
 def get_all_alumni():
     cur = mysql.connection.cursor()
-    cur.execute("""
-        SELECT alumni_id, name, email, grad_year, position, phone, occupation, donation_status
-        FROM alumni
-        ORDER BY grad_year DESC, name
-    """)
-    rows = cur.fetchall()
-    cur.close()
+    try:
+        cur.execute("""
+            SELECT alumni_id, name, email, grad_year, position, phone, occupation, donation_status
+            FROM alumni
+            ORDER BY grad_year DESC, name
+        """)
+        rows = cur.fetchall()
 
-    return [
-        {
-            'alumni_id': row[0],
-            'name': row[1],
-            'email': row[2],
-            'grad_year': row[3],
-            'position': row[4],
-            'phone': row[5],
-            'occupation': row[6],
-            'donation_status': row[7]
-        }
-        for row in rows
-    ]
+        return [
+            {
+                'alumni_id': row[0],
+                'name': row[1],
+                'email': row[2],
+                'grad_year': row[3],
+                'position': row[4],
+                'phone': row[5],
+                'occupation': row[6],
+                'donation_status': row[7]
+            }
+            for row in rows
+        ]
+    finally:
+        cur.close()
+
 
 def get_all_donations():
     cur = mysql.connection.cursor()
-    cur.execute("""
-        SELECT d.donation_id, a.name, a.grad_year, d.amount, d.donation_date, d.message
-        FROM donations d
-        JOIN alumni a ON d.alumni_id = a.alumni_id
-        ORDER BY d.donation_date DESC, d.donation_id DESC
-    """)
-    rows = cur.fetchall()
-    cur.close()
+    try:
+        cur.execute("""
+            SELECT d.donation_id, a.name, a.grad_year, d.amount, d.donation_date, d.message
+            FROM donations d
+            JOIN alumni a ON d.alumni_id = a.alumni_id
+            ORDER BY d.donation_date DESC, d.donation_id DESC
+        """)
+        rows = cur.fetchall()
 
-    return [
-        {
-            'donation_id': row[0],
-            'name': row[1],
-            'grad_year': row[2],
-            'amount': float(row[3]),
-            'donation_date': row[4],
-            'message': row[5]
-        }
-        for row in rows
-    ]
+        return [
+            {
+                'donation_id': row[0],
+                'name': row[1],
+                'grad_year': row[2],
+                'amount': float(row[3]),
+                'donation_date': row[4],
+                'message': row[5]
+            }
+            for row in rows
+        ]
+    finally:
+        cur.close()
 
 
 # ---------------------------
@@ -581,8 +587,8 @@ def public_page():
         'index.html',
         upcoming_games=upcoming_games,
         public_players=public_players
-
     )
+
 
 # ---------------------------
 # AUTH ROUTES
@@ -644,7 +650,6 @@ def logout():
 def home():
     cur = mysql.connection.cursor()
     try:
-        # --- Players ---
         cur.execute("SELECT COUNT(*) FROM players")
         total_players = cur.fetchone()[0]
 
@@ -653,7 +658,6 @@ def home():
 
         active_players = total_players - injured_players
 
-        # --- Upcoming Games ---
         cur.execute("""
             SELECT COUNT(*) FROM games
             WHERE game_date >= CURDATE() AND status != 'Cancelled'
@@ -669,7 +673,6 @@ def home():
         next_game_opponent = next_game_row[0] if next_game_row else None
         next_game_date = next_game_row[1] if next_game_row else None
 
-        # --- Inventory ---
         cur.execute("SELECT COUNT(*) FROM inventory_items")
         total_inventory_items = cur.fetchone()[0]
 
@@ -679,7 +682,6 @@ def home():
         """)
         pending_orders = cur.fetchone()[0]
 
-        # --- Financials ---
         cur.execute("""
             SELECT
                 COALESCE(SUM(CASE WHEN entry_type = 'Revenue' THEN amount ELSE 0 END), 0),
@@ -692,7 +694,6 @@ def home():
         total_expenses = float(fin_row[1])
         net_balance = float(fin_row[2])
 
-        # --- Projected Expenses ---
         cur.execute("""
             SELECT COALESCE(SUM(projected_amount), 0)
             FROM financial_projections WHERE projection_type = 'Expense'
@@ -701,7 +702,6 @@ def home():
 
         budget_variance = projected_expenses - total_expenses
 
-        # --- Recent Activity (last 4 financial entry descriptions) ---
         cur.execute("""
             SELECT description FROM financial_entries
             WHERE description IS NOT NULL AND description != ''
@@ -830,6 +830,7 @@ def equipment():
         selected_item_type=item_type
     )
 
+
 # ---------------------------
 # EQUIPMENT ACTIONS
 # ---------------------------
@@ -906,6 +907,7 @@ def create_equipment_order():
 
     return redirect(url_for('equipment'))
 
+
 @app.route('/supplier')
 @app.route('/supplier.html')
 @login_required
@@ -924,6 +926,7 @@ def supplier_page():
         orders=orders,
         summary=summary
     )
+
 
 # ---------------------------
 # SUPPLIER ACTIONS
@@ -1025,6 +1028,7 @@ def update_supplier_order(order_id):
 
     return redirect(url_for('supplier_page'))
 
+
 @app.route('/equipment_suppliers')
 @login_required
 @role_required('Admin', 'Coach')
@@ -1044,6 +1048,7 @@ def equipment_suppliers():
         for row in rows
     ]
     return jsonify(suppliers)
+
 
 @app.route('/finances')
 @app.route('/finances.html')
@@ -1540,7 +1545,7 @@ def practice_details(practice_id):
 @login_required
 @role_required('Admin', 'Coach')
 def alumni():
-    alumni = get_all_alumni()
+    alumni_list = get_all_alumni()
     donations = get_all_donations()
     total_donations = sum(d['amount'] for d in donations)
     if donations:
@@ -1552,12 +1557,13 @@ def alumni():
 
     return render_template(
         'alumni.html',
-        alumni=alumni,
+        alumni=alumni_list,
         donations=donations,
         total_donations=total_donations,
         top_donor=top_donor,
         avg_donation=avg_donation
     )
+
 
 @app.route('/newsletters')
 @app.route('/newsletters.html')
@@ -1638,7 +1644,7 @@ def delete_newsletter(newsletter_id):
 
 
 # ---------------------------
-# ADD PLAYER
+# PLAYER ACTIONS
 # ---------------------------
 @app.route('/update_player/<int:player_id>', methods=['POST'])
 @login_required
@@ -1667,25 +1673,19 @@ def update_player(player_id):
 
         if not row:
             flash('Player not found.', 'danger')
-            cur.close()
             return redirect(url_for('roster'))
 
         user_id = row[0]
 
         cur.execute("""
             UPDATE users
-            SET name = %s,
-                email = %s
+            SET name = %s, email = %s
             WHERE id = %s
         """, (name, email, user_id))
 
         cur.execute("""
             UPDATE players
-            SET jersey_number = %s,
-                position = %s,
-                year = %s,
-                injured = %s,
-                phone = %s
+            SET jersey_number = %s, position = %s, year = %s, injured = %s, phone = %s
             WHERE player_id = %s
         """, (jersey_number, position, year, injured, phone, player_id))
 
@@ -1699,6 +1699,8 @@ def update_player(player_id):
         cur.close()
 
     return redirect(url_for('roster'))
+
+
 @app.route('/add_player', methods=['POST'])
 @login_required
 @role_required('Admin', 'Coach')
@@ -1746,8 +1748,9 @@ def add_player():
 
     return redirect(url_for('roster'))
 
+
 # ---------------------------
-# ADD GAME / PRACTICE
+# GAME / PRACTICE ACTIONS
 # ---------------------------
 @app.route('/add_game', methods=['POST'])
 @login_required
@@ -1941,7 +1944,7 @@ def add_financial_entry():
     entry_date = request.form.get('entry_date')
 
     if not category_id or not entry_type or not amount or not entry_date:
-        flash('Please complete all required fields for the financial entry.', 'danger')
+        flash('Please complete all required fields for the entry.', 'danger')
         return redirect(url_for('finances'))
 
     if game_id == '':
@@ -1949,12 +1952,7 @@ def add_financial_entry():
     if practice_id == '':
         practice_id = None
 
-    if game_id and practice_id:
-        flash('An entry cannot be linked to both a game and a practice.', 'danger')
-        return redirect(url_for('finances'))
-
     cur = mysql.connection.cursor()
-
     try:
         cur.execute("""
             INSERT INTO financial_entries (game_id, practice_id, category_id, entry_type, amount, description, entry_date)
@@ -1968,6 +1966,10 @@ def add_financial_entry():
     finally:
         cur.close()
 
+    if game_id:
+        return redirect(url_for('finances', open_game=game_id))
+    elif practice_id:
+        return redirect(url_for('finances', open_practice=practice_id))
     return redirect(url_for('finances'))
 
 
@@ -2001,7 +2003,6 @@ def add_financial_projection():
         return redirect(url_for('finances'))
 
     cur = mysql.connection.cursor()
-
     try:
         cur.execute("""
             INSERT INTO financial_projections (game_id, practice_id, category_id, projection_type, projected_amount, notes, projection_date)
@@ -2015,11 +2016,15 @@ def add_financial_projection():
     finally:
         cur.close()
 
+    if game_id:
+        return redirect(url_for('finances', open_game=game_id))
+    elif practice_id:
+        return redirect(url_for('finances', open_practice=practice_id))
     return redirect(url_for('finances'))
 
 
 # ---------------------------
-# ADD ALUMNI
+# ALUMNI ACTIONS
 # ---------------------------
 @app.route('/add_alumni', methods=['POST'])
 @login_required
@@ -2098,6 +2103,7 @@ def add_alumni():
 
     return redirect(url_for('alumni'))
 
+
 @app.route('/edit_alumni/<int:alumni_id>', methods=['POST'])
 @login_required
 @role_required('Admin', 'Coach')
@@ -2135,6 +2141,7 @@ def edit_alumni(alumni_id):
 
     return redirect(url_for('alumni'))
 
+
 @app.route('/delete_alumni/<int:alumni_id>', methods=['POST'])
 @login_required
 @role_required('Admin', 'Coach')
@@ -2153,6 +2160,10 @@ def delete_alumni(alumni_id):
 
     return redirect(url_for('alumni'))
 
+
+# ---------------------------
+# FINANCIAL DELETE ACTIONS
+# ---------------------------
 @app.route('/delete_financial_entry/<int:entry_id>', methods=['POST'])
 @login_required
 @role_required('Admin', 'Coach')
@@ -2309,6 +2320,7 @@ def delete_user(user_id):
         mysql.connection.rollback()
         return jsonify(error=str(e)), 400
 
+
 @app.route('/change_password', methods=['POST'])
 @login_required
 def change_password():
@@ -2346,6 +2358,7 @@ def change_password():
         cur.close()
 
     return redirect(url_for('home'))
+
 
 # ---------------------------
 # ERROR HANDLERS
