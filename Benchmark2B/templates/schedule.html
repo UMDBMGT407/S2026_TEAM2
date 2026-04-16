@@ -1160,5 +1160,39 @@
     new bootstrap.Modal(document.getElementById('editPracticeModal')).show();
   }
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const params = new URLSearchParams(window.location.search);
+  const tab = params.get('tab');
+
+  if (tab === 'practices') {
+    const trigger = document.querySelector('#practices-tab');
+    if (trigger) {
+      bootstrap.Tab.getOrCreateInstance(trigger).show();
+    }
+  }
+
+  if (tab === 'games') {
+    const trigger = document.querySelector('#games-tab');
+    if (trigger) {
+      bootstrap.Tab.getOrCreateInstance(trigger).show();
+    }
+  }
+
+  if (tab === 'results') {
+    const trigger = document.querySelector('#results-tab');
+    if (trigger) {
+      bootstrap.Tab.getOrCreateInstance(trigger).show();
+    }
+  }
+
+  if (tab === 'emails') {
+    const trigger = document.querySelector('#emails-tab');
+    if (trigger) {
+      bootstrap.Tab.getOrCreateInstance(trigger).show();
+    }
+  }
+});
+</script>
 </body>
 </html>
