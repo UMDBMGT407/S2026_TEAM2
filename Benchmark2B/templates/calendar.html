@@ -589,6 +589,7 @@
 
   <main class="container my-5">
 
+{% if current_user.role != 'Player' %}
 <div class="fin-summary">
   <div class="card p-4 card-box fin-card fc-revenue text-center">
     <div class="fc-label">Total Event Revenue</div>
@@ -611,6 +612,7 @@
     <div class="fc-sub">Across all calendar events</div>
   </div>
 </div>
+{% endif %}
 
     <div class="cal-toolbar">
       <div class="month-nav">
