@@ -589,25 +589,28 @@
 
   <main class="container my-5">
 
-    <div class="fin-summary">
-      <div class="card p-4 card-box fin-card fc-revenue text-center">
-        <div class="fc-label">Total Event Revenue</div>
-        <div class="fc-amount" id="totalRevenue">$0.00</div>
-        <div class="fc-sub">Ticket sales across all games</div>
-      </div>
+<div class="fin-summary">
+  <div class="card p-4 card-box fin-card fc-revenue text-center">
+    <div class="fc-label">Total Event Revenue</div>
+    <div class="fc-amount" id="totalRevenue">${{ "{:,.2f}".format(total_revenue) }}</div>
+    <div class="fc-sub">Ticket sales across all games</div>
+  </div>
 
-      <div class="card p-4 card-box fin-card fc-expense text-center">
-        <div class="fc-label">Total Event Expenses</div>
-        <div class="fc-amount" id="totalExpenses">$0.00</div>
-        <div class="fc-sub">Ref fees, ice fees, and travel</div>
-      </div>
+  <div class="card p-4 card-box fin-card fc-expense text-center">
+    <div class="fc-label">Total Event Expenses</div>
+    <div class="fc-amount" id="totalExpenses">${{ "{:,.2f}".format(total_expenses) }}</div>
+    <div class="fc-sub">Ref fees, ice fees, and travel</div>
+  </div>
 
-      <div class="card p-4 card-box fin-card fc-net text-center">
-        <div class="fc-label">Net (Revenue − Expenses)</div>
-        <div class="fc-amount" id="netAmount">$0.00</div>
-        <div class="fc-sub">Across all calendar events</div>
-      </div>
+  <div class="card p-4 card-box fin-card fc-net text-center">
+    <div class="fc-label">Net (Revenue − Expenses)</div>
+    <div class="fc-amount" id="netAmount"
+         style="color: {{ '#198754' if net_balance >= 0 else '#b22222' }}">
+      ${{ "{:,.2f}".format(net_balance) }}
     </div>
+    <div class="fc-sub">Across all calendar events</div>
+  </div>
+</div>
 
     <div class="cal-toolbar">
       <div class="month-nav">
