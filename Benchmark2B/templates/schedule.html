@@ -534,9 +534,11 @@
 
     </div>
 
-    <div class="mt-4">
-      <a href="{{ url_for('admin_page') }}" class="btn btn-secondary">Back to Dashboard</a>
-    </div>
+{% if current_user.role != 'Player' %}
+<div class="mt-4">
+  <a href="{{ url_for('admin_page') }}" class="btn btn-secondary">Back to Dashboard</a>
+</div>
+{% endif %}
 
   </main>
 
