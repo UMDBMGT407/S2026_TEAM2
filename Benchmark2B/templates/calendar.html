@@ -687,7 +687,8 @@
         <div id="detailBadge"></div>
         <div id="detailFields"></div>
 
-        <div class="fin-section">
+        <!-- Financial section — hidden for players entirely -->
+        <div class="fin-section" id="finSection">
           <h6>
             &#128178; Financial Entries
             <span id="finCount" style="font-weight:400;color:#aaa;font-size:0.75rem;"></span>
@@ -805,9 +806,8 @@
     const EXP_CATS = ['Ref Fees', 'Ice Rental', 'Travel', 'Equipment', 'Facility', 'Other Expense'];
 
     const TODAY = new Date();
-    // Default to April 2026 (month index 3) where upcoming games live
     let viewYear = 2026;
-    let viewMonth = 3;
+    let viewMonth = 3;  // April — where upcoming games live
     let filters = { game: true, practice: true, other: true };
     let activeEv = null;
     let finType = 'revenue';
@@ -835,11 +835,9 @@
       for (let i = 0; i < firstDay; i++) {
         cells.push({ day: daysInPrev - firstDay + 1 + i, mo: -1, other: true });
       }
-
       for (let d = 1; d <= daysInMonth; d++) {
         cells.push({ day: d, mo: 0, other: false });
       }
-
       let n = 1;
       while (cells.length % 7) {
         cells.push({ day: n++, mo: 1, other: true });
@@ -871,11 +869,10 @@
             : `${ev.time ? ev.time + ' ' : ''}${ev.title}`;
           pill.title = pill.textContent;
 
+          // ALL roles can click to open the detail modal now
           pill.onclick = e => {
             e.stopPropagation();
-            if (!IS_PLAYER) {
-              openDetail(ev);
-            }
+            openDetail(ev);
           };
 
           cell.appendChild(pill);
@@ -925,7 +922,9 @@
             <span class="tag-${ev.gameType.toLowerCase()}">${ev.gameType.toUpperCase()}</span>
           </span></div>
           <div class="frow"><strong>Status:</strong><span>${ev.status}</span></div>
-          ${ev.inResults ? '<div class="frow"><strong>Section:</strong><span>Results</span></div>' : '<div class="frow"><strong>Section:</strong><span>Schedule</span></div>'}
+          ${ev.inResults
+            ? '<div class="frow"><strong>Section:</strong><span>Results</span></div>'
+            : '<div class="frow"><strong>Section:</strong><span>Schedule</span></div>'}
           ${ev.notes ? `<div class="frow"><strong>Notes:</strong><span>${ev.notes}</span></div>` : ''}
         `;
       } else if (ev.type === 'practice') {
@@ -936,8 +935,12 @@
           <div class="frow"><strong>Time:</strong><span>${ev.time || 'N/A'}</span></div>
           <div class="frow"><strong>Location:</strong><span>${ev.location}</span></div>
           <div class="frow"><strong>Status:</strong><span>${ev.status}</span></div>
-          ${ev.emailContact ? `<div class="frow"><strong>Contact Email:</strong><span>${ev.emailContact}</span></div>` : ''}
-          ${ev.inResults ? '<div class="frow"><strong>Section:</strong><span>Results</span></div>' : '<div class="frow"><strong>Section:</strong><span>Schedule</span></div>'}
+          ${ev.emailContact
+            ? `<div class="frow"><strong>Contact Email:</strong><span>${ev.emailContact}</span></div>`
+            : ''}
+          ${ev.inResults
+            ? '<div class="frow"><strong>Section:</strong><span>Results</span></div>'
+            : '<div class="frow"><strong>Section:</strong><span>Schedule</span></div>'}
           ${ev.notes ? `<div class="frow"><strong>Notes:</strong><span>${ev.notes}</span></div>` : ''}
         `;
       } else {
@@ -949,7 +952,11 @@
         `;
       }
 
-      renderFinList();
+      // Hide the entire financial section for players
+      document.getElementById('finSection').style.display = IS_PLAYER ? 'none' : 'block';
+
+      if (!IS_PLAYER) renderFinList();
+
       openM('detailModal');
     }
 
@@ -959,11 +966,6 @@
         entries.length ? `(${entries.length} entr${entries.length === 1 ? 'y' : 'ies'})` : '';
 
       const list = document.getElementById('finList');
-
-      if (IS_PLAYER) {
-        list.innerHTML = `<p class="text-muted" style="font-size:0.8rem;padding:4px 0;">Financial details are not available in player view.</p>`;
-        return;
-      }
 
       if (!entries.length) {
         list.innerHTML = `<p class="text-muted" style="font-size:0.8rem;padding:4px 0;">No financial entries yet for this event.</p>`;
@@ -976,7 +978,6 @@
         const isRev = e.type === 'revenue';
         if (isRev) rev += e.amount; else exp += e.amount;
 
-        // Don't show remove button for DB-seeded entries (they show label "DB Entry")
         const isDbEntry = e.category === 'DB Entry';
         html += `
           <div class="fin-entry-row">
@@ -1031,16 +1032,13 @@
         alert('Please enter a valid amount greater than $0.');
         return;
       }
-
       if (!finData[activeEv.id]) finData[activeEv.id] = [];
-
       finData[activeEv.id].push({
         type: finType,
         category: document.getElementById('finCat').value,
         amount: amt,
         desc: document.getElementById('finDesc').value.trim()
       });
-
       closeM('finModal');
       renderFinList();
       render();
@@ -1052,7 +1050,6 @@
       let rev = BASE_REVENUE;
       let exp = BASE_EXPENSES;
 
-      // Only add session-added entries (not DB entries which are already in the base totals)
       Object.values(finData).forEach(arr =>
         arr.forEach(e => {
           if (e.category !== 'DB Entry') {
