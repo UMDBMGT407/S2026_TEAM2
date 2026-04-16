@@ -986,25 +986,25 @@
       render();
     }
 
-    function updateCards() {
-      let rev = 0;
-      let exp = 0;
+function updateCards() {
+  let rev = BASE_REVENUE;
+  let exp = BASE_EXPENSES;
 
-      Object.values(finData).forEach(arr =>
-        arr.forEach(e => {
-          if (e.type === 'revenue') rev += e.amount;
-          else exp += e.amount;
-        })
-      );
+  Object.values(finData).forEach(arr =>
+    arr.forEach(e => {
+      if (e.type === 'revenue') rev += e.amount;
+      else exp += e.amount;
+    })
+  );
 
-      const net = rev - exp;
-      document.getElementById('totalRevenue').textContent = `$${rev.toFixed(2)}`;
-      document.getElementById('totalExpenses').textContent = `$${exp.toFixed(2)}`;
+  const net = rev - exp;
+  document.getElementById('totalRevenue').textContent = `$${rev.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+  document.getElementById('totalExpenses').textContent = `$${exp.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
-      const netEl = document.getElementById('netAmount');
-      netEl.textContent = `$${net.toFixed(2)}`;
-      netEl.style.color = net >= 0 ? '#198754' : '#b22222';
-    }
+  const netEl = document.getElementById('netAmount');
+  netEl.textContent = `$${net.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+  netEl.style.color = net >= 0 ? '#198754' : '#b22222';
+}
 
     function openM(id) {
       document.getElementById(id).classList.add('show');
