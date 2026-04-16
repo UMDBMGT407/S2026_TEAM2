@@ -830,8 +830,10 @@ const EVENTS = [
           pill.title = pill.textContent;
           pill.onclick = e => {
             e.stopPropagation();
-            openDetail(ev);
-          };
+            if (!IS_PLAYER) {
+              openDetail(ev);
+          }
+      };
 
           cell.appendChild(pill);
         });
