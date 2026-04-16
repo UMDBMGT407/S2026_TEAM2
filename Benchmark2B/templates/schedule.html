@@ -189,9 +189,7 @@
                 </p>
 
 <div class="card-actions" onclick="event.stopPropagation();">
-  <button
-    type="button"
-    class="btn btn-outline-primary btn-sm"
+  <button type="button" class="btn btn-outline-primary btn-sm"
     onclick="openEventDetailFromButton(this)"
     data-event-type="game"
     data-game-id="{{ game.game_id }}"
@@ -203,14 +201,12 @@
     data-projected-cost="{{ game.projected_cost if game.projected_cost is not none else '' }}"
     data-actual-cost="{{ game.actual_cost if game.actual_cost is not none else '' }}"
     data-final-score="{{ game.final_score or '' }}"
-    data-notes="{{ game.notes or 'None' }}"
-  >
+    data-notes="{{ game.notes or 'None' }}">
     View Details
   </button>
 
-  <button
-    type="button"
-    class="btn btn-outline-warning btn-sm"
+  {% if current_user.role in ['Admin', 'Coach'] %}
+  <button type="button" class="btn btn-outline-warning btn-sm"
     data-game-id="{{ game.game_id }}"
     data-opponent="{{ game.opponent }}"
     data-date="{{ game.game_date }}"
@@ -219,8 +215,7 @@
     data-status="{{ game.status }}"
     data-projected-cost="{{ game.projected_cost if game.projected_cost is not none else '' }}"
     data-notes="{{ game.notes or '' }}"
-    onclick="openEditGameModal(this)"
-  >
+    onclick="openEditGameModal(this)">
     Edit
   </button>
 
@@ -228,15 +223,13 @@
     <button type="submit" class="btn btn-outline-success btn-sm">Move to Results</button>
   </form>
 
-  <button
-    type="button"
-    class="btn btn-outline-danger btn-sm"
+  <button type="button" class="btn btn-outline-danger btn-sm"
     data-game-id="{{ game.game_id }}"
     data-opponent="{{ game.opponent }}"
-    onclick="openDeleteGameModalFromButton(this)"
-  >
+    onclick="openDeleteGameModalFromButton(this)">
     Delete
   </button>
+  {% endif %}
 </div>
               </div>
             </div>
@@ -294,11 +287,8 @@
                 <p class="mb-2"><strong>Projected Cost:</strong>
                   {% if practice.projected_cost is not none %}${{ "%.2f"|format(practice.projected_cost) }}{% else %}Not entered{% endif %}
                 </p>
-
-             <div class="card-actions" onclick="event.stopPropagation();">
-  <button
-    type="button"
-    class="btn btn-outline-primary btn-sm"
+<div class="card-actions" onclick="event.stopPropagation();">
+  <button type="button" class="btn btn-outline-primary btn-sm"
     onclick="openEventDetailFromButton(this)"
     data-event-type="practice"
     data-practice-id="{{ practice.practice_id }}"
@@ -310,14 +300,12 @@
     data-notes="{{ practice.notes or 'None' }}"
     data-status="{{ practice.status }}"
     data-projected-cost="{{ practice.projected_cost if practice.projected_cost is not none else '' }}"
-    data-actual-cost="{{ practice.actual_cost if practice.actual_cost is not none else '' }}"
-  >
+    data-actual-cost="{{ practice.actual_cost if practice.actual_cost is not none else '' }}">
     View Details
   </button>
 
-  <button
-    type="button"
-    class="btn btn-outline-warning btn-sm"
+  {% if current_user.role in ['Admin', 'Coach'] %}
+  <button type="button" class="btn btn-outline-warning btn-sm"
     data-practice-id="{{ practice.practice_id }}"
     data-title="{{ practice.title }}"
     data-date="{{ practice.practice_date }}"
@@ -327,8 +315,7 @@
     data-notes="{{ practice.notes or '' }}"
     data-status="{{ practice.status }}"
     data-projected-cost="{{ practice.projected_cost if practice.projected_cost is not none else '' }}"
-    onclick="openEditPracticeModal(this)"
-  >
+    onclick="openEditPracticeModal(this)">
     Edit
   </button>
 
@@ -336,16 +323,15 @@
     <button type="submit" class="btn btn-outline-success btn-sm">Move to Results</button>
   </form>
 
-  <button
-    type="button"
-    class="btn btn-outline-danger btn-sm"
+  <button type="button" class="btn btn-outline-danger btn-sm"
     data-practice-id="{{ practice.practice_id }}"
     data-title="{{ practice.title }}"
-    onclick="openDeletePracticeModalFromButton(this)"
-  >
+    onclick="openDeletePracticeModalFromButton(this)">
     Delete
   </button>
+  {% endif %}
 </div>
+
               </div>
             </div>
             {% endfor %}
