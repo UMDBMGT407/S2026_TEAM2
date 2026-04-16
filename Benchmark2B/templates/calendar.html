@@ -777,6 +777,7 @@ const EVENTS = [
     const finData = {};
     const BASE_REVENUE = {{ total_revenue }};
     const BASE_EXPENSES = {{ total_expenses }};
+    const IS_PLAYER = {{ 'true' if current_user.role == 'Player' else 'false' }};
 
     const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const MSHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
