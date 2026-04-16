@@ -27,6 +27,7 @@
         </li>
         {% endif %}
 
+        {% if current_user.is_authenticated and current_user.role != 'Supplier' %}
         <li class="nav-item">
           <a class="nav-link {% if request.endpoint == 'calendar' %}active{% endif %}" href="{{ url_for('calendar') }}">
             Calendar
@@ -44,6 +45,7 @@
             Schedule
           </a>
         </li>
+        {% endif %}
 
         {% if current_user.is_authenticated and current_user.role == 'Admin' %}
         <li class="nav-item">
