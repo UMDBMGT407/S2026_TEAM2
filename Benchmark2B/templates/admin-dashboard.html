@@ -59,10 +59,9 @@
 
       <div class="col-md-4">
         <div class="card p-4 card-box text-center">
-          <h3>Total Revenue</h3>
-          <p class="display-6 text-success">${{ "%.2f"|format(stats.total_revenue) }}
-            {%- set rev = stats.total_revenue | int -%}
-          </p>
+
+<h3>Total Revenue</h3>
+<p class="display-6 text-success">${{ "{:,.0f}".format(stats.total_revenue) }}</p>
           <p>Alumni donations and ticket sales</p>
         </div>
       </div>
