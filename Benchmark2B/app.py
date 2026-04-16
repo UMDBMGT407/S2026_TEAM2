@@ -1657,6 +1657,8 @@ def practice_details(practice_id):
 def alumni():
     alumni_list = get_all_alumni()
     donations = get_all_donations()
+    subscribers=get_all_subscribers()
+
     total_donations = sum(d['amount'] for d in donations)
     if donations:
         top_donor = max(d['amount'] for d in donations)
@@ -1669,6 +1671,7 @@ def alumni():
         'alumni.html',
         alumni=alumni_list,
         donations=donations,
+        subscribers=subscribers,
         total_donations=total_donations,
         top_donor=top_donor,
         avg_donation=avg_donation
