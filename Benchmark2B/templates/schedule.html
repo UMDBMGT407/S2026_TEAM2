@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -385,14 +385,19 @@
 
                 <p class="mb-2"><strong>Date:</strong> {{ game.game_date }}</p>
                 <p class="mb-2"><strong>Location:</strong> {{ game.location }}</p>
+
+                {% if current_user.role != 'Player' %}
                 <p class="mb-2"><strong>Projected Cost:</strong>
                   {% if game.projected_cost is not none %}${{ "%.2f"|format(game.projected_cost) }}{% else %}Not entered{% endif %}
                 </p>
                 <p class="mb-2"><strong>Actual Cost:</strong>
                   {% if game.actual_cost is not none %}${{ "%.2f"|format(game.actual_cost) }}{% else %}Not entered{% endif %}
                 </p>
+                {% endif %}
+
                 <p class="mb-3"><strong>Final Score:</strong> {{ game.final_score or 'Not entered' }}</p>
 
+                {% if current_user.role != 'Player' %}
                 <form method="POST" action="{{ url_for('update_game_results', game_id=game.game_id) }}">
                   <input type="hidden" name="in_results" value="1">
                   <input type="hidden" name="status" value="Completed">
@@ -421,6 +426,8 @@
                     </button>
                   </div>
                 </form>
+                {% endif %}
+
               </div>
             </div>
             {% endfor %}
@@ -436,13 +443,17 @@
                 <p class="mb-2"><strong>Date:</strong> {{ practice.practice_date }}</p>
                 <p class="mb-2"><strong>Time:</strong> {{ practice.practice_time }}</p>
                 <p class="mb-2"><strong>Location:</strong> {{ practice.location }}</p>
+
+                {% if current_user.role != 'Player' %}
                 <p class="mb-2"><strong>Projected Cost:</strong>
                   {% if practice.projected_cost is not none %}${{ "%.2f"|format(practice.projected_cost) }}{% else %}Not entered{% endif %}
                 </p>
                 <p class="mb-3"><strong>Actual Cost:</strong>
                   {% if practice.actual_cost is not none %}${{ "%.2f"|format(practice.actual_cost) }}{% else %}Not entered{% endif %}
                 </p>
+                {% endif %}
 
+                {% if current_user.role != 'Player' %}
                 <form method="POST" action="{{ url_for('update_practice_results', practice_id=practice.practice_id) }}">
                   <input type="hidden" name="in_results" value="1">
                   <input type="hidden" name="status" value="Completed">
@@ -467,6 +478,8 @@
                     </button>
                   </div>
                 </form>
+                {% endif %}
+
               </div>
             </div>
             {% endfor %}
