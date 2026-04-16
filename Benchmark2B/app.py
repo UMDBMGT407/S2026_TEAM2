@@ -772,7 +772,7 @@ def edit_game(game_id):
 
     if not opponent or not game_date or not location or not game_type or not status:
         flash('Please fill in all required game fields.', 'danger')
-        return redirect(url_for('schedule'))
+        return redirect(url_for('schedule', tab='games'))
 
     if projected_cost == '':
         projected_cost = None
@@ -798,7 +798,7 @@ def edit_game(game_id):
     finally:
         cur.close()
 
-    return redirect(url_for('schedule'))
+    return redirect(url_for('schedule', tab='games'))
 
 
 @app.route('/edit_practice/<int:practice_id>', methods=['POST'])
@@ -816,7 +816,7 @@ def edit_practice(practice_id):
 
     if not title or not practice_date or not practice_time or not location or not status:
         flash('Please fill in all required practice fields.', 'danger')
-        return redirect(url_for('schedule'))
+        return redirect(url_for('schedule', tab='practices'))
 
     if projected_cost == '':
         projected_cost = None
@@ -843,7 +843,7 @@ def edit_practice(practice_id):
     finally:
         cur.close()
 
-    return redirect(url_for('schedule'))
+    return redirect(url_for('schedule', tab='practices'))
 
 @app.route('/calendar')
 @app.route('/calendar.html')
@@ -1785,34 +1785,6 @@ def update_player(player_id):
 
     return redirect(url_for('roster'))
 
-@app.route('/delete_player/<int:player_id>', methods=['POST'])
-@login_required
-@role_required('Admin', 'Coach')
-def delete_player(player_id):
-    cur = mysql.connection.cursor()
-    try:
-        # First get the user_id linked to this player
-        cur.execute("SELECT user_id FROM players WHERE player_id = %s", (player_id,))
-        row = cur.fetchone()
-
-        if not row:
-            flash('Player not found.', 'danger')
-            return redirect(url_for('roster'))
-
-        user_id = row[0]
-
-        # Deleting the user automatically deletes the player row via ON DELETE CASCADE
-        cur.execute("DELETE FROM users WHERE id = %s", (user_id,))
-        mysql.connection.commit()
-        flash('Player deleted successfully.', 'success')
-
-    except Exception as e:
-        mysql.connection.rollback()
-        flash(f'Could not delete player: {e}', 'danger')
-    finally:
-        cur.close()
-
-    return redirect(url_for('roster'))
 
 @app.route('/add_player', methods=['POST'])
 @login_required
