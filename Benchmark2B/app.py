@@ -1785,6 +1785,34 @@ def update_player(player_id):
 
     return redirect(url_for('roster'))
 
+@app.route('/delete_player/<int:player_id>', methods=['POST'])
+@login_required
+@role_required('Admin', 'Coach')
+def delete_player(player_id):
+    cur = mysql.connection.cursor()
+    try:
+        # First get the user_id linked to this player
+        cur.execute("SELECT user_id FROM players WHERE player_id = %s", (player_id,))
+        row = cur.fetchone()
+
+        if not row:
+            flash('Player not found.', 'danger')
+            return redirect(url_for('roster'))
+
+        user_id = row[0]
+
+        # Deleting the user automatically deletes the player row via ON DELETE CASCADE
+        cur.execute("DELETE FROM users WHERE id = %s", (user_id,))
+        mysql.connection.commit()
+        flash('Player deleted successfully.', 'success')
+
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f'Could not delete player: {e}', 'danger')
+    finally:
+        cur.close()
+
+    return redirect(url_for('roster'))
 
 @app.route('/add_player', methods=['POST'])
 @login_required
