@@ -634,7 +634,9 @@
         </button>
       </div>
 
-      <a href="{{ url_for('finances') }}" class="btn btn-danger btn-sm">&#128200; Go to Finances</a>
+   {% if current_user.role != 'Player' %}
+<a href="{{ url_for('finances') }}" class="btn btn-danger btn-sm">&#128200; Go to Finances</a>
+{% endif %}
     </div>
 
     <div class="cal-wrap">
@@ -654,12 +656,16 @@
       <span><span class="ldot ldot-game"></span> Game</span>
       <span><span class="ldot ldot-practice"></span> Practice</span>
       <span><span class="ldot ldot-other"></span> Other Event</span>
-      <span><span class="ldot ldot-finance"></span> Has financial entry ($)</span>
+    {% if current_user.role != 'Player' %}
+<span><span class="ldot ldot-finance"></span> Has financial entry ($)</span>
+{% endif %}
     </div>
 
-    <div class="mt-4">
-      <a href="{{ url_for('admin_page') }}" class="btn btn-secondary">Back to Dashboard</a>
-    </div>
+{% if current_user.role != 'Player' %}
+<div class="mt-4">
+  <a href="{{ url_for('admin_page') }}" class="btn btn-secondary">Back to Dashboard</a>
+</div>
+{% endif %}
 
   </main>
 
