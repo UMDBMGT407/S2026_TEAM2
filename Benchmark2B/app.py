@@ -767,7 +767,35 @@ def schedule():
 def calendar():
     games = get_all_games()
     practices = get_all_practices()
-    return render_template('calendar.html', games=games, practices=practices)
+
+    cur = mysql.connection.cursor()
+    try:
+        cur.execute("""
+            SELECT
+                COALESCE(SUM(CASE WHEN entry_type = 'Revenue' THEN amount ELSE 0 END), 0),
+                COALESCE(SUM(CASE WHEN entry_type = 'Expense' THEN amount ELSE 0 END), 0),
+                COALESCE(SUM(CASE WHEN entry_type = 'Revenue' THEN amount ELSE -amount END), 0)
+            FROM financial_entries
+        """)
+        row = cur.fetchone()
+        total_revenue = float(row[0])
+        total_expenses = float(row[1])
+        net_balance = float(row[2])
+    except Exception:
+        total_revenue = 0.0
+        total_expenses = 0.0
+        net_balance = 0.0
+    finally:
+        cur.close()
+
+    return render_template(
+        'calendar.html',
+        games=games,
+        practices=practices,
+        total_revenue=total_revenue,
+        total_expenses=total_expenses,
+        net_balance=net_balance
+    )
 
 
 @app.route('/roster')
