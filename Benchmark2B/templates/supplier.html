@@ -8,15 +8,6 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/newstyle.css') }}">
 
   <style>
-    body {
-      background: linear-gradient(180deg, #f04a4a 0%, #a81f1f 100%);
-      min-height: 100vh;
-    }
-    .supplier-topbar {
-      background: linear-gradient(90deg, #3d2029 0%, #4a2a2a 100%);
-      color: white;
-      padding: 20px 0;
-    }
     .supplier-stat-card,
     .supplier-section-card {
       border-radius: 16px;
@@ -44,23 +35,14 @@
 </head>
 <body>
 
-  <header class="supplier-topbar">
+  {% include '_navbar.html' %}
+
+  <section class="hero text-center">
     <div class="container">
-      <div class="row align-items-center gy-3">
-        <div class="col-md-3">
-          <span class="fw-bold">UMD Hockey</span>
-        </div>
-        <div class="col-md-6 text-center">
-          <h1 class="h2 mb-0">Supplier Portal</h1>
-        </div>
-        <div class="col-md-3 text-md-end">
-          <div class="fw-semibold">{{ current_user.name }}</div>
-          <div>{{ current_user.role }}</div>
-          <a href="{{ url_for('logout') }}" class="btn btn-sm btn-light mt-2">Logout</a>
-        </div>
-      </div>
+      <h1>Supplier Portal</h1>
+      <p class="mb-0">Manage and update equipment orders assigned to you</p>
     </div>
-  </header>
+  </section>
 
   <main class="container my-4">
 
