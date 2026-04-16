@@ -92,6 +92,20 @@ CREATE TABLE financial_categories (
     category_type ENUM('Revenue', 'Expense') NOT NULL
 );
 
+
+-- =========================
+-- Send Emails
+-- =========================
+CREATE TABLE IF NOT EXISTS sent_messages (
+    message_id INT AUTO_INCREMENT PRIMARY KEY,
+    recipients VARCHAR(100) NOT NULL,
+    subject VARCHAR(200),
+    body TEXT,
+    sent_by INT NOT NULL,
+    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sent_by) REFERENCES users(id)
+);
+
 -- =========================
 -- FINANCIAL ENTRIES
 -- Now supports games AND practices
