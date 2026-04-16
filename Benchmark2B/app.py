@@ -770,7 +770,7 @@ def home():
 @app.route('/admin-dashboard')
 @app.route('/admin-dashboard.html')
 @login_required
-@role_required('Admin')
+@role_required('Admin', 'Coach')
 def admin_page():
     return redirect(url_for('home'))
 
@@ -1930,7 +1930,7 @@ def add_game():
     finally:
         cur.close()
 
-    return redirect(url_for('schedule'))
+    return redirect(url_for('schedule', tab='games'))
 
 
 @app.route('/add_practice', methods=['POST'])
@@ -1968,7 +1968,7 @@ def add_practice():
     finally:
         cur.close()
 
-    return redirect(url_for('schedule'))
+    return redirect(url_for('schedule', tab='practices'))
 
 
 @app.route('/update_game_results/<int:game_id>', methods=['POST'])
@@ -2393,7 +2393,7 @@ def delete_game(game_id):
 
     if next_page == 'schedule':
         return redirect(url_for('schedule'))
-    return redirect(url_for('finances'))
+    return redirect(url_for('schedule', tab='games'))
 
 
 @app.route('/delete_practice/<int:practice_id>', methods=['POST'])
@@ -2417,7 +2417,7 @@ def delete_practice(practice_id):
 
     if next_page == 'schedule':
         return redirect(url_for('schedule'))
-    return redirect(url_for('finances'))
+    return redirect(url_for('schedule', tab='practices'))
 
 
 
