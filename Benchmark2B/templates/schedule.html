@@ -191,21 +191,23 @@
 {% endif %}
 
 <div class="card-actions" onclick="event.stopPropagation();">
-  <button type="button" class="btn btn-outline-primary btn-sm"
-    onclick="openEventDetailFromButton(this)"
-    data-event-type="game"
-    data-game-id="{{ game.game_id }}"
-    data-title="{{ game.opponent }}"
-    data-date="{{ game.game_date }}"
-    data-location="{{ game.location }}"
-    data-type="{{ game.game_type }}"
-    data-status="{{ game.status }}"
-    data-projected-cost="{{ game.projected_cost if game.projected_cost is not none else '' }}"
-    data-actual-cost="{{ game.actual_cost if game.actual_cost is not none else '' }}"
-    data-final-score="{{ game.final_score or '' }}"
-    data-notes="{{ game.notes or 'None' }}">
-    View Details
-  </button>
+{% if current_user.role != 'Player' %}
+<button type="button" class="btn btn-outline-primary btn-sm"
+  onclick="openEventDetailFromButton(this)"
+  data-event-type="game"
+  data-game-id="{{ game.game_id }}"
+  data-title="{{ game.opponent }}"
+  data-date="{{ game.game_date }}"
+  data-location="{{ game.location }}"
+  data-type="{{ game.game_type }}"
+  data-status="{{ game.status }}"
+  data-projected-cost="{{ game.projected_cost if game.projected_cost is not none else '' }}"
+  data-actual-cost="{{ game.actual_cost if game.actual_cost is not none else '' }}"
+  data-final-score="{{ game.final_score or '' }}"
+  data-notes="{{ game.notes or 'None' }}">
+  View Details
+</button>
+{% endif %}
 
   {% if current_user.role in ['Admin', 'Coach'] %}
   <button type="button" class="btn btn-outline-warning btn-sm"
