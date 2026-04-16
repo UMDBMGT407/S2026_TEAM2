@@ -680,7 +680,9 @@
             <span id="finCount" style="font-weight:400;color:#aaa;font-size:0.75rem;"></span>
           </h6>
           <div id="finList"></div>
-          <button class="btn-add-fin" onclick="openAddFin()">+ Add Revenue or Expense</button>
+{% if current_user.role != 'Player' %}
+<button class="btn-add-fin" onclick="openAddFin()">+ Add Revenue or Expense</button>
+{% endif %}
         </div>
       </div>
 
@@ -911,43 +913,48 @@ const EVENTS = [
     }
 
     function renderFinList() {
-      const entries = finData[activeEv.id] || [];
-      document.getElementById('finCount').textContent = entries.length ? `(${entries.length} entr${entries.length === 1 ? 'y' : 'ies'})` : '';
+  const entries = finData[activeEv.id] || [];
+  document.getElementById('finCount').textContent = entries.length ? `(${entries.length} entr${entries.length === 1 ? 'y' : 'ies'})` : '';
 
-      const list = document.getElementById('finList');
+  const list = document.getElementById('finList');
 
-      if (!entries.length) {
-        list.innerHTML = `<p class="text-muted" style="font-size:0.8rem;padding:4px 0;">No financial entries yet for this event.</p>`;
-        return;
-      }
+  if (IS_PLAYER) {
+    list.innerHTML = `<p class="text-muted" style="font-size:0.8rem;padding:4px 0;">Financial details are view only.</p>`;
+    return;
+  }
 
-      let rev = 0;
-      let exp = 0;
-      let html = '';
+  if (!entries.length) {
+    list.innerHTML = `<p class="text-muted" style="font-size:0.8rem;padding:4px 0;">No financial entries yet for this event.</p>`;
+    return;
+  }
 
-      entries.forEach((e, i) => {
-        const isRev = e.type === 'revenue';
-        if (isRev) rev += e.amount;
-        else exp += e.amount;
+  let rev = 0;
+  let exp = 0;
+  let html = '';
 
-        html += `
-          <div class="fin-entry-row">
-            <span class="fe-label">
-              <strong>${isRev ? '↑' : '↓'} ${e.category}</strong>
-              ${e.desc ? `<small>${e.desc}</small>` : ''}
-            </span>
-            <span style="display:flex;align-items:center;gap:8px;">
-              <span class="fe-amt ${e.type}">$${e.amount.toFixed(2)}</span>
-              <button onclick="removeFin(${i})" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:0.8rem;">&#10005;</button>
-            </span>
-          </div>
-        `;
-      });
+  entries.forEach((e, i) => {
+    const isRev = e.type === 'revenue';
+    if (isRev) rev += e.amount;
+    else exp += e.amount;
 
-      const net = rev - exp;
-      html += `<div class="fin-net-row"><span>Net</span><span class="${net >= 0 ? 'net-pos' : 'net-neg'}">$${net.toFixed(2)}</span></div>`;
-      list.innerHTML = html;
-    }
+    html += `
+      <div class="fin-entry-row">
+        <span class="fe-label">
+          <strong>${isRev ? '↑' : '↓'} ${e.category}</strong>
+          ${e.desc ? `<small>${e.desc}</small>` : ''}
+        </span>
+        <span style="display:flex;align-items:center;gap:8px;">
+          <span class="fe-amt ${e.type}">$${e.amount.toFixed(2)}</span>
+          <button onclick="removeFin(${i})" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:0.8rem;">&#10005;</button>
+        </span>
+      </div>
+    `;
+  });
+
+  const net = rev - exp;
+  html += `<div class="fin-net-row"><span>Net</span><span class="${net >= 0 ? 'net-pos' : 'net-neg'}">$${net.toFixed(2)}</span></div>`;
+  list.innerHTML = html;
+}
 
     function removeFin(idx) {
       finData[activeEv.id].splice(idx, 1);
