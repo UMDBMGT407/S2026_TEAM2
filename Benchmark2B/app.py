@@ -1680,6 +1680,8 @@ def alumni():
 @login_required
 @role_required('Admin', 'Coach')
 def newsletters():
+    search = request.args.get('search', '').strip()
+
     cur = mysql.connection.cursor()
     try:
         cur.execute("""
@@ -1700,11 +1702,20 @@ def newsletters():
             for row in rows
         ]
 
-        cur.execute("""
-            SELECT subscriber_id, email, date_added, status
-            FROM subscribers
-            ORDER BY date_added DESC, subscriber_id DESC
-        """)
+        if search:
+            cur.execute("""
+                SELECT subscriber_id, email, date_added, status
+                FROM subscribers
+                WHERE email LIKE %s
+                ORDER BY date_added DESC, subscriber_id DESC
+            """, (f"%{search}%",))
+        else:
+            cur.execute("""
+                SELECT subscriber_id, email, date_added, status
+                FROM subscribers
+                ORDER BY date_added DESC, subscriber_id DESC
+            """)
+
         subscriber_rows = cur.fetchall()
         subscribers_list = [
             {
@@ -1727,7 +1738,6 @@ def newsletters():
         return render_template('newsletters.html', newsletters=[], subscribers=[])
     finally:
         cur.close()
-
 @app.route('/add_newsletter', methods=['POST'])
 @login_required
 @role_required('Admin', 'Coach')
