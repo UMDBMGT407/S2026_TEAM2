@@ -383,6 +383,12 @@
       border: 1px solid #c0392b;
     }
 
+    .eb-completed {
+      background: #e8e8e8;
+      color: #444;
+      border: 1px solid #999;
+    }
+
     .eb-practice {
       background: #fef9e7;
       color: #9a6700;
@@ -589,30 +595,30 @@
 
   <main class="container my-5">
 
-{% if current_user.role != 'Player' %}
-<div class="fin-summary">
-  <div class="card p-4 card-box fin-card fc-revenue text-center">
-    <div class="fc-label">Total Event Revenue</div>
-    <div class="fc-amount" id="totalRevenue">${{ "{:,.2f}".format(total_revenue) }}</div>
-    <div class="fc-sub">Ticket sales across all games</div>
-  </div>
+    {% if current_user.role != 'Player' %}
+    <div class="fin-summary">
+      <div class="card p-4 card-box fin-card fc-revenue text-center">
+        <div class="fc-label">Total Event Revenue</div>
+        <div class="fc-amount" id="totalRevenue">${{ "{:,.2f}".format(total_revenue) }}</div>
+        <div class="fc-sub">Ticket sales across all games</div>
+      </div>
 
-  <div class="card p-4 card-box fin-card fc-expense text-center">
-    <div class="fc-label">Total Event Expenses</div>
-    <div class="fc-amount" id="totalExpenses">${{ "{:,.2f}".format(total_expenses) }}</div>
-    <div class="fc-sub">Ref fees, ice fees, and travel</div>
-  </div>
+      <div class="card p-4 card-box fin-card fc-expense text-center">
+        <div class="fc-label">Total Event Expenses</div>
+        <div class="fc-amount" id="totalExpenses">${{ "{:,.2f}".format(total_expenses) }}</div>
+        <div class="fc-sub">Ref fees, ice fees, and travel</div>
+      </div>
 
-  <div class="card p-4 card-box fin-card fc-net text-center">
-    <div class="fc-label">Net (Revenue − Expenses)</div>
-    <div class="fc-amount" id="netAmount"
-         style="color: {{ '#198754' if net_balance >= 0 else '#b22222' }}">
-      ${{ "{:,.2f}".format(net_balance) }}
+      <div class="card p-4 card-box fin-card fc-net text-center">
+        <div class="fc-label">Net (Revenue − Expenses)</div>
+        <div class="fc-amount" id="netAmount"
+             style="color: {{ '#198754' if net_balance >= 0 else '#b22222' }}">
+          ${{ "{:,.2f}".format(net_balance) }}
+        </div>
+        <div class="fc-sub">Across all calendar events</div>
+      </div>
     </div>
-    <div class="fc-sub">Across all calendar events</div>
-  </div>
-</div>
-{% endif %}
+    {% endif %}
 
     <div class="cal-toolbar">
       <div class="month-nav">
@@ -634,9 +640,9 @@
         </button>
       </div>
 
-   {% if current_user.role != 'Player' %}
-<a href="{{ url_for('finances') }}" class="btn btn-danger btn-sm">&#128200; Go to Finances</a>
-{% endif %}
+      {% if current_user.role != 'Player' %}
+      <a href="{{ url_for('finances') }}" class="btn btn-danger btn-sm">&#128200; Go to Finances</a>
+      {% endif %}
     </div>
 
     <div class="cal-wrap">
@@ -656,19 +662,20 @@
       <span><span class="ldot ldot-game"></span> Game</span>
       <span><span class="ldot ldot-practice"></span> Practice</span>
       <span><span class="ldot ldot-other"></span> Other Event</span>
-    {% if current_user.role != 'Player' %}
-<span><span class="ldot ldot-finance"></span> Has financial entry ($)</span>
-{% endif %}
+      {% if current_user.role != 'Player' %}
+      <span><span class="ldot ldot-finance"></span> Has financial entry ($)</span>
+      {% endif %}
     </div>
 
-{% if current_user.role != 'Player' %}
-<div class="mt-4">
-  <a href="{{ url_for('admin_page') }}" class="btn btn-secondary">Back to Dashboard</a>
-</div>
-{% endif %}
+    {% if current_user.role != 'Player' %}
+    <div class="mt-4">
+      <a href="{{ url_for('admin_page') }}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+    {% endif %}
 
   </main>
 
+  <!-- EVENT DETAIL MODAL -->
   <div class="modal-backdrop-custom" id="detailModal" onclick="bgClose(event,'detailModal')">
     <div class="modal-box">
       <div class="mhdr" id="detailHdr">
@@ -686,9 +693,9 @@
             <span id="finCount" style="font-weight:400;color:#aaa;font-size:0.75rem;"></span>
           </h6>
           <div id="finList"></div>
-{% if current_user.role != 'Player' %}
-<button class="btn-add-fin" onclick="openAddFin()">+ Add Revenue or Expense</button>
-{% endif %}
+          {% if current_user.role != 'Player' %}
+          <button class="btn-add-fin" onclick="openAddFin()">+ Add Revenue or Expense</button>
+          {% endif %}
         </div>
       </div>
 
@@ -699,6 +706,7 @@
     </div>
   </div>
 
+  <!-- ADD FINANCIAL ENTRY MODAL -->
   <div class="modal-backdrop-custom" id="finModal" onclick="bgClose(event,'finModal')">
     <div class="modal-box" style="max-width:420px;">
       <div class="mhdr finance">
@@ -742,54 +750,76 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-const EVENTS = [
-  {% for game in games %}
-  {
-    id: {{ game.game_id }},
-    type: 'game',
-    title: '{{ game.opponent }}',
-    date: '{{ game.game_date }}',
-    time: '',
-    opponent: '{{ game.opponent }}',
-    location: '{{ game.location | replace("'", "\\'") }}',
-    gameType: '{{ game.game_type }}',
-    status: '{{ game.status }}',
-    notes: '{{ (game.notes or "") | replace("'", "\\'") }}'
-  },
-  {% endfor %}
-  {% for practice in practices %}
-  {
-    id: 'p{{ practice.practice_id }}',
-    type: 'practice',
-    title: '{{ practice.title | replace("'", "\\'") }}',
-    practiceTitle: '{{ practice.title | replace("'", "\\'") }}',
-    date: '{{ practice.practice_date }}',
-    time: '{{ practice.practice_time }}',
-    location: '{{ practice.location | replace("'", "\\'") }}',
-    emailContact: '{{ practice.contact_email or "" }}',
-    notes: '{{ (practice.notes or "") | replace("'", "\\'") }}',
-    status: '{{ practice.status }}'
-  },
-  {% endfor %}
-];
+    // ── Event data from Flask/DB ────────────────────────────────────────────────
+    const EVENTS = [
+      {% for game in games %}
+      {
+        id: {{ game.game_id }},
+        type: 'game',
+        title: 'vs {{ game.opponent | replace("'", "\\'") }}',
+        date: '{{ game.game_date }}',
+        time: '',
+        opponent: '{{ game.opponent | replace("'", "\\'") }}',
+        location: '{{ game.location | replace("'", "\\'") }}',
+        gameType: '{{ game.game_type }}',
+        status: '{{ game.status }}',
+        notes: '{{ (game.notes or "") | replace("'", "\\'") }}',
+        inResults: {{ 'true' if game.in_results else 'false' }}
+      },
+      {% endfor %}
+      {% for practice in practices %}
+      {
+        id: 'p{{ practice.practice_id }}',
+        type: 'practice',
+        title: '{{ practice.title | replace("'", "\\'") }}',
+        practiceTitle: '{{ practice.title | replace("'", "\\'") }}',
+        date: '{{ practice.practice_date }}',
+        time: '{{ practice.practice_time }}',
+        location: '{{ practice.location | replace("'", "\\'") }}',
+        emailContact: '{{ (practice.contact_email or "") | replace("'", "\\'") }}',
+        notes: '{{ (practice.notes or "") | replace("'", "\\'") }}',
+        status: '{{ practice.status }}',
+        inResults: {{ 'true' if practice.in_results else 'false' }}
+      },
+      {% endfor %}
+    ];
+
+    // ── Pre-load financial presence from DB so $ badge renders on page load ────
+    const finData = {};
+    {% for ag in actual_games %}
+      {% if ag.total_revenue > 0 or ag.total_expenses > 0 %}
+      finData[{{ ag.game_id }}] = [
+        { type: '{{ "revenue" if ag.total_revenue > 0 else "expense" }}', category: 'DB Entry', amount: {{ ag.total_revenue if ag.total_revenue > 0 else ag.total_expenses }}, desc: '' }
+      ];
+      {% endif %}
+    {% endfor %}
+    {% for ap in actual_practices %}
+      {% if ap.total_revenue > 0 or ap.total_expenses > 0 %}
+      finData['p{{ ap.practice_id }}'] = [
+        { type: '{{ "revenue" if ap.total_revenue > 0 else "expense" }}', category: 'DB Entry', amount: {{ ap.total_revenue if ap.total_revenue > 0 else ap.total_expenses }}, desc: '' }
+      ];
+      {% endif %}
+    {% endfor %}
 
     const REV_CATS = ['Ticket Sales', 'Sponsorship', 'Donation', 'Other Revenue'];
     const EXP_CATS = ['Ref Fees', 'Ice Rental', 'Travel', 'Equipment', 'Facility', 'Other Expense'];
 
     const TODAY = new Date();
+    // Default to April 2026 (month index 3) where upcoming games live
     let viewYear = 2026;
-    let viewMonth = 2;
+    let viewMonth = 3;
     let filters = { game: true, practice: true, other: true };
     let activeEv = null;
     let finType = 'revenue';
-    const finData = {};
+
     const BASE_REVENUE = {{ total_revenue }};
     const BASE_EXPENSES = {{ total_expenses }};
     const IS_PLAYER = {{ 'true' if current_user.role == 'Player' else 'false' }};
 
-    const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    const MSHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const MSHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
+    // ── Calendar render ─────────────────────────────────────────────────────────
     function render() {
       document.getElementById('monthLabel').textContent = `${MONTHS[viewMonth]} ${viewYear}`;
       const body = document.getElementById('calBody');
@@ -816,12 +846,14 @@ const EVENTS = [
       }
 
       cells.forEach(c => {
-        const m = ((viewMonth + c.mo) % 12 + 12) % 12;
-        const y = viewYear + Math.floor((viewMonth + c.mo) / 12);
-        const ds = `${y}-${pad(m + 1)}-${pad(c.day)}`;
+        const mo = ((viewMonth + c.mo) % 12 + 12) % 12;
+        const yr = viewYear + Math.floor((viewMonth + c.mo) / 12);
+        const ds = `${yr}-${pad(mo + 1)}-${pad(c.day)}`;
 
         const cell = document.createElement('div');
-        cell.className = 'cal-cell' + (c.other ? ' other-month' : '') + (ds === todayStr ? ' today' : '');
+        cell.className = 'cal-cell' +
+          (c.other ? ' other-month' : '') +
+          (ds === todayStr ? ' today' : '');
 
         const num = document.createElement('span');
         num.className = 'day-num';
@@ -833,15 +865,18 @@ const EVENTS = [
 
           const hasFin = (finData[ev.id] || []).length > 0;
           const pill = document.createElement('span');
-          pill.className = `ev-pill ev-${ev.type}${hasFin ? ' has-finance' : ''}`;
-          pill.textContent = ev.type === 'game' ? `${ev.time} vs ${ev.opponent}` : `${ev.time} ${ev.title}`;
+          pill.className = `ev-pill ev-${ev.type}${hasFin && !IS_PLAYER ? ' has-finance' : ''}`;
+          pill.textContent = ev.type === 'game'
+            ? `${ev.time ? ev.time + ' ' : ''}${ev.title}`
+            : `${ev.time ? ev.time + ' ' : ''}${ev.title}`;
           pill.title = pill.textContent;
+
           pill.onclick = e => {
             e.stopPropagation();
             if (!IS_PLAYER) {
               openDetail(ev);
-          }
-      };
+            }
+          };
 
           cell.appendChild(pill);
         });
@@ -860,38 +895,37 @@ const EVENTS = [
     }
 
     document.getElementById('prevBtn').onclick = () => {
-      if (--viewMonth < 0) {
-        viewMonth = 11;
-        viewYear--;
-      }
+      if (--viewMonth < 0) { viewMonth = 11; viewYear--; }
       render();
     };
 
     document.getElementById('nextBtn').onclick = () => {
-      if (++viewMonth > 11) {
-        viewMonth = 0;
-        viewYear++;
-      }
+      if (++viewMonth > 11) { viewMonth = 0; viewYear++; }
       render();
     };
 
+    // ── Event detail modal ──────────────────────────────────────────────────────
     function openDetail(ev) {
       activeEv = ev;
       document.getElementById('detailHdr').className = `mhdr ${ev.type}`;
-      document.getElementById('detailTitle').textContent = ev.title;
+      document.getElementById('detailTitle').textContent =
+        ev.type === 'game' ? `Game ${ev.title}` : ev.practiceTitle;
 
       const badge = document.getElementById('detailBadge');
       const fields = document.getElementById('detailFields');
+      const statusClass = ev.status ? `eb-${ev.status.toLowerCase()}` : 'eb-scheduled';
 
       if (ev.type === 'game') {
-        badge.innerHTML = `<span class="ev-badge eb-${ev.status.toLowerCase()}">${ev.status}</span>`;
+        badge.innerHTML = `<span class="ev-badge ${statusClass}">${ev.status}</span>`;
         fields.innerHTML = `
           <div class="frow"><strong>Opponent:</strong><span>${ev.opponent}</span></div>
           <div class="frow"><strong>Date:</strong><span>${fmt(ev.date)}</span></div>
-          <div class="frow"><strong>Time:</strong><span>${ev.time}</span></div>
           <div class="frow"><strong>Location:</strong><span>${ev.location}</span></div>
-          <div class="frow"><strong>Game Type:</strong><span>${ev.gameType}<span class="tag-${ev.gameType.toLowerCase()}">${ev.gameType.toUpperCase()}</span></span></div>
+          <div class="frow"><strong>Game Type:</strong><span>${ev.gameType}
+            <span class="tag-${ev.gameType.toLowerCase()}">${ev.gameType.toUpperCase()}</span>
+          </span></div>
           <div class="frow"><strong>Status:</strong><span>${ev.status}</span></div>
+          ${ev.inResults ? '<div class="frow"><strong>Section:</strong><span>Results</span></div>' : '<div class="frow"><strong>Section:</strong><span>Schedule</span></div>'}
           ${ev.notes ? `<div class="frow"><strong>Notes:</strong><span>${ev.notes}</span></div>` : ''}
         `;
       } else if (ev.type === 'practice') {
@@ -899,18 +933,19 @@ const EVENTS = [
         fields.innerHTML = `
           <div class="frow"><strong>Title:</strong><span>${ev.practiceTitle}</span></div>
           <div class="frow"><strong>Date:</strong><span>${fmt(ev.date)}</span></div>
-          <div class="frow"><strong>Time:</strong><span>${ev.time}</span></div>
+          <div class="frow"><strong>Time:</strong><span>${ev.time || 'N/A'}</span></div>
           <div class="frow"><strong>Location:</strong><span>${ev.location}</span></div>
-          <div class="frow"><strong>Email Contact:</strong><span>${ev.emailContact}</span></div>
+          <div class="frow"><strong>Status:</strong><span>${ev.status}</span></div>
+          ${ev.emailContact ? `<div class="frow"><strong>Contact Email:</strong><span>${ev.emailContact}</span></div>` : ''}
+          ${ev.inResults ? '<div class="frow"><strong>Section:</strong><span>Results</span></div>' : '<div class="frow"><strong>Section:</strong><span>Schedule</span></div>'}
           ${ev.notes ? `<div class="frow"><strong>Notes:</strong><span>${ev.notes}</span></div>` : ''}
         `;
       } else {
         badge.innerHTML = `<span class="ev-badge eb-event">Event</span>`;
         fields.innerHTML = `
           <div class="frow"><strong>Date:</strong><span>${fmt(ev.date)}</span></div>
-          <div class="frow"><strong>Time:</strong><span>${ev.time}</span></div>
+          <div class="frow"><strong>Time:</strong><span>${ev.time || 'N/A'}</span></div>
           <div class="frow"><strong>Location:</strong><span>${ev.location}</span></div>
-          ${ev.description ? `<div class="frow"><strong>Description:</strong><span>${ev.description}</span></div>` : ''}
         `;
       }
 
@@ -919,51 +954,53 @@ const EVENTS = [
     }
 
     function renderFinList() {
-  const entries = finData[activeEv.id] || [];
-  document.getElementById('finCount').textContent = entries.length ? `(${entries.length} entr${entries.length === 1 ? 'y' : 'ies'})` : '';
+      const entries = finData[activeEv.id] || [];
+      document.getElementById('finCount').textContent =
+        entries.length ? `(${entries.length} entr${entries.length === 1 ? 'y' : 'ies'})` : '';
 
-  const list = document.getElementById('finList');
+      const list = document.getElementById('finList');
 
-  if (IS_PLAYER) {
-    list.innerHTML = `<p class="text-muted" style="font-size:0.8rem;padding:4px 0;">Financial details are view only.</p>`;
-    return;
-  }
+      if (IS_PLAYER) {
+        list.innerHTML = `<p class="text-muted" style="font-size:0.8rem;padding:4px 0;">Financial details are not available in player view.</p>`;
+        return;
+      }
 
-  if (!entries.length) {
-    list.innerHTML = `<p class="text-muted" style="font-size:0.8rem;padding:4px 0;">No financial entries yet for this event.</p>`;
-    return;
-  }
+      if (!entries.length) {
+        list.innerHTML = `<p class="text-muted" style="font-size:0.8rem;padding:4px 0;">No financial entries yet for this event.</p>`;
+        return;
+      }
 
-  let rev = 0;
-  let exp = 0;
-  let html = '';
+      let rev = 0, exp = 0, html = '';
 
-  entries.forEach((e, i) => {
-    const isRev = e.type === 'revenue';
-    if (isRev) rev += e.amount;
-    else exp += e.amount;
+      entries.forEach((e, i) => {
+        const isRev = e.type === 'revenue';
+        if (isRev) rev += e.amount; else exp += e.amount;
 
-    html += `
-      <div class="fin-entry-row">
-        <span class="fe-label">
-          <strong>${isRev ? '↑' : '↓'} ${e.category}</strong>
-          ${e.desc ? `<small>${e.desc}</small>` : ''}
-        </span>
-        <span style="display:flex;align-items:center;gap:8px;">
-          <span class="fe-amt ${e.type}">$${e.amount.toFixed(2)}</span>
-          <button onclick="removeFin(${i})" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:0.8rem;">&#10005;</button>
-        </span>
-      </div>
-    `;
-  });
+        // Don't show remove button for DB-seeded entries (they show label "DB Entry")
+        const isDbEntry = e.category === 'DB Entry';
+        html += `
+          <div class="fin-entry-row">
+            <span class="fe-label">
+              <strong>${isRev ? '↑' : '↓'} ${e.category}</strong>
+              ${e.desc ? `<small>${e.desc}</small>` : ''}
+              ${isDbEntry ? '<small style="color:#aaa">(saved in database)</small>' : ''}
+            </span>
+            <span style="display:flex;align-items:center;gap:8px;">
+              <span class="fe-amt ${e.type}">$${e.amount.toFixed(2)}</span>
+              ${!isDbEntry ? `<button onclick="removeFin(${i})" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:0.8rem;">&#10005;</button>` : ''}
+            </span>
+          </div>
+        `;
+      });
 
-  const net = rev - exp;
-  html += `<div class="fin-net-row"><span>Net</span><span class="${net >= 0 ? 'net-pos' : 'net-neg'}">$${net.toFixed(2)}</span></div>`;
-  list.innerHTML = html;
-}
+      const net = rev - exp;
+      html += `<div class="fin-net-row"><span>Net</span><span class="${net >= 0 ? 'net-pos' : 'net-neg'}">$${net.toFixed(2)}</span></div>`;
+      list.innerHTML = html;
+    }
 
     function removeFin(idx) {
       finData[activeEv.id].splice(idx, 1);
+      if (finData[activeEv.id].length === 0) delete finData[activeEv.id];
       renderFinList();
       render();
     }
@@ -984,22 +1021,18 @@ const EVENTS = [
     function syncFinUI() {
       document.getElementById('btnRev').className = finType === 'revenue' ? 't-revenue' : '';
       document.getElementById('btnExp').className = finType === 'expense' ? 't-expense' : '';
-
       const cats = finType === 'revenue' ? REV_CATS : EXP_CATS;
       document.getElementById('finCat').innerHTML = cats.map(c => `<option>${c}</option>`).join('');
     }
 
     function saveFin() {
       const amt = parseFloat(document.getElementById('finAmt').value);
-
       if (!amt || amt <= 0) {
         alert('Please enter a valid amount greater than $0.');
         return;
       }
 
-      if (!finData[activeEv.id]) {
-        finData[activeEv.id] = [];
-      }
+      if (!finData[activeEv.id]) finData[activeEv.id] = [];
 
       finData[activeEv.id].push({
         type: finType,
@@ -1013,49 +1046,44 @@ const EVENTS = [
       render();
     }
 
-function updateCards() {
-  let rev = BASE_REVENUE;
-  let exp = BASE_EXPENSES;
+    function updateCards() {
+      if (IS_PLAYER) return;
 
-  Object.values(finData).forEach(arr =>
-    arr.forEach(e => {
-      if (e.type === 'revenue') rev += e.amount;
-      else exp += e.amount;
-    })
-  );
+      let rev = BASE_REVENUE;
+      let exp = BASE_EXPENSES;
 
-  const net = rev - exp;
-  document.getElementById('totalRevenue').textContent = `$${rev.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-  document.getElementById('totalExpenses').textContent = `$${exp.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+      // Only add session-added entries (not DB entries which are already in the base totals)
+      Object.values(finData).forEach(arr =>
+        arr.forEach(e => {
+          if (e.category !== 'DB Entry') {
+            if (e.type === 'revenue') rev += e.amount;
+            else exp += e.amount;
+          }
+        })
+      );
 
-  const netEl = document.getElementById('netAmount');
-  netEl.textContent = `$${net.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-  netEl.style.color = net >= 0 ? '#198754' : '#b22222';
-}
+      const net = rev - exp;
+      document.getElementById('totalRevenue').textContent =
+        `$${rev.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      document.getElementById('totalExpenses').textContent =
+        `$${exp.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-    function openM(id) {
-      document.getElementById(id).classList.add('show');
+      const netEl = document.getElementById('netAmount');
+      netEl.textContent = `$${net.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      netEl.style.color = net >= 0 ? '#198754' : '#b22222';
     }
 
-    function closeM(id) {
-      document.getElementById(id).classList.remove('show');
-    }
-
-    function bgClose(e, id) {
-      if (e.target === document.getElementById(id)) {
-        closeM(id);
-      }
-    }
+    // ── Modal helpers ───────────────────────────────────────────────────────────
+    function openM(id) { document.getElementById(id).classList.add('show'); }
+    function closeM(id) { document.getElementById(id).classList.remove('show'); }
+    function bgClose(e, id) { if (e.target === document.getElementById(id)) closeM(id); }
 
     function goSchedule() {
-      if (activeEv) {
-        window.location.href = "{{ url_for('schedule') }}";
-      }
+      if (activeEv) window.location.href = "{{ url_for('schedule') }}";
     }
 
-    function pad(n) {
-      return String(n).padStart(2, '0');
-    }
+    // ── Utilities ───────────────────────────────────────────────────────────────
+    function pad(n) { return String(n).padStart(2, '0'); }
 
     function fmt(s) {
       const [y, m, d] = s.split('-').map(Number);
@@ -1063,12 +1091,10 @@ function updateCards() {
     }
 
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') {
-        closeM('detailModal');
-        closeM('finModal');
-      }
+      if (e.key === 'Escape') { closeM('detailModal'); closeM('finModal'); }
     });
 
+    // ── Boot ────────────────────────────────────────────────────────────────────
     syncFinUI();
     render();
   </script>
