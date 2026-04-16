@@ -100,19 +100,21 @@
         <h2 class="mb-0">Schedule Module</h2>
       </div>
 
-      <div class="col-md-8 text-md-end">
-        <button type="button" class="btn btn-danger me-2 mb-2" data-bs-toggle="modal" data-bs-target="#addPracticeModal">
-          Add Practice
-        </button>
+<div class="col-md-8 text-md-end">
+  {% if current_user.role in ['Admin', 'Coach'] %}
+  <button type="button" class="btn btn-danger me-2 mb-2" data-bs-toggle="modal" data-bs-target="#addPracticeModal">
+    Add Practice
+  </button>
 
-        <button type="button" class="btn btn-primary me-2 mb-2" data-bs-toggle="modal" data-bs-target="#addGameModal">
-          Add Game
-        </button>
+  <button type="button" class="btn btn-primary me-2 mb-2" data-bs-toggle="modal" data-bs-target="#addGameModal">
+    Add Game
+  </button>
 
-        <button type="button" class="btn btn-success mb-2" data-bs-toggle="modal" data-bs-target="#sendMessageModal">
-          Send Message
-        </button>
-      </div>
+  <button type="button" class="btn btn-success mb-2" data-bs-toggle="modal" data-bs-target="#sendMessageModal">
+    Send Message
+  </button>
+  {% endif %}
+</div>
     </div>
 
     <ul class="nav nav-tabs mb-4" id="scheduleTabs" role="tablist">
