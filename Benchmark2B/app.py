@@ -417,7 +417,7 @@ def get_all_practices():
         return []
     finally:
         cur.close()
-        
+
 def get_sent_messages():
     cur = mysql.connection.cursor()
     try:
@@ -807,7 +807,7 @@ def schedule():
     practices = get_all_practices()
     messages = get_sent_messages()
     return render_template('schedule.html', games=games, practices=practices, messages=messages)
-    
+
 @app.route('/edit_game/<int:game_id>', methods=['POST'])
 @login_required
 @role_required('Admin', 'Coach')
@@ -895,6 +895,10 @@ def edit_practice(practice_id):
 
     return redirect(url_for('schedule', tab='practices'))
 
+
+# ---------------------------
+# CALENDAR ROUTE  (UPDATED)
+# ---------------------------
 @app.route('/calendar')
 @app.route('/calendar.html')
 @login_required
@@ -905,6 +909,7 @@ def calendar():
 
     cur = mysql.connection.cursor()
     try:
+        # Overall financial totals
         cur.execute("""
             SELECT
                 COALESCE(SUM(CASE WHEN entry_type = 'Revenue' THEN amount ELSE 0 END), 0),
@@ -916,10 +921,43 @@ def calendar():
         total_revenue = float(row[0])
         total_expenses = float(row[1])
         net_balance = float(row[2])
+
+        # Per-game actuals so the $ badge renders correctly on calendar load
+        cur.execute("""
+            SELECT
+                g.game_id,
+                COALESCE(SUM(CASE WHEN fe.entry_type = 'Revenue' THEN fe.amount ELSE 0 END), 0) AS rev,
+                COALESCE(SUM(CASE WHEN fe.entry_type = 'Expense' THEN fe.amount ELSE 0 END), 0) AS exp
+            FROM games g
+            LEFT JOIN financial_entries fe ON g.game_id = fe.game_id
+            GROUP BY g.game_id
+        """)
+        actual_games = [
+            {'game_id': r[0], 'total_revenue': float(r[1]), 'total_expenses': float(r[2])}
+            for r in cur.fetchall()
+        ]
+
+        # Per-practice actuals for the same reason
+        cur.execute("""
+            SELECT
+                p.practice_id,
+                COALESCE(SUM(CASE WHEN fe.entry_type = 'Revenue' THEN fe.amount ELSE 0 END), 0) AS rev,
+                COALESCE(SUM(CASE WHEN fe.entry_type = 'Expense' THEN fe.amount ELSE 0 END), 0) AS exp
+            FROM practices p
+            LEFT JOIN financial_entries fe ON p.practice_id = fe.practice_id
+            GROUP BY p.practice_id
+        """)
+        actual_practices = [
+            {'practice_id': r[0], 'total_revenue': float(r[1]), 'total_expenses': float(r[2])}
+            for r in cur.fetchall()
+        ]
+
     except Exception:
         total_revenue = 0.0
         total_expenses = 0.0
         net_balance = 0.0
+        actual_games = []
+        actual_practices = []
     finally:
         cur.close()
 
@@ -929,7 +967,9 @@ def calendar():
         practices=practices,
         total_revenue=total_revenue,
         total_expenses=total_expenses,
-        net_balance=net_balance
+        net_balance=net_balance,
+        actual_games=actual_games,
+        actual_practices=actual_practices
     )
 
 
@@ -1682,7 +1722,7 @@ def practice_details(practice_id):
 def alumni():
     alumni_list = get_all_alumni()
     donations = get_all_donations()
-    subscribers=get_all_subscribers()
+    subscribers = get_all_subscribers()
 
     total_donations = sum(d['amount'] for d in donations)
     if donations:
@@ -1766,6 +1806,8 @@ def newsletters():
         return render_template('newsletters.html', newsletters=[], subscribers=[])
     finally:
         cur.close()
+
+
 @app.route('/add_newsletter', methods=['POST'])
 @login_required
 @role_required('Admin', 'Coach')
@@ -1869,6 +1911,7 @@ def update_player(player_id):
 
     return redirect(url_for('roster'))
 
+
 @app.route('/delete_player/<int:player_id>', methods=['POST'])
 @login_required
 @role_required('Admin', 'Coach')
@@ -1895,6 +1938,7 @@ def delete_player(player_id):
         cur.close()
 
     return redirect(url_for('roster'))
+
 
 @app.route('/add_player', methods=['POST'])
 @login_required
@@ -2122,6 +2166,7 @@ def move_practice_to_results(practice_id):
 
     return redirect(url_for('schedule'))
 
+
 @app.route('/send_message', methods=['POST'])
 @login_required
 @role_required('Admin', 'Coach')
@@ -2149,8 +2194,6 @@ def send_message():
         cur.close()
 
     return redirect(url_for('schedule', tab='emails'))
-
-
 
 
 # ---------------------------
@@ -2384,6 +2427,8 @@ def delete_alumni(alumni_id):
         cur.close()
 
     return redirect(url_for('alumni'))
+
+
 # ---------------------------
 # ADD SUBSCRIBER ACTION
 # ---------------------------
@@ -2499,8 +2544,6 @@ def delete_practice(practice_id):
     if next_page == 'schedule':
         return redirect(url_for('schedule'))
     return redirect(url_for('schedule', tab='practices'))
-
-
 
 
 # ---------------------------
