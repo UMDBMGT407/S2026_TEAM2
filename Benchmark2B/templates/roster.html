@@ -39,9 +39,11 @@
         </div>
 
         <div class="col-md-4 text-md-end">
+          {% if current_user.role in ['Admin', 'Coach'] %}
           <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#addPlayerModal">
             Add Player
           </button>
+          {% endif %}
         </div>
       </div>
 
@@ -56,7 +58,9 @@
               <th>Injured</th>
               <th>Email</th>
               <th>Phone</th>
+              {% if current_user.role in ['Admin', 'Coach'] %}
               <th>Action</th>
+              {% endif %}
             </tr>
           </thead>
 
@@ -71,6 +75,7 @@
                 <td>{{ 'Yes' if player['injured'] else 'No' }}</td>
                 <td>{{ player['email'] }}</td>
                 <td>{{ player['phone'] }}</td>
+                {% if current_user.role in ['Admin', 'Coach'] %}
                 <td>
                   <button
                     type="button"
@@ -80,11 +85,12 @@
                     Edit
                   </button>
                 </td>
+                {% endif %}
               </tr>
               {% endfor %}
             {% else %}
               <tr>
-                <td colspan="8" style="text-align:center;">No players found.</td>
+                <td colspan="{% if current_user.role in ['Admin', 'Coach'] %}8{% else %}7{% endif %}" style="text-align:center;">No players found.</td>
               </tr>
             {% endif %}
           </tbody>
@@ -98,7 +104,7 @@
     </div>
   </main>
 
-  <!-- Add Player Modal -->
+  {% if current_user.role in ['Admin', 'Coach'] %}
   <div class="modal fade" id="addPlayerModal" tabindex="-1" aria-labelledby="addPlayerModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
@@ -180,7 +186,6 @@
     </div>
   </div>
 
-  <!-- Edit Player Modals -->
   {% for player in players %}
   <div class="modal fade" id="editPlayerModal{{ player['player_id'] }}" tabindex="-1" aria-labelledby="editPlayerModalLabel{{ player['player_id'] }}" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -261,6 +266,7 @@
     </div>
   </div>
   {% endfor %}
+  {% endif %}
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
