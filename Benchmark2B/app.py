@@ -417,7 +417,30 @@ def get_all_practices():
         return []
     finally:
         cur.close()
-
+        
+def get_sent_messages():
+    cur = mysql.connection.cursor()
+    try:
+        cur.execute("""
+            SELECT sm.message_id, sm.recipients, sm.subject, sm.sent_at, u.name
+            FROM sent_messages sm
+            JOIN users u ON sm.sent_by = u.id
+            ORDER BY sm.sent_at DESC
+            LIMIT 50
+        """)
+        rows = cur.fetchall()
+        return [
+            {
+                'message_id': row[0],
+                'recipients': row[1],
+                'subject': row[2],
+                'sent_at': row[3],
+                'sent_by_name': row[4]
+            }
+            for row in rows
+        ]
+    finally:
+        cur.close()
 
 def build_game_comparisons(actual_games, projected_games):
     projected_map = {game['game_id']: game for game in projected_games}
@@ -782,7 +805,9 @@ def admin_page():
 def schedule():
     games = get_all_games()
     practices = get_all_practices()
-    return render_template('schedule.html', games=games, practices=practices)
+    messages = get_sent_messages()
+    return render_template('schedule.html', games=games, practices=practices, messages=messages)
+    
 @app.route('/edit_game/<int:game_id>', methods=['POST'])
 @login_required
 @role_required('Admin', 'Coach')
@@ -2096,6 +2121,36 @@ def move_practice_to_results(practice_id):
         cur.close()
 
     return redirect(url_for('schedule'))
+
+@app.route('/send_message', methods=['POST'])
+@login_required
+@role_required('Admin', 'Coach')
+def send_message():
+    recipients = request.form.get('recipients', '').strip()
+    subject = request.form.get('subject', '').strip()
+    body = request.form.get('body', '').strip()
+
+    if not recipients or not subject or not body:
+        flash('Please fill in all message fields.', 'danger')
+        return redirect(url_for('schedule', tab='emails'))
+
+    cur = mysql.connection.cursor()
+    try:
+        cur.execute("""
+            INSERT INTO sent_messages (recipients, subject, body, sent_by)
+            VALUES (%s, %s, %s, %s)
+        """, (recipients, subject, body, current_user.id))
+        mysql.connection.commit()
+        flash('Message sent successfully.', 'success')
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f'Could not send message: {e}', 'danger')
+    finally:
+        cur.close()
+
+    return redirect(url_for('schedule', tab='emails'))
+
+
 
 
 # ---------------------------
