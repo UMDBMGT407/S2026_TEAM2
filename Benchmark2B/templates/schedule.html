@@ -286,9 +286,11 @@
                 <p class="mb-2"><strong>Location:</strong> {{ practice.location }}</p>
                 <p class="mb-2"><strong>Contact:</strong> {{ practice.contact_email or 'N/A' }}</p>
                 <p class="mb-2"><strong>Status:</strong> {{ practice.status }}</p>
-                <p class="mb-2"><strong>Projected Cost:</strong>
-                  {% if practice.projected_cost is not none %}${{ "%.2f"|format(practice.projected_cost) }}{% else %}Not entered{% endif %}
-                </p>
+{% if current_user.role != 'Player' %}
+<p class="mb-2"><strong>Projected Cost:</strong>
+  {% if practice.projected_cost is not none %}${{ "%.2f"|format(practice.projected_cost) }}{% else %}Not entered{% endif %}
+</p>
+{% endif %}
 <div class="card-actions" onclick="event.stopPropagation();">
   <button type="button" class="btn btn-outline-primary btn-sm"
     onclick="openEventDetailFromButton(this)"
