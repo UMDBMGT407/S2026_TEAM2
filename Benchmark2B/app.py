@@ -758,7 +758,92 @@ def schedule():
     games = get_all_games()
     practices = get_all_practices()
     return render_template('schedule.html', games=games, practices=practices)
+@app.route('/edit_game/<int:game_id>', methods=['POST'])
+@login_required
+@role_required('Admin', 'Coach')
+def edit_game(game_id):
+    opponent = request.form.get('opponent', '').strip()
+    game_date = request.form.get('game_date')
+    location = request.form.get('location', '').strip()
+    game_type = request.form.get('game_type', '').strip()
+    status = request.form.get('status', '').strip()
+    projected_cost = request.form.get('projected_cost')
+    notes = request.form.get('notes', '').strip()
 
+    if not opponent or not game_date or not location or not game_type or not status:
+        flash('Please fill in all required game fields.', 'danger')
+        return redirect(url_for('schedule'))
+
+    if projected_cost == '':
+        projected_cost = None
+
+    cur = mysql.connection.cursor()
+    try:
+        cur.execute("""
+            UPDATE games
+            SET opponent = %s,
+                game_date = %s,
+                location = %s,
+                game_type = %s,
+                status = %s,
+                projected_cost = %s,
+                notes = %s
+            WHERE game_id = %s
+        """, (opponent, game_date, location, game_type, status, projected_cost, notes, game_id))
+        mysql.connection.commit()
+        flash('Game updated successfully.', 'success')
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f'Could not update game: {e}', 'danger')
+    finally:
+        cur.close()
+
+    return redirect(url_for('schedule'))
+
+
+@app.route('/edit_practice/<int:practice_id>', methods=['POST'])
+@login_required
+@role_required('Admin', 'Coach')
+def edit_practice(practice_id):
+    title = request.form.get('title', '').strip()
+    practice_date = request.form.get('practice_date')
+    practice_time = request.form.get('practice_time')
+    location = request.form.get('location', '').strip()
+    contact_email = request.form.get('contact_email', '').strip()
+    status = request.form.get('status', '').strip()
+    projected_cost = request.form.get('projected_cost')
+    notes = request.form.get('notes', '').strip()
+
+    if not title or not practice_date or not practice_time or not location or not status:
+        flash('Please fill in all required practice fields.', 'danger')
+        return redirect(url_for('schedule'))
+
+    if projected_cost == '':
+        projected_cost = None
+
+    cur = mysql.connection.cursor()
+    try:
+        cur.execute("""
+            UPDATE practices
+            SET title = %s,
+                practice_date = %s,
+                practice_time = %s,
+                location = %s,
+                contact_email = %s,
+                status = %s,
+                projected_cost = %s,
+                notes = %s
+            WHERE practice_id = %s
+        """, (title, practice_date, practice_time, location, contact_email, status, projected_cost, notes, practice_id))
+        mysql.connection.commit()
+        flash('Practice updated successfully.', 'success')
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f'Could not update practice: {e}', 'danger')
+    finally:
+        cur.close()
+
+    return redirect(url_for('schedule'))
 
 @app.route('/calendar')
 @app.route('/calendar.html')
