@@ -600,6 +600,8 @@ def login():
             return redirect(url_for('supplier_page'))
         if current_user.role == 'Admin':
             return redirect(url_for('admin_page'))
+        if current_user.role == 'Player':
+            return redirect(url_for('roster'))
         return redirect(url_for('home'))
 
     if request.method == 'POST':
@@ -627,6 +629,8 @@ def login():
                 return redirect(url_for('supplier_page'))
             if user.role == 'Admin':
                 return redirect(url_for('admin_page'))
+            if user.role == 'Player':
+                return redirect(url_for('roster'))
             return redirect(url_for('home'))
 
         flash('Invalid email or password.', 'danger')
