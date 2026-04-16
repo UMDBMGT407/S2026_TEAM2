@@ -83,7 +83,20 @@
         <div class="card p-4 card-box">
           <div class="row mb-4">
             <div class="col-md-8 mb-3 mb-md-0">
-              <input type="text" class="form-control" placeholder="Search subscriber by email">
+              <form method="GET" action="{{ url_for('newsletters') }}">
+                <div class="row mb-4">
+                  <div class="col-12 d-flex gap-2">
+                    <input 
+                    type="text"
+                    name="search"
+                    class="form-control" 
+                    placeholder="Search subscriber by email"
+                    value="{{ request.args.get('search', '') }}"
+                    >
+                    <button type="submit" class="btn btn-primary">Search</button>
+                  </div>
+                </div>
+              </form>
             </div>
           </div>
 
