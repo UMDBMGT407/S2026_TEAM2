@@ -123,6 +123,17 @@
     </div>
   </section>
 
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+  {% endwith %}
+  
   <!-- ===============================
        MAIN PUBLIC CONTENT
        =============================== -->
@@ -218,12 +229,11 @@
           <h3>Newsletter Signup</h3>
           <p>Subscribe to receive team updates, schedules, and announcements.</p>
 
-          <form>
+          <form method="POST" action="{{ url_for('add_subscriber') }}">
             <div class="mb-3">
-              <input type="email" class="form-control" placeholder="Enter your email">
+              <input type="email" class="form-control" name="email" placeholder="Enter your email" required>
             </div>
-
-            <button type="button" class="btn btn-danger">
+            <button type="submit" class="btn btn-danger">
               Subscribe
             </button>
           </form>
