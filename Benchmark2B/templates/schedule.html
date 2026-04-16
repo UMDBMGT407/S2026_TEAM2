@@ -294,21 +294,23 @@
 </p>
 {% endif %}
 <div class="card-actions" onclick="event.stopPropagation();">
-  <button type="button" class="btn btn-outline-primary btn-sm"
-    onclick="openEventDetailFromButton(this)"
-    data-event-type="practice"
-    data-practice-id="{{ practice.practice_id }}"
-    data-title="{{ practice.title }}"
-    data-date="{{ practice.practice_date }}"
-    data-time="{{ practice.practice_time }}"
-    data-location="{{ practice.location }}"
-    data-email="{{ practice.contact_email or 'N/A' }}"
-    data-notes="{{ practice.notes or 'None' }}"
-    data-status="{{ practice.status }}"
-    data-projected-cost="{{ practice.projected_cost if practice.projected_cost is not none else '' }}"
-    data-actual-cost="{{ practice.actual_cost if practice.actual_cost is not none else '' }}">
-    View Details
-  </button>
+{% if current_user.role != 'Player' %}
+<button type="button" class="btn btn-outline-primary btn-sm"
+  onclick="openEventDetailFromButton(this)"
+  data-event-type="practice"
+  data-practice-id="{{ practice.practice_id }}"
+  data-title="{{ practice.title }}"
+  data-date="{{ practice.practice_date }}"
+  data-time="{{ practice.practice_time }}"
+  data-location="{{ practice.location }}"
+  data-email="{{ practice.contact_email or 'N/A' }}"
+  data-notes="{{ practice.notes or 'None' }}"
+  data-status="{{ practice.status }}"
+  data-projected-cost="{{ practice.projected_cost if practice.projected_cost is not none else '' }}"
+  data-actual-cost="{{ practice.actual_cost if practice.actual_cost is not none else '' }}">
+  View Details
+</button>
+{% endif %}
 
   {% if current_user.role in ['Admin', 'Coach'] %}
   <button type="button" class="btn btn-outline-warning btn-sm"
