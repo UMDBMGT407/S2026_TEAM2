@@ -28,7 +28,7 @@ View game calendar - Page loads and monthly calendar renders - Shows all upcomin
 Navigate calendar months - Click the left and right arrow buttons - Calendar re-renders for previous or next month
 Click a game date - Click a highlighted game cell - Game details appear in the details box below showing opponent, date, time, and location
 View team players table - Scroll to Team Players section - Shows first 8 active players with jersey number, name, position, year, and status
-Newsletter signup form - Enter email and click Subscribe - UI interaction only, no backend connection
+Newsletter signup form - Enter email and click Subscribe - POST to /add_subscriber. Inserts the email into the subscriber table. Success flash shown: You are now subscribed; Duplicate email flash shown: email already exists; No email flash shown: enter email address
 Click Login button - Hero section login button - Redirects to /login
 
 ---
