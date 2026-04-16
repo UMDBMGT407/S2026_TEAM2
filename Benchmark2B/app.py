@@ -565,6 +565,27 @@ def get_all_donations():
     finally:
         cur.close()
 
+def get_all_subscribers():
+    cur = mysql.connection.cursor()
+    try:
+        cur.execute("""
+            SELECT subscriber_id, email, date_added, status
+            FROM subscribers
+            ORDER BY date_added DESC, subscriber_id DESC
+        """)
+        rows = cur.fetchall()
+
+        return [
+            {
+                'subscriber_id': row[0],
+                'email': row[1],
+                'date_added': row[2],
+                'status': row[3]
+            }
+            for row in rows
+        ]
+    finally:
+        cur.close()
 
 # ---------------------------
 # ROOT / PUBLIC ROUTES
@@ -1678,13 +1699,34 @@ def newsletters():
             }
             for row in rows
         ]
-        return render_template('newsletters.html', newsletters=newsletters_list)
+
+        cur.execute("""
+            SELECT subscriber_id, email, date_added, status
+            FROM subscribers
+            ORDER BY date_added DESC, subscriber_id DESC
+        """)
+        subscriber_rows = cur.fetchall()
+        subscribers_list = [
+            {
+                'subscriber_id': row[0],
+                'email': row[1],
+                'date_added': row[2],
+                'status': row[3]
+            }
+            for row in subscriber_rows
+        ]
+
+        return render_template(
+            'newsletters.html',
+            newsletters=newsletters_list,
+            subscribers=subscribers_list
+        )
+
     except Exception as e:
         flash(f'Could not load newsletters: {e}', 'danger')
-        return render_template('newsletters.html', newsletters=[])
+        return render_template('newsletters.html', newsletters=[], subscribers=[])
     finally:
         cur.close()
-
 
 @app.route('/add_newsletter', methods=['POST'])
 @login_required
