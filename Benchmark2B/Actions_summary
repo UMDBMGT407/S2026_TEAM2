@@ -1,1 +1,234 @@
+Hockey Management System Actions and Testing Reference
 
+---
+
+TEST CREDENTIALS
+
+Admin: admin@umd.edu / test123
+Coach: coach@umd.edu / test123
+Player: player@umd.edu / test123
+Supplier: supplier@umd.edu / test123
+
+---
+
+LOGIN PAGE - /login
+Access: Public
+
+Submit valid credentials - Enter email and password for any seeded user - Redirects Admin to /admin, Supplier to /supplier, others to /home
+Submit invalid credentials - Wrong email or password - Flash error: Invalid email or password.
+Submit empty fields - Leave email or password blank - Flash error: Please enter both email and password.
+Click Back to Public Site - Link at bottom of form - Redirects to /index
+
+---
+
+PUBLIC PAGE - /index
+Access: Public, no login required
+
+View game calendar - Page loads and monthly calendar renders - Shows all upcoming games with red highlights on game dates
+Navigate calendar months - Click the left and right arrow buttons - Calendar re-renders for previous or next month
+Click a game date - Click a highlighted game cell - Game details appear in the details box below showing opponent, date, time, and location
+View team players table - Scroll to Team Players section - Shows first 8 active players with jersey number, name, position, year, and status
+Newsletter signup form - Enter email and click Subscribe - UI interaction only, no backend connection
+Click Login button - Hero section login button - Redirects to /login
+
+---
+
+ADMIN DASHBOARD - /home
+Access: Admin only
+
+View dashboard stats - Page load - Displays total players, injured and active count, upcoming games, next game info, inventory count, pending orders, total revenue, total expenses, net balance, projected expenses, budget variance, and recent activity
+Click Roster Player Information button - Button in System Modules card - Navigates to /roster
+Click Scheduling and Notifications button - Button in System Modules card - Navigates to /schedule
+Click Inventory Management button - Button in System Modules card - Navigates to /equipment
+Click Financial Reporting button - Button in System Modules card - Navigates to /finances
+Click Alumni Portal button - Button in System Modules card - Navigates to /alumni
+Click Newsletter Management button - Button in System Modules card - Navigates to /newsletters
+Change Password via navbar modal - Click Change Password in navbar - Opens modal with current, new, and confirm password fields
+Submit change password with valid data - Fill in correct current password plus matching new password of 6 or more characters - Flash success: Password changed successfully.
+Submit change password with wrong current password - Enter incorrect current password - Flash error: Current password is incorrect.
+Submit change password with mismatched new passwords - New and confirm passwords differ - Flash error: New passwords do not match.
+Submit change password with too short new password - New password under 6 characters - Flash error: New password must be at least 6 characters.
+Logout - Click Logout in navbar - Session cleared and redirect to /login with flash: You have been logged out.
+
+---
+
+ROSTER MANAGEMENT - /roster
+Access: Admin and Coach can edit, Player can view only
+
+View roster table - Page load - Displays all players with jersey number, name, position, year, injured status, email, and phone
+Search players - Type in search box - Filters rows live by name, position, or jersey number using client-side JavaScript
+Add Player - Admin or Coach clicks Add Player, fills modal form, clicks Save Player - POST to /add_player, new user and player record created, flash: Player added successfully.
+Add Player with missing required fields - Submit with blank name, position, year, or email - Flash error: Please fill in all required fields.
+Edit Player - Click Edit on a row, modify fields, click Update Player - POST to /update_player/player_id, updates users and players tables, flash: Player updated successfully.
+Delete Player - Click Delete on a row and confirm the dialog - POST to /delete_player/player_id, deletes user which cascades to player record, flash: Player deleted successfully.
+
+---
+
+SCHEDULING AND NOTIFICATIONS - /schedule
+Access: Admin and Coach can edit, Player can view only
+
+GAME SCHEDULE TAB
+
+View scheduled games - Games tab on load - Shows all games where in_results is false as cards
+View game details - Click View Details on a game card - Opens Event Detail modal with opponent, date, location, type, status, costs, and notes
+Add Game - Click Add Game, fill modal, click Save Game - POST to /add_game, inserts into games table, flash: Game added successfully.
+Add Game with missing fields - Submit with blank required fields - Flash error: Please fill in all required game fields.
+Edit Game - Click Edit on a game card, modify fields, click Save Changes - POST to /edit_game/game_id, updates game record, flash: Game updated successfully.
+Move to Results - Click Move to Results on a game card - POST to /move_game_to_results/game_id, sets in_results to true and status to Completed, game moves to Results tab
+Delete Game - Click Delete and confirm in the modal - POST to /delete_game/game_id, deletes game and all related financial entries and projections, flash confirmation shown
+
+PRACTICES TAB
+
+View scheduled practices - Practices tab - Shows all practices where in_results is false
+Add Practice - Click Add Practice, fill modal, click Save Practice - POST to /add_practice, inserts into practices table, flash: Practice added successfully.
+Edit Practice - Click Edit on a practice card, modify fields, click Save Changes - POST to /edit_practice/practice_id, updates practice record, flash success shown
+Move to Results - Click Move to Results - POST to /move_practice_to_results/practice_id, sets in_results to true and status to Completed
+Delete Practice - Click Delete and confirm in the modal - POST to /delete_practice/practice_id, deletes practice and related financial data
+
+RESULTS TAB
+
+View completed games and practices - Results tab - Shows all games and practices with in_results set to true
+Save game result - Enter actual cost and final score, click Save Result - POST to /update_game_results/game_id, updates actual_cost and final_score fields
+Save practice result - Enter actual cost, click Save Result - POST to /update_practice_results/practice_id, updates actual_cost field
+
+EMAIL NOTIFICATIONS TAB
+
+View recent notifications - Emails tab - Displays static table of recent notifications, display only
+Send Message modal - Click Send Message, fill form, click Send Message - 
+
+---
+
+TEAM CALENDAR - /calendar
+Access: Admin, Coach, Player
+
+View calendar - Page load - Monthly calendar renders for current month with financial summary cards at the top
+Navigate months - Click left or right arrow buttons - Calendar re-renders for previous or next month
+Filter event types - Click Game, Practice, or Other Event filter pills - Toggles visibility of that event type on the calendar
+Click event on calendar - Click a colored event pill - Opens Event Detail modal with event info and financial entries
+Add financial entry to event - Click Add Revenue or Expense in the event modal - Opens Add Financial Entry modal
+Save financial entry - Select type and category, enter amount, click Save Entry - Entry added to in-memory data and updates summary cards, note this is not persisted to the database from this page
+Remove financial entry - Click the X next to an entry in the event modal - Removes from in-memory list and re-renders the calendar
+View on Schedule - Click View on Schedule in event modal - Redirects to /schedule
+Financial summary cards - Top of page - Shows total event revenue, total event expenses, and net balance reflecting database values plus any in-session additions
+
+---
+
+EQUIPMENT MANAGEMENT - /equipment
+Access: Admin, Coach
+
+INVENTORY TAB
+
+View inventory - Inventory tab on load - Table of all items showing ID, category, name, source, type, quantity, reorder level, unit cost, and status
+Search and filter inventory - Enter search term or select category or type then click Go - GET request to /equipment with query parameters, filtered results returned
+Add Inventory Item - Click Add Item, fill modal, click Save Item - POST to /add_inventory_item, inserts item and auto-calculates status as In Stock, Low Stock, or Out of Stock
+Status badges - View Status column - Green badge means In Stock, yellow badge means Low Stock, red badge means Out of Stock
+
+ORDERS TAB
+
+View orders - Orders tab - Table of all equipment orders with status badges
+Place Order - Click Place Order, select item and supplier and quantity, click Place Order - POST to /create_equipment_order, inserts order with status New Order, flash success shown
+View order summary - Bottom left card in Orders tab - Shows counts of New, In Progress, and Received orders
+View low stock alerts - Bottom right card in Orders tab - Lists any items not currently In Stock
+
+---
+
+SUPPLIER PORTAL - /supplier
+Access: Admin, Supplier
+
+View new orders - New Orders section - Lists all orders with status New Order
+Confirm or update a new order - Click Confirm Order and Provide Details, fill modal with status, dates, total cost, vendor notes, click Save Update - POST to /update_supplier_order/order_id, updates order record
+Mark order as Received - Set status to Received in update modal and save - Inventory quantity auto-incremented by order quantity, received_to_inventory set to true, item status recalculated
+View in-progress and shipped orders - Orders In Progress and Shipped section - Cards for all In Progress and Shipped orders with Update button
+View completed orders - Received and Completed Orders table - Shows all Received orders with inventory posted indicator
+
+---
+
+FINANCIAL REPORTING - /finances
+Access: Admin, Coach
+
+SUMMARY CARDS
+
+View totals - Page load - Cards show Total Revenue, Total Expenses, Net Balance, Projected Expenses, Projected Revenue, and Projected Net
+
+GAMES TABLE
+
+View game comparisons - Games section - Table with projected versus actual revenue and expenses and variance per game
+Click a game row - Click anywhere on a game row - Opens Game Finance Detail modal via async fetch to /game_details/game_id
+Add Actual Entry for game - Inside game detail modal click Add Actual Entry - Opens Add Actual Entry modal locked to that game
+Add Projection for game - Inside game detail modal click Add Projection - Opens Add Projection modal locked to that game
+Save actual entry - Fill form and click Save Entry - POST to /add_financial_entry, inserts into financial_entries linked to game_id
+Save projection - Fill form and click Save Projection - POST to /add_financial_projection, inserts into financial_projections linked to game_id
+Delete actual entry - Click Delete button in entries table inside modal - POST to /delete_financial_entry/entry_id, removes entry
+Delete projection - Click Delete button in projections table inside modal - POST to /delete_financial_projection/projection_id, removes projection
+Delete game from modal - Click Delete Game button inside game detail modal - POST to /delete_game/game_id, removes game and all related financial records
+
+PRACTICES TABLE
+
+Click a practice row - Click anywhere on a practice row - Opens Practice Finance Detail modal via async fetch to /practice_details/practice_id
+Add Actual Entry or Projection - Same workflow as game modal - POST to /add_financial_entry or /add_financial_projection linked to practice_id
+Delete entries or projections - Delete buttons in detail modal - Same delete routes as game entries
+Delete practice from modal - Click Delete Practice button - POST to /delete_practice/practice_id, removes practice and related financial records
+
+GENERAL TEAM FINANCES SECTION
+
+View general entries - Bottom table - Shows entries not linked to any game or practice
+Click a general entry row - Click a row - Opens General Team Finance Entry modal showing date, type, category, description, and amount
+Delete general entry - Click Delete Entry in modal - POST to /delete_financial_entry/entry_id, removes entry and shows flash confirmation
+Add General Entry - Click Add General Entry, fill modal, click Save Entry - POST to /add_financial_entry with game_id and practice_id both empty, general entry created
+
+ANNUAL SUMMARY MODAL
+
+Open Annual Summary - Click View Annual Summary button - Opens modal with total revenue, expenses, net cards, and two pie charts
+Revenue pie chart - Rendered on modal open - Pie chart showing revenue breakdown by category
+Expense pie chart - Rendered on modal open - Pie chart showing expense breakdown by category
+
+---
+
+ALUMNI PORTAL - /alumni
+Access: Admin, Coach
+
+View alumni cards - Alumni Records tab on load - Cards for each alumni showing name, class year, position, email, occupation, phone, and donation status
+Search alumni - Type in search box - Client-side filter by name, class year, or occupation
+Summary stats - Top cards - Shows total donations in dollars, active alumni count, and newsletter subscribers shown as 36
+Add Alumni without donation - Click Add Alumni, fill form, select Has Not Donated, click Save Alumni - POST to /add_alumni, inserts alumni record only
+Add Alumni with donation - Select Donated so donation fields appear, fill amount and date and message, click Save Alumni - Inserts alumni record plus donation record plus financial entry as Revenue under Donation category
+Edit Alumni - Click Edit on an alumni card, modify fields, click Save Changes - POST to /edit_alumni/alumni_id, updates alumni record
+Delete Alumni - Click Delete on an alumni card and confirm - POST to /delete_alumni/alumni_id, deletes alumni and all linked donation records
+View Donation Summary tab - Click Donation Summary tab - Table of all donations with alumni name, year, amount, and message plus breakdown cards below
+Newsletter modal - Click Newsletters button - Opens newsletter subscription modal, UI only, no backend
+
+---
+
+NEWSLETTER MANAGEMENT - /newsletters
+Access: Admin, Coach
+
+View subscribers - Subscribers tab - Static table of 4 sample subscribers, display only, not from database
+View past newsletters - Past Newsletters tab - Table of all newsletters from the database with date, title, content preview, and author
+Create Newsletter - Click Create Newsletter, enter title and content, click Save Newsletter - POST to /add_newsletter, inserts into newsletters table linked to current user, flash success shown
+Create Newsletter with missing fields - Submit with blank title or content - Flash error: Title and content are required.
+Delete Newsletter - Click Delete on a newsletter row and confirm - POST to /delete_newsletter/newsletter_id, removes record, flash: Newsletter deleted.
+Summary stats - Top cards - Total Subscribers shown as 36, Past Newsletters shown as 8, Latest Issue shown as Mar 2026, all static display values
+
+---
+
+LOGOUT - /logout
+Access: Any authenticated user
+
+Logout - Click Logout in navbar or any logout button - Session cleared, redirected to /login, flash: You have been logged out.
+
+---
+
+ROLE BASED ACCESS SUMMARY
+
+/index - All roles including public
+/login - All roles including public
+/home dashboard - Admin only
+/roster - Admin and Coach can edit, Player can view only
+/schedule - Admin and Coach can edit, Player can view only
+/calendar - Admin, Coach, Player
+/equipment - Admin, Coach
+/supplier - Admin, Supplier
+/finances - Admin, Coach
+/alumni - Admin, Coach
+/newsletters - Admin, Coach
+/logout - Any authenticated user
