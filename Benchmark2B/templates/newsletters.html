@@ -45,7 +45,7 @@
       <div class="col-md-4">
         <div class="card p-4 card-box text-center">
           <h3>Past Newsletters</h3>
-          <p class="display-6 text-success">8</p>
+          <p class="display-6 text-success">{{ newsletters|length }}</p>
           <p class="mb-0">Archived editions</p>
         </div>
       </div>
@@ -53,8 +53,13 @@
       <div class="col-md-4">
         <div class="card p-4 card-box text-center">
           <h3>Latest Issue</h3>
-          <p class="display-6 text-dark">Mar 2026</p>
-          <p class="mb-0">Spring Schedule Update</p>
+          {% if newsletters %}
+          <p class="display-6 text-dark">{{ newsletters[0].created_at.strftime('%b %Y') }}</p>
+          <p class="mb-0">{{ newsletters[0].title }}</p>
+          {% else %}
+          <p class="display-6 text-dark">N/A</p>
+          <p class="mb-0">No newsletters yet</p>
+          {% endif %}  
         </div>
       </div>
     </div>
