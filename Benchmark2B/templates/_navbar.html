@@ -45,7 +45,7 @@
           </a>
         </li>
 
-        {% if current_user.is_authenticated and current_user.role in ['Admin', 'Coach'] %}
+        {% if current_user.is_authenticated and current_user.role == 'Admin' %}
         <li class="nav-item">
           <a class="nav-link {% if request.endpoint == 'equipment' %}active{% endif %}" href="{{ url_for('equipment') }}">
             Equipment
@@ -57,7 +57,9 @@
             Finances
           </a>
         </li>
+        {% endif %}
 
+        {% if current_user.is_authenticated and current_user.role in ['Admin', 'Coach'] %}
         <li class="nav-item">
           <a class="nav-link {% if request.endpoint == 'alumni' %}active{% endif %}" href="{{ url_for('alumni') }}">
             Alumni
