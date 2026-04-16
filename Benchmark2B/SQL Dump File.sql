@@ -401,3 +401,21 @@ INSERT INTO donations (alumni_id, amount, donation_date, message) VALUES
 (1, 1500.00, '2026-03-28', 'Happy to support the team.'),
 (2, 2000.00, '2026-03-29', 'Proud alum donation.'),
 (3, 750.00, '2026-03-30', 'Keep it going!');
+
+-- =========================
+-- NEWSLETTER SUBSCRIBERS TABLE
+-- =========================
+CREATE TABLE subscribers (
+    subscriber_id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    date_added DATE NOT NULL,
+    status ENUM('Active', 'Pending', 'Inactive') NOT NULL DEFAULT 'Active'
+);
+-- =========================
+-- NEWSLETTER SEED DATA 
+-- =========================
+INSERT INTO subscribers (email, date_added, status) VALUES
+('fan1@email.com', '2026-01-15', 'Active'),
+('alumni1@email.com', '2026-02-02', 'Active'),
+('supporter@email.com', '2026-02-18', 'Active'),
+('familymember@email.com', '2026-03-01', 'Pending');
