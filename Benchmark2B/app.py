@@ -2300,6 +2300,36 @@ def delete_alumni(alumni_id):
         cur.close()
 
     return redirect(url_for('alumni'))
+# ---------------------------
+# ADD SUBSCRIBER ACTION
+# ---------------------------
+@app.route('/add_subscriber', methods=['POST'])
+def add_subscriber():
+    email = request.form.get('email', '').strip()
+
+    if not email:
+        flash('Please enter an email address.', 'danger')
+        return redirect(request.referrer or url_for('public_page'))
+
+    cur = mysql.connection.cursor()
+    try:
+        cur.execute("""
+            INSERT INTO subscribers (email, date_added, status)
+            VALUES (%s, CURDATE(), 'Active')
+        """, (email,))
+        mysql.connection.commit()
+        flash('You are now subscribed.', 'success')
+    except Exception as e:
+        mysql.connection.rollback()
+
+        if 'Duplicate entry' in str(e):
+            flash('This email is already subscribed.', 'warning')
+        else:
+            flash(f'Could not subscribe: {e}', 'danger')
+    finally:
+        cur.close()
+
+    return redirect(request.referrer or url_for('public_page'))
 
 
 # ---------------------------
@@ -2385,6 +2415,8 @@ def delete_practice(practice_id):
     if next_page == 'schedule':
         return redirect(url_for('schedule'))
     return redirect(url_for('finances'))
+
+
 
 
 # ---------------------------
