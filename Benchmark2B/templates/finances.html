@@ -217,6 +217,81 @@
     .table thead th {
       white-space: nowrap;
     }
+    @media print {
+  .no-print,
+  nav,
+  .navbar,
+  .hero,
+  .btn,
+  .modal,
+  .modal-backdrop,
+  script {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  main.container {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0.25in !important;
+  }
+
+  .card,
+  .summary-group,
+  .metric-card {
+    border: 1px solid #999 !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    page-break-inside: avoid;
+  }
+
+  .summary-group {
+    margin-bottom: 0.25in !important;
+  }
+
+  .metric-value {
+    color: #000000 !important;
+  }
+
+  .table {
+    font-size: 10px;
+  }
+
+  .table-dark th {
+    background: #e9ecef !important;
+    color: #000000 !important;
+    border-color: #999 !important;
+  }
+
+  .status-chip {
+    border: 1px solid #000 !important;
+    color: #000 !important;
+    background: #ffffff !important;
+  }
+
+  h1, h2, h3, h4 {
+    color: #000000 !important;
+    page-break-after: avoid;
+  }
+
+  table {
+    page-break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  a[href]:after {
+    content: "";
+  }
+}
   </style>
 </head>
 <body>
@@ -935,7 +1010,9 @@
 
     let revenuePieChart = null;
     let expensePieChart = null;
-
+    function printFinancialReport() {
+  window.print();
+}
     function money(value) {
       const num = Number(value || 0);
       return `$${num.toFixed(2)}`;
