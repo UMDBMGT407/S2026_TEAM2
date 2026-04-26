@@ -243,13 +243,19 @@
       {% endif %}
     {% endwith %}
 
-    <div class="row mb-4">
-      <div class="col-md-12">
-        <button type="button" class="btn btn-dark w-100" data-bs-toggle="modal" data-bs-target="#annualSummaryModal">
-          View Annual Summary
-        </button>
-      </div>
-    </div>
+    <div class="row mb-4 g-3 no-print">
+  <div class="col-md-6">
+    <button type="button" class="btn btn-dark w-100" data-bs-toggle="modal" data-bs-target="#annualSummaryModal">
+      View Annual Summary
+    </button>
+  </div>
+
+  <div class="col-md-6">
+    <button type="button" class="btn btn-outline-dark w-100" onclick="printFinancialReport()">
+      Print / Save Financial Report as PDF
+    </button>
+  </div>
+</div>
 
     <div class="summary-group">
       <div class="summary-group-title">Actual Finances</div>
