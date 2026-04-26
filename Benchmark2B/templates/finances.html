@@ -196,11 +196,6 @@
       white-space: nowrap;
     }
 
-    .status-chip-empty {
-      color: #6c757d;
-      font-size: 0.82rem;
-    }
-
     .variance-text {
       white-space: nowrap;
       font-weight: 600;
@@ -217,83 +212,95 @@
     .table thead th {
       white-space: nowrap;
     }
+
+    .print-report {
+      display: none;
+    }
+
     @media print {
-  .no-print,
-  nav,
-  .navbar,
-  .hero,
-  .btn,
-  .modal,
-  .modal-backdrop,
-  script {
-    display: none !important;
-  }
+      body * {
+        visibility: hidden !important;
+      }
 
-  body {
-    background: #ffffff !important;
-    color: #000000 !important;
-  }
+      #printableReport,
+      #printableReport * {
+        visibility: visible !important;
+      }
 
-  main.container {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-    padding: 0.25in !important;
-  }
+      #printableReport {
+        display: block !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        padding: 0.4in;
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-family: Arial, sans-serif;
+      }
 
-  .card,
-  .summary-group,
-  .metric-card {
-    border: 1px solid #999 !important;
-    box-shadow: none !important;
-    background: #ffffff !important;
-    page-break-inside: avoid;
-  }
+      .report-header {
+        text-align: center;
+        border-bottom: 2px solid #000;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+      }
 
-  .summary-group {
-    margin-bottom: 0.25in !important;
-  }
+      .report-header h1 {
+        margin-bottom: 4px;
+        font-size: 24px;
+      }
 
-  .metric-value {
-    color: #000000 !important;
-  }
+      .report-header p {
+        margin: 2px 0;
+        font-size: 12px;
+      }
 
-  .table {
-    font-size: 10px;
-  }
+      .report-section {
+        margin-bottom: 24px;
+        page-break-inside: avoid;
+      }
 
-  .table-dark th {
-    background: #e9ecef !important;
-    color: #000000 !important;
-    border-color: #999 !important;
-  }
+      .report-section h2 {
+        font-size: 18px;
+        border-bottom: 1px solid #999;
+        padding-bottom: 4px;
+        margin-bottom: 10px;
+      }
 
-  .status-chip {
-    border: 1px solid #000 !important;
-    color: #000 !important;
-    background: #ffffff !important;
-  }
+      .report-section table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 10px;
+      }
 
-  h1, h2, h3, h4 {
-    color: #000000 !important;
-    page-break-after: avoid;
-  }
+      .report-section th,
+      .report-section td {
+        border: 1px solid #999;
+        padding: 6px;
+        text-align: left;
+      }
 
-  table {
-    page-break-inside: auto;
-  }
+      .report-section th {
+        background: #eeeeee !important;
+        font-weight: bold;
+      }
 
-  tr {
-    page-break-inside: avoid;
-    page-break-after: auto;
-  }
+      .report-money {
+        white-space: nowrap;
+      }
 
-  a[href]:after {
-    content: "";
-  }
-}
+      .no-print {
+        display: none !important;
+      }
+
+      @page {
+        margin: 0.45in;
+      }
+    }
   </style>
 </head>
+
 <body>
 
   {% include '_navbar.html' %}
@@ -319,18 +326,18 @@
     {% endwith %}
 
     <div class="row mb-4 g-3 no-print">
-  <div class="col-md-6">
-    <button type="button" class="btn btn-dark w-100" data-bs-toggle="modal" data-bs-target="#annualSummaryModal">
-      View Annual Summary
-    </button>
-  </div>
+      <div class="col-md-6">
+        <button type="button" class="btn btn-dark w-100" data-bs-toggle="modal" data-bs-target="#annualSummaryModal">
+          View Annual Summary
+        </button>
+      </div>
 
-  <div class="col-md-6">
-    <button type="button" class="btn btn-outline-dark w-100" onclick="printFinancialReport()">
-      Print / Save Financial Report as PDF
-    </button>
-  </div>
-</div>
+      <div class="col-md-6">
+        <button type="button" class="btn btn-outline-dark w-100" data-bs-toggle="modal" data-bs-target="#printReportModal">
+          Generate Printable Financial Report
+        </button>
+      </div>
+    </div>
 
     <div class="summary-group">
       <div class="summary-group-title">Actual Finances</div>
@@ -590,6 +597,234 @@
     </div>
 
   </main>
+
+  <!-- PRINTABLE REPORT ONLY -->
+  <section id="printableReport" class="print-report">
+    <div class="report-header">
+      <h1>Financial Report</h1>
+      <p>University Hockey Team Financial Summary</p>
+      <p>Generated from the Financial Reporting page</p>
+    </div>
+
+    <div id="reportSummary" class="report-section">
+      <h2>Summary</h2>
+      <table>
+        <tr>
+          <th>Metric</th>
+          <th>Amount</th>
+        </tr>
+        <tr>
+          <td>Total Revenue</td>
+          <td class="report-money">${{ "%.2f"|format(totals.total_revenue) }}</td>
+        </tr>
+        <tr>
+          <td>Total Expenses</td>
+          <td class="report-money">${{ "%.2f"|format(totals.total_expenses) }}</td>
+        </tr>
+        <tr>
+          <td>Net Balance</td>
+          <td class="report-money">${{ "%.2f"|format(totals.net_balance) }}</td>
+        </tr>
+        <tr>
+          <td>Projected Revenue</td>
+          <td class="report-money">${{ "%.2f"|format(projections.projected_revenue) }}</td>
+        </tr>
+        <tr>
+          <td>Projected Expenses</td>
+          <td class="report-money">${{ "%.2f"|format(projections.projected_expenses) }}</td>
+        </tr>
+        <tr>
+          <td>Projected Net</td>
+          {% set report_projected_net = projections.projected_revenue - projections.projected_expenses %}
+          <td class="report-money">${{ "%.2f"|format(report_projected_net) }}</td>
+        </tr>
+      </table>
+    </div>
+
+    <div id="reportGames" class="report-section">
+      <h2>Games</h2>
+      <table>
+        <tr>
+          <th>Date</th>
+          <th>Opponent</th>
+          <th>Type</th>
+          <th>Status</th>
+          <th>Projected Rev.</th>
+          <th>Actual Rev.</th>
+          <th>Revenue Result</th>
+          <th>Projected Exp.</th>
+          <th>Actual Exp.</th>
+          <th>Expense Result</th>
+        </tr>
+
+        {% if game_comparisons %}
+          {% for game in game_comparisons %}
+          <tr>
+            <td>{{ game.game_date }}</td>
+            <td>{{ game.opponent }}</td>
+            <td>{{ game.game_type }}</td>
+            <td>{{ game.status }}</td>
+            <td class="report-money">${{ "%.2f"|format(game.projected_revenue) }}</td>
+            <td class="report-money">${{ "%.2f"|format(game.actual_revenue) }}</td>
+            <td>
+              {% if game.revenue_variance > 0 %}
+                ▲ Above Target
+              {% elif game.revenue_variance < 0 %}
+                ▼ Below Target
+              {% else %}
+                ● On Target
+              {% endif %}
+            </td>
+            <td class="report-money">${{ "%.2f"|format(game.projected_expenses) }}</td>
+            <td class="report-money">${{ "%.2f"|format(game.actual_expenses) }}</td>
+            <td>
+              {% if game.expense_variance > 0 %}
+                ▲ Over Budget
+              {% elif game.expense_variance < 0 %}
+                ▼ Under Budget
+              {% else %}
+                ● On Budget
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="10">No game financial data found.</td>
+          </tr>
+        {% endif %}
+      </table>
+    </div>
+
+    <div id="reportPractices" class="report-section">
+      <h2>Practices</h2>
+      <table>
+        <tr>
+          <th>Date</th>
+          <th>Time</th>
+          <th>Practice</th>
+          <th>Status</th>
+          <th>Projected Rev.</th>
+          <th>Actual Rev.</th>
+          <th>Revenue Result</th>
+          <th>Projected Exp.</th>
+          <th>Actual Exp.</th>
+          <th>Expense Result</th>
+        </tr>
+
+        {% if practice_comparisons %}
+          {% for practice in practice_comparisons %}
+          <tr>
+            <td>{{ practice.practice_date }}</td>
+            <td>{{ practice.practice_time }}</td>
+            <td>{{ practice.title }}</td>
+            <td>{{ practice.status }}</td>
+            <td class="report-money">${{ "%.2f"|format(practice.projected_revenue) }}</td>
+            <td class="report-money">${{ "%.2f"|format(practice.actual_revenue) }}</td>
+            <td>
+              {% if practice.revenue_variance > 0 %}
+                ▲ Above Target
+              {% elif practice.revenue_variance < 0 %}
+                ▼ Below Target
+              {% else %}
+                ● On Target
+              {% endif %}
+            </td>
+            <td class="report-money">${{ "%.2f"|format(practice.projected_expenses) }}</td>
+            <td class="report-money">${{ "%.2f"|format(practice.actual_expenses) }}</td>
+            <td>
+              {% if practice.expense_variance > 0 %}
+                ▲ Over Budget
+              {% elif practice.expense_variance < 0 %}
+                ▼ Under Budget
+              {% else %}
+                ● On Budget
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="10">No practice financial data found.</td>
+          </tr>
+        {% endif %}
+      </table>
+    </div>
+
+    <div id="reportGeneral" class="report-section">
+      <h2>General Team Finances</h2>
+      <table>
+        <tr>
+          <th>Date</th>
+          <th>Type</th>
+          <th>Category</th>
+          <th>Description</th>
+          <th>Amount</th>
+        </tr>
+
+        {% if general_entries %}
+          {% for entry in general_entries %}
+          <tr>
+            <td>{{ entry.entry_date }}</td>
+            <td>{{ entry.entry_type }}</td>
+            <td>{{ entry.category_name }}</td>
+            <td>{{ entry.description }}</td>
+            <td class="report-money">${{ "%.2f"|format(entry.amount) }}</td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="5">No general team financial entries found.</td>
+          </tr>
+        {% endif %}
+      </table>
+    </div>
+  </section>
+
+  <!-- PRINT REPORT MODAL -->
+  <div class="modal fade" id="printReportModal" tabindex="-1" aria-labelledby="printReportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title" id="printReportModalLabel">Generate Financial Report</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <p class="text-muted">
+            Choose what to include in the printable report. After clicking Generate Report, select “Save as PDF” in the browser print window.
+          </p>
+
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="printSummary" checked>
+            <label class="form-check-label" for="printSummary">Summary</label>
+          </div>
+
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="printGames" checked>
+            <label class="form-check-label" for="printGames">Games</label>
+          </div>
+
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="printPractices" checked>
+            <label class="form-check-label" for="printPractices">Practices</label>
+          </div>
+
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="printGeneral" checked>
+            <label class="form-check-label" for="printGeneral">General Team Finances</label>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-dark" onclick="generatePrintableReport()">Generate Report</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
 
   <!-- ADD GENERAL ENTRY MODAL -->
   <div class="modal fade" id="addGeneralEntryModal" tabindex="-1" aria-labelledby="addGeneralEntryModalLabel" aria-hidden="true">
@@ -1010,12 +1245,33 @@
 
     let revenuePieChart = null;
     let expensePieChart = null;
-    function printFinancialReport() {
-  window.print();
-}
+
     function money(value) {
       const num = Number(value || 0);
       return `$${num.toFixed(2)}`;
+    }
+
+    function generatePrintableReport() {
+      document.getElementById('reportSummary').style.display =
+        document.getElementById('printSummary').checked ? 'block' : 'none';
+
+      document.getElementById('reportGames').style.display =
+        document.getElementById('printGames').checked ? 'block' : 'none';
+
+      document.getElementById('reportPractices').style.display =
+        document.getElementById('printPractices').checked ? 'block' : 'none';
+
+      document.getElementById('reportGeneral').style.display =
+        document.getElementById('printGeneral').checked ? 'block' : 'none';
+
+      const modal = bootstrap.Modal.getInstance(document.getElementById('printReportModal'));
+      if (modal) {
+        modal.hide();
+      }
+
+      setTimeout(() => {
+        window.print();
+      }, 300);
     }
 
     function buildStatusBadge(categoryType, projected, actual) {
@@ -1041,16 +1297,10 @@
         return `<span class="variance-text">● ${money(variance)}</span>`;
       }
 
-      if (categoryType === 'Revenue') {
-        if (variance > 0) {
-          return `<span class="variance-text">▲ +${money(Math.abs(variance)).replace('$', '')}</span>`;
-        }
-        return `<span class="variance-text">▼ -${money(Math.abs(variance)).replace('$', '')}</span>`;
-      }
-
       if (variance > 0) {
         return `<span class="variance-text">▲ +${money(Math.abs(variance)).replace('$', '')}</span>`;
       }
+
       return `<span class="variance-text">▼ -${money(Math.abs(variance)).replace('$', '')}</span>`;
     }
 
