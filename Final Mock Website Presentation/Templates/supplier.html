@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supplier Portal</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/newstyle.css') }}">
+
+  <style>
+    .supplier-stat-card,
+    .supplier-section-card {
+      border-radius: 16px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+    }
+    .supplier-stat-card {
+      background: #ffffff;
+      padding: 20px;
+      height: 100%;
+    }
+    .supplier-section-card {
+      background: #f2f2f5;
+      padding: 22px;
+      margin-bottom: 24px;
+    }
+    .section-chip {
+      display: inline-block;
+      background: #d9d9d9;
+      border-radius: 999px;
+      padding: 6px 16px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  {% include '_navbar.html' %}
+
+  <section class="hero text-center">
+    <div class="container">
+      <h1>Supplier Portal</h1>
+      <p class="mb-0">Manage and update equipment orders assigned to you</p>
+    </div>
+  </section>
+
+  <main class="container my-4">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="row g-4 mb-4">
+      <div class="col-md-4">
+        <div class="supplier-stat-card">
+          <div class="text-muted">New Orders</div>
+          <div class="display-6">{{ summary.new_orders }}</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="supplier-stat-card">
+          <div class="text-muted">In Progress</div>
+          <div class="display-6">{{ summary.in_progress_orders }}</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="supplier-stat-card">
+          <div class="text-muted">Completed / Received</div>
+          <div class="display-6">{{ summary.received_orders }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="supplier-section-card">
+      <div class="section-chip">NEW ORDERS - ACTION REQUIRED</div>
+
+      {% for order in orders if order.order_status == 'New Order' %}
+      <div class="card mb-3">
+        <div class="card-body">
+          <p class="mb-2">
+            <strong>ORDER #{{ order.order_id }}</strong>
+            <span class="badge bg-primary">New Order</span><br>
+            <strong>ITEM:</strong> {{ order.item_name }}<br>
+            <strong>CATEGORY:</strong> {{ order.category }}<br>
+            <strong>QUANTITY:</strong> {{ order.quantity }}<br>
+            <strong>ORDER DATE:</strong> {{ order.order_date or '-' }}<br>
+            <strong>CUSTOMER NOTES:</strong> {{ order.customer_notes or '-' }}
+          </p>
+
+          <button class="btn btn-primary"
+                  data-bs-toggle="modal"
+                  data-bs-target="#updateOrderModal{{ order.order_id }}">
+            Confirm Order &amp; Provide Details
+          </button>
+        </div>
+      </div>
+      {% else %}
+      <div class="alert alert-light border">No new orders right now.</div>
+      {% endfor %}
+    </div>
+
+    <div class="supplier-section-card">
+      <div class="section-chip">ORDERS IN PROGRESS / SHIPPED</div>
+
+      <div class="row g-3">
+        {% for order in orders if order.order_status in ['In Progress', 'Shipped'] %}
+        <div class="col-lg-6">
+          <div class="card h-100">
+            <div class="card-body">
+              <p class="mb-2">
+                <strong>ORDER #{{ order.order_id }}</strong><br>
+                <strong>ITEM:</strong> {{ order.item_name }}<br>
+                <strong>STATUS:</strong>
+                {% if order.order_status == 'In Progress' %}
+                  <span class="badge bg-warning text-dark">In Progress</span>
+                {% else %}
+                  <span class="badge bg-info text-dark">Shipped</span>
+                {% endif %}
+                <br>
+                <strong>ORDER DATE:</strong> {{ order.order_date or '-' }}<br>
+                <strong>EST. DELIVERY:</strong> {{ order.estimated_delivery_date or '-' }}<br>
+                <strong>TOTAL:</strong>
+                {% if order.total_cost is not none %}
+                  ${{ '%.2f'|format(order.total_cost) }}
+                {% else %}
+                  -
+                {% endif %}
+                <br>
+                <strong>VENDOR NOTES:</strong> {{ order.vendor_notes or '-' }}
+              </p>
+
+              <button class="btn btn-outline-dark btn-sm"
+                      data-bs-toggle="modal"
+                      data-bs-target="#updateOrderModal{{ order.order_id }}">
+                Update
+              </button>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      {% if not (orders | selectattr('order_status', 'in', ['In Progress', 'Shipped']) | list) %}
+        <div class="alert alert-light border mt-3">No in-progress or shipped orders.</div>
+      {% endif %}
+    </div>
+
+    <div class="supplier-section-card">
+      <div class="section-chip">RECEIVED / COMPLETED ORDERS</div>
+
+      <div class="table-responsive">
+        <table class="table table-bordered table-striped align-middle bg-white">
+          <thead class="table-dark">
+            <tr>
+              <th>Order</th>
+              <th>Item</th>
+              <th>Qty</th>
+              <th>Status</th>
+              <th>Delivery</th>
+              <th>Total</th>
+              <th>Inventory Posted</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in orders if order.order_status == 'Received' %}
+            <tr>
+              <td>#{{ order.order_id }}</td>
+              <td>{{ order.item_name }}</td>
+              <td>{{ order.quantity }}</td>
+              <td><span class="badge bg-success">Received</span></td>
+              <td>{{ order.estimated_delivery_date or '-' }}</td>
+              <td>
+                {% if order.total_cost is not none %}
+                  ${{ '%.2f'|format(order.total_cost) }}
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+              <td>
+                {% if order.received_to_inventory %}
+                  <span class="badge bg-success">Yes</span>
+                {% else %}
+                  <span class="badge bg-warning text-dark">No</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="7" class="text-center text-muted">No received orders yet.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {% for order in orders %}
+    <div class="modal fade" id="updateOrderModal{{ order.order_id }}" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form method="POST" action="{{ url_for('update_supplier_order', order_id=order.order_id) }}">
+            <div class="modal-header">
+              <h5 class="modal-title">Update Order #{{ order.order_id }}</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <p class="mb-3">
+                <strong>Item:</strong> {{ order.item_name }}<br>
+                <strong>Quantity:</strong> {{ order.quantity }}<br>
+                <strong>Customer Notes:</strong> {{ order.customer_notes or '-' }}
+              </p>
+
+              <div class="mb-3">
+                <label class="form-label">Order Status</label>
+                <select class="form-select" name="order_status" required>
+                  {% for status in ['New Order', 'In Progress', 'Shipped', 'Received', 'Cancelled'] %}
+                    <option value="{{ status }}" {% if order.order_status == status %}selected{% endif %}>{{ status }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Order Date</label>
+                <input type="date" class="form-control" name="order_date"
+                       value="{{ order.order_date.strftime('%Y-%m-%d') if order.order_date else '' }}">
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Estimated Delivery Date</label>
+                <input type="date" class="form-control" name="estimated_delivery_date"
+                       value="{{ order.estimated_delivery_date.strftime('%Y-%m-%d') if order.estimated_delivery_date else '' }}">
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Total Cost</label>
+                <input type="number" step="0.01" min="0" class="form-control" name="total_cost"
+                       value="{{ order.total_cost if order.total_cost is not none else '' }}">
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Vendor Notes</label>
+                <textarea class="form-control" name="vendor_notes" rows="3">{{ order.vendor_notes or '' }}</textarea>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-primary" type="submit">Save Update</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
