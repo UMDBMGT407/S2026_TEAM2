@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Team Calendar | Hockey System</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/newstyle.css') }}">
+
+  <style>
+    :root {
+      --game-color: #c0392b;
+      --practice-color: #f39c12;
+      --other-color: #2980b9;
+      --revenue-color: #198754;
+      --expense-color: #b22222;
+    }
+
+    .fin-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .fin-card .fc-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #888;
+      margin-bottom: 4px;
+    }
+
+    .fin-card .fc-amount {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .fin-card .fc-sub {
+      font-size: 0.78rem;
+      color: #999;
+      margin-top: 2px;
+    }
+
+    .fc-revenue .fc-amount { color: var(--revenue-color); }
+    .fc-expense .fc-amount { color: var(--expense-color); }
+    .fc-net .fc-amount { color: #0d6efd; }
+
+    .cal-toolbar {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .month-nav {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .month-nav button {
+      background: #f0f0f0;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      width: 32px;
+      height: 32px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .month-nav button:hover {
+      background: #e0e0e0;
+    }
+
+    .month-label {
+      font-size: 1.1rem;
+      font-weight: 700;
+      min-width: 180px;
+      text-align: center;
+      color: #2c3e50;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-pill {
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1.5px solid transparent;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: none;
+      font-family: inherit;
+      transition: opacity 0.2s;
+    }
+
+    .filter-pill .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .fp-game {
+      border-color: var(--game-color);
+      color: var(--game-color);
+      background: rgba(192, 57, 43, 0.08);
+    }
+
+    .fp-practice {
+      border-color: var(--practice-color);
+      color: #9a6700;
+      background: rgba(243, 156, 18, 0.08);
+    }
+
+    .fp-other {
+      border-color: var(--other-color);
+      color: #1a5276;
+      background: rgba(41, 128, 185, 0.08);
+    }
+
+    .fp-game .dot { background: var(--game-color); }
+    .fp-practice .dot { background: var(--practice-color); }
+    .fp-other .dot { background: var(--other-color); }
+
+    .filter-pill.off {
+      opacity: 0.3;
+    }
+
+    .cal-wrap {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+    }
+
+    .cal-header-row {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      background: #f8f9fa;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .cal-header-row div {
+      padding: 8px;
+      text-align: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .cal-body {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+    }
+
+    .cal-cell {
+      border-right: 1px solid #f0f0f0;
+      border-bottom: 1px solid #f0f0f0;
+      min-height: 110px;
+      padding: 6px;
+    }
+
+    .cal-cell:nth-child(7n) {
+      border-right: none;
+    }
+
+    .cal-cell.other-month {
+      background: #fafafa;
+    }
+
+    .cal-cell.today {
+      background: #fff8f0;
+    }
+
+    .day-num {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #aaa;
+      display: inline-block;
+      margin-bottom: 4px;
+    }
+
+    .today .day-num {
+      background: #b22222;
+      color: #fff;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+    }
+
+    .other-month .day-num {
+      color: #ddd;
+    }
+
+    .ev-pill {
+      display: block;
+      border-radius: 3px;
+      padding: 2px 5px;
+      font-size: 0.68rem;
+      font-weight: 600;
+      margin-bottom: 2px;
+      cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      border-left: 3px solid transparent;
+      transition: filter 0.12s;
+    }
+
+    .ev-pill:hover {
+      filter: brightness(0.9);
+    }
+
+    .ev-game {
+      background: rgba(192, 57, 43, 0.09);
+      border-left-color: var(--game-color);
+      color: #922b21;
+    }
+
+    .ev-practice {
+      background: rgba(243, 156, 18, 0.09);
+      border-left-color: var(--practice-color);
+      color: #9a6700;
+    }
+
+    .ev-other {
+      background: rgba(41, 128, 185, 0.09);
+      border-left-color: var(--other-color);
+      color: #1a5276;
+    }
+
+    .has-finance::after {
+      content: ' $';
+      font-weight: 800;
+      color: var(--revenue-color);
+    }
+
+    .cal-legend {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      padding: 10px 4px;
+      font-size: 0.78rem;
+      color: #888;
+    }
+
+    .cal-legend span {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .ldot {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      display: inline-block;
+    }
+
+    .ldot-game { background: var(--game-color); }
+    .ldot-practice { background: var(--practice-color); }
+    .ldot-other { background: var(--other-color); }
+    .ldot-finance { background: var(--revenue-color); }
+
+    .modal-backdrop-custom {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1055;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .modal-backdrop-custom.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-box {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+      width: 90%;
+      max-width: 520px;
+      max-height: 90vh;
+      overflow-y: auto;
+      transform: translateY(14px);
+      transition: transform 0.2s;
+    }
+
+    .modal-backdrop-custom.show .modal-box {
+      transform: translateY(0);
+    }
+
+    .mhdr {
+      padding: 14px 18px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 4px solid transparent;
+      border-radius: 12px 12px 0 0;
+    }
+
+    .mhdr.game { border-top-color: var(--game-color); }
+    .mhdr.practice { border-top-color: var(--practice-color); }
+    .mhdr.other { border-top-color: var(--other-color); }
+    .mhdr.finance { border-top-color: var(--revenue-color); }
+
+    .mhdr-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #2c3e50;
+    }
+
+    .mhdr-close {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      color: #aaa;
+      cursor: pointer;
+    }
+
+    .mhdr-close:hover {
+      color: #555;
+    }
+
+    .ev-badge {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+    }
+
+    .eb-scheduled {
+      background: #d6eaf8;
+      color: #1a5276;
+      border: 1px solid #2980b9;
+    }
+
+    .eb-confirmed {
+      background: #d5f5e3;
+      color: #196f3d;
+      border: 1px solid #27ae60;
+    }
+
+    .eb-cancelled {
+      background: #fadbd8;
+      color: #922b21;
+      border: 1px solid #c0392b;
+    }
+
+    .eb-completed {
+      background: #e8e8e8;
+      color: #444;
+      border: 1px solid #999;
+    }
+
+    .eb-practice {
+      background: #fef9e7;
+      color: #9a6700;
+      border: 1px solid #f39c12;
+    }
+
+    .eb-event {
+      background: #d6eaf8;
+      color: #1a5276;
+      border: 1px solid #2980b9;
+    }
+
+    .mbody {
+      padding: 16px 18px;
+    }
+
+    .frow {
+      display: flex;
+      padding: 8px 0;
+      border-bottom: 1px solid #f5f5f5;
+      font-size: 0.87rem;
+      gap: 8px;
+    }
+
+    .frow:last-of-type {
+      border-bottom: none;
+    }
+
+    .frow strong {
+      color: #aaa;
+      font-weight: 600;
+      min-width: 120px;
+      flex-shrink: 0;
+      font-size: 0.82rem;
+    }
+
+    .frow span {
+      color: #2c3e50;
+      font-weight: 500;
+    }
+
+    .tag-home {
+      display: inline-block;
+      background: #d5f5e3;
+      color: #196f3d;
+      border: 1px solid #27ae60;
+      border-radius: 3px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 1px 5px;
+      margin-left: 5px;
+    }
+
+    .tag-away {
+      display: inline-block;
+      background: #fef9e7;
+      color: #9a6700;
+      border: 1px solid #f39c12;
+      border-radius: 3px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 1px 5px;
+      margin-left: 5px;
+    }
+
+    .fin-section {
+      margin-top: 14px;
+      border-top: 2px dashed #e8e8e8;
+      padding-top: 14px;
+    }
+
+    .fin-section h6 {
+      font-size: 0.83rem;
+      font-weight: 700;
+      color: #555;
+      margin-bottom: 10px;
+    }
+
+    .fin-entry-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 5px 0;
+      font-size: 0.83rem;
+      border-bottom: 1px solid #f8f8f8;
+    }
+
+    .fin-entry-row:last-child {
+      border-bottom: none;
+    }
+
+    .fe-label small {
+      display: block;
+      color: #aaa;
+      font-size: 0.74rem;
+    }
+
+    .fe-amt {
+      font-weight: 700;
+    }
+
+    .fe-amt.revenue { color: var(--revenue-color); }
+    .fe-amt.expense { color: var(--expense-color); }
+
+    .fin-net-row {
+      display: flex;
+      justify-content: space-between;
+      background: #f8f9fa;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 0.87rem;
+      font-weight: 700;
+      margin-top: 6px;
+    }
+
+    .net-pos { color: var(--revenue-color); }
+    .net-neg { color: var(--expense-color); }
+
+    .btn-add-fin {
+      width: 100%;
+      margin-top: 10px;
+      background: none;
+      border: 1.5px dashed #ddd;
+      border-radius: 8px;
+      padding: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #aaa;
+      cursor: pointer;
+      font-family: inherit;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .btn-add-fin:hover {
+      border-color: #b22222;
+      color: #b22222;
+    }
+
+    .mftr {
+      padding: 12px 18px;
+      border-top: 1px solid #eee;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .type-toggle {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .type-toggle button {
+      flex: 1;
+      padding: 7px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1.5px solid #ddd;
+      background: #f8f8f8;
+      color: #888;
+      font-family: inherit;
+      transition: all 0.18s;
+    }
+
+    .t-revenue {
+      background: #d5f5e3 !important;
+      border-color: #27ae60 !important;
+      color: #196f3d !important;
+    }
+
+    .t-expense {
+      background: #fadbd8 !important;
+      border-color: #c0392b !important;
+      color: #922b21 !important;
+    }
+
+    @media (max-width: 768px) {
+      .fin-summary {
+        grid-template-columns: 1fr;
+      }
+
+      .cal-cell {
+        min-height: 60px;
+      }
+
+      .ev-pill {
+        font-size: 0.6rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  {% include '_navbar.html' %}
+
+  <section class="hero text-center">
+    <div class="container">
+      <h1>Team Calendar</h1>
+      <p class="mb-0">View games, practices, and events. Log ticket revenue and event expenses per game.</p>
+    </div>
+  </section>
+
+  <main class="container my-5">
+
+    {% if current_user.role != 'Player' %}
+    <div class="fin-summary">
+      <div class="card p-4 card-box fin-card fc-revenue text-center">
+        <div class="fc-label">Total Event Revenue</div>
+        <div class="fc-amount" id="totalRevenue">${{ "{:,.2f}".format(total_revenue) }}</div>
+        <div class="fc-sub">Ticket sales across all games</div>
+      </div>
+
+      <div class="card p-4 card-box fin-card fc-expense text-center">
+        <div class="fc-label">Total Event Expenses</div>
+        <div class="fc-amount" id="totalExpenses">${{ "{:,.2f}".format(total_expenses) }}</div>
+        <div class="fc-sub">Ref fees, ice fees, and travel</div>
+      </div>
+
+      <div class="card p-4 card-box fin-card fc-net text-center">
+        <div class="fc-label">Net (Revenue − Expenses)</div>
+        <div class="fc-amount" id="netAmount"
+             style="color: {{ '#198754' if net_balance >= 0 else '#b22222' }}">
+          ${{ "{:,.2f}".format(net_balance) }}
+        </div>
+        <div class="fc-sub">Across all calendar events</div>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="cal-toolbar">
+      <div class="month-nav">
+        <button id="prevBtn" title="Previous month">&#8249;</button>
+        <div class="month-label" id="monthLabel"></div>
+        <button id="nextBtn" title="Next month">&#8250;</button>
+      </div>
+
+      <div class="filter-group">
+        <small class="text-muted me-1">Filter:</small>
+        <button class="filter-pill fp-game" data-type="game" onclick="toggleFilter(this)">
+          <span class="dot"></span>Games
+        </button>
+        <button class="filter-pill fp-practice" data-type="practice" onclick="toggleFilter(this)">
+          <span class="dot"></span>Practices
+        </button>
+        <button class="filter-pill fp-other" data-type="other" onclick="toggleFilter(this)">
+          <span class="dot"></span>Other Events
+        </button>
+      </div>
+
+      {% if current_user.role != 'Player' %}
+      <a href="{{ url_for('finances') }}" class="btn btn-danger btn-sm">&#128200; Go to Finances</a>
+      {% endif %}
+    </div>
+
+    <div class="cal-wrap">
+      <div class="cal-header-row">
+        <div>Sun</div>
+        <div>Mon</div>
+        <div>Tue</div>
+        <div>Wed</div>
+        <div>Thu</div>
+        <div>Fri</div>
+        <div>Sat</div>
+      </div>
+      <div class="cal-body" id="calBody"></div>
+    </div>
+
+    <div class="cal-legend mt-2">
+      <span><span class="ldot ldot-game"></span> Game</span>
+      <span><span class="ldot ldot-practice"></span> Practice</span>
+      <span><span class="ldot ldot-other"></span> Other Event</span>
+      {% if current_user.role != 'Player' %}
+      <span><span class="ldot ldot-finance"></span> Has financial entry ($)</span>
+      {% endif %}
+    </div>
+
+    {% if current_user.role != 'Player' %}
+    <div class="mt-4">
+      <a href="{{ url_for('admin_page') }}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+    {% endif %}
+
+  </main>
+
+  <!-- EVENT DETAIL MODAL -->
+  <div class="modal-backdrop-custom" id="detailModal" onclick="bgClose(event,'detailModal')">
+    <div class="modal-box">
+      <div class="mhdr" id="detailHdr">
+        <div class="mhdr-title" id="detailTitle"></div>
+        <button class="mhdr-close" onclick="closeM('detailModal')">&#10005;</button>
+      </div>
+
+      <div class="mbody">
+        <div id="detailBadge"></div>
+        <div id="detailFields"></div>
+
+        <!-- Financial section — hidden for players entirely -->
+        <div class="fin-section" id="finSection">
+          <h6>
+            &#128178; Financial Entries
+            <span id="finCount" style="font-weight:400;color:#aaa;font-size:0.75rem;"></span>
+          </h6>
+          <div id="finList"></div>
+          {% if current_user.role != 'Player' %}
+          <button class="btn-add-fin" onclick="openAddFin()">+ Add Revenue or Expense</button>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="mftr">
+        <button class="btn btn-secondary btn-sm" onclick="closeM('detailModal')">Close</button>
+        <button class="btn btn-danger btn-sm" onclick="goSchedule()">&#128269; View on Schedule</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD FINANCIAL ENTRY MODAL -->
+  <div class="modal-backdrop-custom" id="finModal" onclick="bgClose(event,'finModal')">
+    <div class="modal-box" style="max-width:420px;">
+      <div class="mhdr finance">
+        <div class="mhdr-title">Add Financial Entry</div>
+        <button class="mhdr-close" onclick="closeM('finModal')">&#10005;</button>
+      </div>
+
+      <div class="mbody">
+        <div class="type-toggle">
+          <button id="btnRev" onclick="setFinType('revenue')">&#8593; Revenue</button>
+          <button id="btnExp" onclick="setFinType('expense')">&#8595; Expense</button>
+        </div>
+
+        <div class="row g-2 mb-3">
+          <div class="col-7">
+            <label class="form-label fw-semibold" style="font-size:0.82rem;">Category</label>
+            <select class="form-select form-select-sm" id="finCat"></select>
+          </div>
+
+          <div class="col-5">
+            <label class="form-label fw-semibold" style="font-size:0.82rem;">Amount ($)</label>
+            <input type="number" class="form-control form-control-sm" id="finAmt" placeholder="0.00" min="0" step="0.01">
+          </div>
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label fw-semibold" style="font-size:0.82rem;">
+            Description <small class="text-muted fw-normal">(optional)</small>
+          </label>
+          <input type="text" class="form-control form-control-sm" id="finDesc" placeholder="e.g. 120 tickets @ $15">
+        </div>
+      </div>
+
+      <div class="mftr">
+        <button class="btn btn-secondary btn-sm" onclick="closeM('finModal')">Cancel</button>
+        <button class="btn btn-danger btn-sm" onclick="saveFin()">Save Entry</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // ── Event data from Flask/DB ────────────────────────────────────────────────
+    const EVENTS = [
+      {% for game in games %}
+      {
+        id: {{ game.game_id }},
+        type: 'game',
+        title: 'vs {{ game.opponent | replace("'", "\\'") }}',
+        date: '{{ game.game_date }}',
+        time: '',
+        opponent: '{{ game.opponent | replace("'", "\\'") }}',
+        location: '{{ game.location | replace("'", "\\'") }}',
+        gameType: '{{ game.game_type }}',
+        status: '{{ game.status }}',
+        notes: '{{ (game.notes or "") | replace("'", "\\'") }}',
+        inResults: {{ 'true' if game.in_results else 'false' }}
+      },
+      {% endfor %}
+      {% for practice in practices %}
+      {
+        id: 'p{{ practice.practice_id }}',
+        type: 'practice',
+        title: '{{ practice.title | replace("'", "\\'") }}',
+        practiceTitle: '{{ practice.title | replace("'", "\\'") }}',
+        date: '{{ practice.practice_date }}',
+        time: '{{ practice.practice_time }}',
+        location: '{{ practice.location | replace("'", "\\'") }}',
+        emailContact: '{{ (practice.contact_email or "") | replace("'", "\\'") }}',
+        notes: '{{ (practice.notes or "") | replace("'", "\\'") }}',
+        status: '{{ practice.status }}',
+        inResults: {{ 'true' if practice.in_results else 'false' }}
+      },
+      {% endfor %}
+    ];
+
+    // ── Pre-load financial presence from DB so $ badge renders on page load ────
+    const finData = {};
+    {% for ag in actual_games %}
+      {% if ag.total_revenue > 0 or ag.total_expenses > 0 %}
+      finData[{{ ag.game_id }}] = [
+        { type: '{{ "revenue" if ag.total_revenue > 0 else "expense" }}', category: 'DB Entry', amount: {{ ag.total_revenue if ag.total_revenue > 0 else ag.total_expenses }}, desc: '' }
+      ];
+      {% endif %}
+    {% endfor %}
+    {% for ap in actual_practices %}
+      {% if ap.total_revenue > 0 or ap.total_expenses > 0 %}
+      finData['p{{ ap.practice_id }}'] = [
+        { type: '{{ "revenue" if ap.total_revenue > 0 else "expense" }}', category: 'DB Entry', amount: {{ ap.total_revenue if ap.total_revenue > 0 else ap.total_expenses }}, desc: '' }
+      ];
+      {% endif %}
+    {% endfor %}
+
+    const REV_CATS = ['Ticket Sales', 'Sponsorship', 'Donation', 'Other Revenue'];
+    const EXP_CATS = ['Ref Fees', 'Ice Rental', 'Travel', 'Equipment', 'Facility', 'Other Expense'];
+
+    const TODAY = new Date();
+    let viewYear = 2026;
+    let viewMonth = 3;  // April — where upcoming games live
+    let filters = { game: true, practice: true, other: true };
+    let activeEv = null;
+    let finType = 'revenue';
+
+    const BASE_REVENUE = {{ total_revenue }};
+    const BASE_EXPENSES = {{ total_expenses }};
+    const IS_PLAYER = {{ 'true' if current_user.role == 'Player' else 'false' }};
+
+    const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const MSHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+    // ── Calendar render ─────────────────────────────────────────────────────────
+    function render() {
+      document.getElementById('monthLabel').textContent = `${MONTHS[viewMonth]} ${viewYear}`;
+      const body = document.getElementById('calBody');
+      body.innerHTML = '';
+
+      const firstDay = new Date(viewYear, viewMonth, 1).getDay();
+      const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+      const daysInPrev = new Date(viewYear, viewMonth, 0).getDate();
+      const todayStr = `${TODAY.getFullYear()}-${pad(TODAY.getMonth() + 1)}-${pad(TODAY.getDate())}`;
+
+      let cells = [];
+
+      for (let i = 0; i < firstDay; i++) {
+        cells.push({ day: daysInPrev - firstDay + 1 + i, mo: -1, other: true });
+      }
+      for (let d = 1; d <= daysInMonth; d++) {
+        cells.push({ day: d, mo: 0, other: false });
+      }
+      let n = 1;
+      while (cells.length % 7) {
+        cells.push({ day: n++, mo: 1, other: true });
+      }
+
+      cells.forEach(c => {
+        const mo = ((viewMonth + c.mo) % 12 + 12) % 12;
+        const yr = viewYear + Math.floor((viewMonth + c.mo) / 12);
+        const ds = `${yr}-${pad(mo + 1)}-${pad(c.day)}`;
+
+        const cell = document.createElement('div');
+        cell.className = 'cal-cell' +
+          (c.other ? ' other-month' : '') +
+          (ds === todayStr ? ' today' : '');
+
+        const num = document.createElement('span');
+        num.className = 'day-num';
+        num.textContent = c.day;
+        cell.appendChild(num);
+
+        EVENTS.forEach(ev => {
+          if (ev.date !== ds || !filters[ev.type]) return;
+
+          const hasFin = (finData[ev.id] || []).length > 0;
+          const pill = document.createElement('span');
+          pill.className = `ev-pill ev-${ev.type}${hasFin && !IS_PLAYER ? ' has-finance' : ''}`;
+          pill.textContent = ev.type === 'game'
+            ? `${ev.time ? ev.time + ' ' : ''}${ev.title}`
+            : `${ev.time ? ev.time + ' ' : ''}${ev.title}`;
+          pill.title = pill.textContent;
+
+          // ALL roles can click to open the detail modal now
+          pill.onclick = e => {
+            e.stopPropagation();
+            openDetail(ev);
+          };
+
+          cell.appendChild(pill);
+        });
+
+        body.appendChild(cell);
+      });
+
+      updateCards();
+    }
+
+    function toggleFilter(btn) {
+      const t = btn.dataset.type;
+      filters[t] = !filters[t];
+      btn.classList.toggle('off', !filters[t]);
+      render();
+    }
+
+    document.getElementById('prevBtn').onclick = () => {
+      if (--viewMonth < 0) { viewMonth = 11; viewYear--; }
+      render();
+    };
+
+    document.getElementById('nextBtn').onclick = () => {
+      if (++viewMonth > 11) { viewMonth = 0; viewYear++; }
+      render();
+    };
+
+    // ── Event detail modal ──────────────────────────────────────────────────────
+    function openDetail(ev) {
+      activeEv = ev;
+      document.getElementById('detailHdr').className = `mhdr ${ev.type}`;
+      document.getElementById('detailTitle').textContent =
+        ev.type === 'game' ? `Game ${ev.title}` : ev.practiceTitle;
+
+      const badge = document.getElementById('detailBadge');
+      const fields = document.getElementById('detailFields');
+      const statusClass = ev.status ? `eb-${ev.status.toLowerCase()}` : 'eb-scheduled';
+
+      if (ev.type === 'game') {
+        badge.innerHTML = `<span class="ev-badge ${statusClass}">${ev.status}</span>`;
+        fields.innerHTML = `
+          <div class="frow"><strong>Opponent:</strong><span>${ev.opponent}</span></div>
+          <div class="frow"><strong>Date:</strong><span>${fmt(ev.date)}</span></div>
+          <div class="frow"><strong>Location:</strong><span>${ev.location}</span></div>
+          <div class="frow"><strong>Game Type:</strong><span>${ev.gameType}
+            <span class="tag-${ev.gameType.toLowerCase()}">${ev.gameType.toUpperCase()}</span>
+          </span></div>
+          <div class="frow"><strong>Status:</strong><span>${ev.status}</span></div>
+          ${ev.inResults
+            ? '<div class="frow"><strong>Section:</strong><span>Results</span></div>'
+            : '<div class="frow"><strong>Section:</strong><span>Schedule</span></div>'}
+          ${ev.notes ? `<div class="frow"><strong>Notes:</strong><span>${ev.notes}</span></div>` : ''}
+        `;
+      } else if (ev.type === 'practice') {
+        badge.innerHTML = `<span class="ev-badge eb-practice">Practice</span>`;
+        fields.innerHTML = `
+          <div class="frow"><strong>Title:</strong><span>${ev.practiceTitle}</span></div>
+          <div class="frow"><strong>Date:</strong><span>${fmt(ev.date)}</span></div>
+          <div class="frow"><strong>Time:</strong><span>${ev.time || 'N/A'}</span></div>
+          <div class="frow"><strong>Location:</strong><span>${ev.location}</span></div>
+          <div class="frow"><strong>Status:</strong><span>${ev.status}</span></div>
+          ${ev.emailContact
+            ? `<div class="frow"><strong>Contact Email:</strong><span>${ev.emailContact}</span></div>`
+            : ''}
+          ${ev.inResults
+            ? '<div class="frow"><strong>Section:</strong><span>Results</span></div>'
+            : '<div class="frow"><strong>Section:</strong><span>Schedule</span></div>'}
+          ${ev.notes ? `<div class="frow"><strong>Notes:</strong><span>${ev.notes}</span></div>` : ''}
+        `;
+      } else {
+        badge.innerHTML = `<span class="ev-badge eb-event">Event</span>`;
+        fields.innerHTML = `
+          <div class="frow"><strong>Date:</strong><span>${fmt(ev.date)}</span></div>
+          <div class="frow"><strong>Time:</strong><span>${ev.time || 'N/A'}</span></div>
+          <div class="frow"><strong>Location:</strong><span>${ev.location}</span></div>
+        `;
+      }
+
+      // Hide the entire financial section for players
+      document.getElementById('finSection').style.display = IS_PLAYER ? 'none' : 'block';
+
+      if (!IS_PLAYER) renderFinList();
+
+      openM('detailModal');
+    }
+
+    function renderFinList() {
+      const entries = finData[activeEv.id] || [];
+      document.getElementById('finCount').textContent =
+        entries.length ? `(${entries.length} entr${entries.length === 1 ? 'y' : 'ies'})` : '';
+
+      const list = document.getElementById('finList');
+
+      if (!entries.length) {
+        list.innerHTML = `<p class="text-muted" style="font-size:0.8rem;padding:4px 0;">No financial entries yet for this event.</p>`;
+        return;
+      }
+
+      let rev = 0, exp = 0, html = '';
+
+      entries.forEach((e, i) => {
+        const isRev = e.type === 'revenue';
+        if (isRev) rev += e.amount; else exp += e.amount;
+
+        const isDbEntry = e.category === 'DB Entry';
+        html += `
+          <div class="fin-entry-row">
+            <span class="fe-label">
+              <strong>${isRev ? '↑' : '↓'} ${e.category}</strong>
+              ${e.desc ? `<small>${e.desc}</small>` : ''}
+              ${isDbEntry ? '<small style="color:#aaa">(saved in database)</small>' : ''}
+            </span>
+            <span style="display:flex;align-items:center;gap:8px;">
+              <span class="fe-amt ${e.type}">$${e.amount.toFixed(2)}</span>
+              ${!isDbEntry ? `<button onclick="removeFin(${i})" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:0.8rem;">&#10005;</button>` : ''}
+            </span>
+          </div>
+        `;
+      });
+
+      const net = rev - exp;
+      html += `<div class="fin-net-row"><span>Net</span><span class="${net >= 0 ? 'net-pos' : 'net-neg'}">$${net.toFixed(2)}</span></div>`;
+      list.innerHTML = html;
+    }
+
+    function removeFin(idx) {
+      finData[activeEv.id].splice(idx, 1);
+      if (finData[activeEv.id].length === 0) delete finData[activeEv.id];
+      renderFinList();
+      render();
+    }
+
+    function openAddFin() {
+      finType = 'revenue';
+      syncFinUI();
+      document.getElementById('finAmt').value = '';
+      document.getElementById('finDesc').value = '';
+      openM('finModal');
+    }
+
+    function setFinType(t) {
+      finType = t;
+      syncFinUI();
+    }
+
+    function syncFinUI() {
+      document.getElementById('btnRev').className = finType === 'revenue' ? 't-revenue' : '';
+      document.getElementById('btnExp').className = finType === 'expense' ? 't-expense' : '';
+      const cats = finType === 'revenue' ? REV_CATS : EXP_CATS;
+      document.getElementById('finCat').innerHTML = cats.map(c => `<option>${c}</option>`).join('');
+    }
+
+    function saveFin() {
+      const amt = parseFloat(document.getElementById('finAmt').value);
+      if (!amt || amt <= 0) {
+        alert('Please enter a valid amount greater than $0.');
+        return;
+      }
+      if (!finData[activeEv.id]) finData[activeEv.id] = [];
+      finData[activeEv.id].push({
+        type: finType,
+        category: document.getElementById('finCat').value,
+        amount: amt,
+        desc: document.getElementById('finDesc').value.trim()
+      });
+      closeM('finModal');
+      renderFinList();
+      render();
+    }
+
+    function updateCards() {
+      if (IS_PLAYER) return;
+
+      let rev = BASE_REVENUE;
+      let exp = BASE_EXPENSES;
+
+      Object.values(finData).forEach(arr =>
+        arr.forEach(e => {
+          if (e.category !== 'DB Entry') {
+            if (e.type === 'revenue') rev += e.amount;
+            else exp += e.amount;
+          }
+        })
+      );
+
+      const net = rev - exp;
+      document.getElementById('totalRevenue').textContent =
+        `$${rev.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      document.getElementById('totalExpenses').textContent =
+        `$${exp.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+      const netEl = document.getElementById('netAmount');
+      netEl.textContent = `$${net.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      netEl.style.color = net >= 0 ? '#198754' : '#b22222';
+    }
+
+    // ── Modal helpers ───────────────────────────────────────────────────────────
+    function openM(id) { document.getElementById(id).classList.add('show'); }
+    function closeM(id) { document.getElementById(id).classList.remove('show'); }
+    function bgClose(e, id) { if (e.target === document.getElementById(id)) closeM(id); }
+
+    function goSchedule() {
+      if (activeEv) window.location.href = "{{ url_for('schedule') }}";
+    }
+
+    // ── Utilities ───────────────────────────────────────────────────────────────
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    function fmt(s) {
+      const [y, m, d] = s.split('-').map(Number);
+      return `${MSHORT[m - 1]} ${d}, ${y}`;
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') { closeM('detailModal'); closeM('finModal'); }
+    });
+
+    // ── Boot ────────────────────────────────────────────────────────────────────
+    syncFinUI();
+    render();
+  </script>
+
+</body>
+</html>
