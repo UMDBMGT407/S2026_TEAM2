@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alumni Portal</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/newstyle.css') }}">
+</head>
+<body>
+
+  {% include '_navbar.html' %}
+
+  <section class="hero text-center">
+    <div class="container">
+      <h1>Alumni Portal</h1>
+      <p class="mb-0">Manage alumni records, newsletters, and donations</p>
+    </div>
+  </section>
+
+  <main class="container my-5">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <div class="row mb-4">
+      <div class="col-md-6 mb-3 mb-md-0">
+        <input
+          type="text"
+          id="searchInput"
+          class="form-control"
+          placeholder="Search alumni by name, class year, or occupation"
+        >
+      </div>
+
+      <div class="col-md-3 mb-3 mb-md-0">
+        <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#addAlumniModal">
+          Add Alumni
+        </button>
+      </div>
+
+      <div class="col-md-3">
+        <button type="button" class="btn btn-secondary w-100" data-bs-toggle="modal" data-bs-target="#newsletterModal">
+          Newsletters
+        </button>
+      </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+      <div class="col-md-4">
+        <div class="card p-4 card-box text-center h-100">
+          <h3>Total Donations</h3>
+          <p class="display-6 text-success">${{  "{:,.2f}".format(total_donations) }}</p>
+          <p class="mb-0">Aligned with finance report</p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card p-4 card-box text-center h-100">
+          <h3>Active Alumni</h3>
+          <p class="display-6 text-primary">{{ alumni|length }}</p>
+          <p class="mb-0">Registered in the portal</p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card p-4 card-box text-center h-100">
+          <h3>Newsletter Subscribers</h3>
+          <p class="display-6 text-dark">36</p>
+          <p class="mb-0">Subscribed to updates</p>
+        </div>
+      </div>
+    </div>
+
+    <ul class="nav nav-tabs mb-4" id="alumniTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="records-tab" data-bs-toggle="tab" data-bs-target="#records-pane" type="button" role="tab">
+          Alumni Records
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="donations-tab" data-bs-toggle="tab" data-bs-target="#donations-pane" type="button" role="tab">
+          Donation Summary
+        </button>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+
+      <div class="tab-pane fade show active" id="records-pane" role="tabpanel">
+        <div class="row g-4" id="alumniCards">
+
+          {% for a in alumni %}
+          <div class="col-md-6 alumni-card">
+            <div class="card p-4 card-box h-100">
+              <div class="d-flex align-items-center mb-3">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Alumni Profile" class="profile-img me-3">
+                <div>
+                  <h4 class="mb-1">{{ a.name }}</h4>
+                  <p class="mb-0">Class of {{ a.grad_year }}</p>
+                  <p class="mb-0"><em>{{ a.position }}</em></p>
+                </div>
+              </div>
+
+<p><strong>Email:</strong> {{ a.email }}</p>
+<p><strong>Occupation:</strong> {{ a.occupation }}</p>
+<p><strong>Phone:</strong> {{ a.phone }}</p>
+<p><strong>Donation Status:</strong> {{ a.donation_status }}</p>
+
+<div class="d-flex gap-2 mt-3">
+  <button type="button" class="btn btn-sm btn-outline-primary"
+          data-bs-toggle="modal"
+          data-bs-target="#editAlumniModal{{ a.alumni_id }}">
+    Edit
+  </button>
+
+  <form method="POST" action="/delete_alumni/{{ a.alumni_id }}"
+        onsubmit="return confirm('Are you sure you want to delete {{ a.name }}?')">
+    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+  </form>
+</div>
+            </div>
+          </div>
+          {% endfor %}
+
+          {% if alumni|length == 0 %}
+          <div class="col-12">
+            <div class="alert alert-info mb-0">
+              No alumni records found.
+            </div>
+          </div>
+          {% endif %}
+
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="donations-pane" role="tabpanel">
+        <div class="card p-4 card-box mb-4">
+          <h3>Donation Summary</h3>
+
+          <div class="table-responsive mt-3">
+            <table class="table table-striped table-bordered align-middle">
+              <thead class="table-dark">
+                <tr>
+                  <th>Alumni Name</th>
+                  <th>Class Year</th>
+                  <th>Donation Status</th>
+                  <th>Total Donated</th>
+                  <th>Message</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for d in donations %}
+                <tr>
+                  <td>{{ d.name }}</td>
+                  <td>{{ d.grad_year }}</td>
+                  <td><span class="badge bg-success">Donated</span></td>
+                  <td>${{ d.amount }}</td>
+                  <td>{{ d.message }}</td>
+                </tr>
+                {% endfor %}
+
+                {% if donations|length == 0 %}
+                <tr>
+                  <td colspan="5" class="text-center">No donations recorded yet.</td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="row g-4">
+          <div class="col-md-6">
+            <div class="card p-4 card-box h-100">
+              <h3>Donation Breakdown</h3>
+              <p><strong>Total Donations:</strong> ${{ total_donations }}</p>
+              <p><strong>Top Donor Contribution:</strong> ${{ top_donor }}</p>
+              <p><strong>Average Donation:</strong> ${{ avg_donation }}</p>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card p-4 card-box h-100">
+              <h3>Donation Notes</h3>
+              <ul class="mb-0">
+                <li>Most alumni donations are one-time annual contributions</li>
+                <li>Donations support equipment, travel, and rink expenses</li>
+                <li>Potential to increase giving through newsletter campaigns</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="mt-4">
+      <a href="{{ url_for('admin_page') }}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+
+    {% for a in alumni %}
+<div class="modal fade" id="editAlumniModal{{ a.alumni_id }}" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Alumni — {{ a.name }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <form action="/edit_alumni/{{ a.alumni_id }}" method="POST">
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">First Name</label>
+              <input type="text" class="form-control" name="first_name"
+                     value="{{ a.name.split(' ')[0] }}" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Last Name</label>
+              <input type="text" class="form-control" name="last_name"
+                     value="{{ a.name.split(' ')[1] if a.name.split(' ')|length > 1 else '' }}" required>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Class Year</label>
+              <input type="number" class="form-control" name="grad_year"
+                     value="{{ a.grad_year }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Former Position</label>
+              <select class="form-select" name="position">
+                <option value="">Select position</option>
+                <option value="Forward" {{ 'selected' if a.position == 'Forward' }}>Forward</option>
+                <option value="Defense" {{ 'selected' if a.position == 'Defense' }}>Defense</option>
+                <option value="Goalie" {{ 'selected' if a.position == 'Goalie' }}>Goalie</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-control" name="email"
+                     value="{{ a.email }}" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Occupation</label>
+              <input type="text" class="form-control" name="occupation"
+                     value="{{ a.occupation }}">
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Phone Number</label>
+              <input type="text" class="form-control" name="phone"
+                     value="{{ a.phone }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Donation Status</label>
+              <select class="form-select" name="donation_status">
+                <option value="Donated" {{ 'selected' if a.donation_status == 'Donated' }}>Donated</option>
+                <option value="Has Not Donated" {{ 'selected' if a.donation_status == 'Has Not Donated' }}>Has Not Donated</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+    
+  </main>
+
+  <div class="modal fade" id="addAlumniModal" tabindex="-1" aria-labelledby="addAlumniModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addAlumniModalLabel">Add New Alumni</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <form action="{{ url_for('add_alumni') }}" method="POST">
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label">First Name</label>
+                <input type="text" class="form-control" name="first_name" required>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Last Name</label>
+                <input type="text" class="form-control" name="last_name" required>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Class Year</label>
+                <input type="number" class="form-control" name="grad_year">
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Former Position</label>
+                <select class="form-select" name="position">
+                  <option selected>Select position</option>
+                  <option>Forward</option>
+                  <option>Defense</option>
+                  <option>Goalie</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" name="email">
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Occupation</label>
+                <input type="text" class="form-control" name="occupation">
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Phone Number</label>
+                <input type="text" class="form-control" name="phone">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Donation Status</label>
+              <select class="form-select" name="donation_status" id="donationStatus" onchange="toggleDonationFields()">
+                <option selected>Select status</option>
+                <option>Donated</option>
+                <option>Has Not Donated</option>
+              </select>
+            </div>
+
+            <div id="donationFields" style="display: none;">
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label class="form-label">Donation Amount</label>
+                  <input type="number" step="0.01" class="form-control" name="amount">
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label">Donation Date</label>
+                  <input type="date" class="form-control" name="donation_date">
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Donation Message</label>
+                <textarea class="form-control" name="message" rows="3"></textarea>
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-success">Save Alumni</button>
+            </div>
+
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="newsletterModal" tabindex="-1" aria-labelledby="newsletterModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="newsletterModalLabel">Newsletter Subscription</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <form method="POST" action="{{ url_for('add_subscriber') }}">
+            <div class="mb-3">
+              <label for="newsletterEmail" class="form-label">Email Address</label>
+              <input 
+              type="email" 
+              class="form-control" 
+              name="email" 
+              placeholder="Enter your email" 
+              required
+              >
+            </div>
+            
+            <div class="modal-footer px-0 pb-0">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                Cancel
+              </button>
+              <button type="submit" class="btn btn-primary">
+                Subscribe
+              </button>
+            </div>
+          </form>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    function toggleDonationFields() {
+      const status = document.getElementById("donationStatus").value;
+      const fields = document.getElementById("donationFields");
+
+      if (status === "Donated") {
+        fields.style.display = "block";
+      } else {
+        fields.style.display = "none";
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const searchInput = document.getElementById("searchInput");
+
+      if (searchInput) {
+        searchInput.addEventListener("keyup", function () {
+          const value = this.value.toLowerCase();
+          const cards = document.querySelectorAll(".alumni-card");
+
+          cards.forEach(card => {
+            const text = card.innerText.toLowerCase();
+            if (text.includes(value)) {
+              card.style.display = "";
+            } else {
+              card.style.display = "none";
+            }
+          });
+        });
+      }
+    });
+  </script>
+
+</body>
+</html>
