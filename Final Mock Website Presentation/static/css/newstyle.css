@@ -1,0 +1,134 @@
+body {
+  background: #f8f9fa;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.hero {
+  background: #b22222;
+  color: white;
+  padding: 40px 0;
+}
+
+.card-box {
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.profile-img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid #dee2e6;
+}
+
+.tab-box {
+  background: #e9ecef;
+  padding: 12px;
+  text-align: center;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+.active-tab {
+  background: #dc3545;
+  color: white;
+}
+
+.donation-box {
+  background: #ffffff;
+  border-left: 5px solid #198754;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.not-donated-box {
+  background: #ffffff;
+  border-left: 5px solid #dc3545;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.module-link {
+  display: block;
+  padding: 15px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: white;
+  font-weight: bold;
+  text-align: center;
+}
+
+.module-link:hover {
+  color: white;
+  opacity: 0.95;
+}
+
+.roster-bg {
+  background: #0d6efd;
+}
+
+.schedule-bg {
+  background: #6f42c1;
+}
+
+.equipment-bg {
+  background: #fd7e14;
+}
+
+.finances-bg {
+  background: #198754;
+}
+
+.alumni-bg {
+  background: #6c757d;
+}
+
+.table {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.navbar-brand {
+  font-weight: 600;
+}
+
+main {
+  margin-top: 40px;
+}
+
+.btn-danger {
+  background-color: #b22222;
+  border-color: #b22222;
+}
+
+.btn-danger:hover {
+  background-color: #8e1b1b;
+  border-color: #8e1b1b;
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: 25px 0;
+  }
+
+  .logo {
+    width: 45px;
+    height: 45px;
+  }
+}
+.newsletter-bg{
+  background-color:#dc3545;
+  color:white;
+}
