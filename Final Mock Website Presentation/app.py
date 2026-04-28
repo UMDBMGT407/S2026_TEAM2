@@ -1939,6 +1939,68 @@ def delete_player(player_id):
 
     return redirect(url_for('roster'))
 
+@app.route('/move_to_alumni/<int:player_id>', methods=['POST'])
+@login_required
+@role_required('Admin', 'Coach')
+def move_to_alumni(player_id):
+    # Optional fields collected from the small modal
+    grad_year = request.form.get('grad_year', '').strip()
+    occupation = request.form.get('occupation', '').strip()
+
+    # grad_year is required so the alumni record is meaningful
+    if not grad_year:
+        flash('Graduation year is required to move a player to alumni.', 'danger')
+        return redirect(url_for('roster'))
+
+    # Empty occupation is fine — store NULL instead of empty string
+    if occupation == '':
+        occupation = None
+
+    cur = mysql.connection.cursor()
+
+    try:
+        # 1. Pull all the info we need from players + users
+        cur.execute("""
+            SELECT u.id, u.name, u.email, p.position, p.phone
+            FROM players p
+            JOIN users u ON p.user_id = u.id
+            WHERE p.player_id = %s
+        """, (player_id,))
+        row = cur.fetchone()
+
+        if not row:
+            flash('Player not found.', 'danger')
+            return redirect(url_for('roster'))
+
+        user_id, name, email, position, phone = row
+
+        # 2. Make sure this email isn't already in the alumni table
+        # (the alumni table has a UNIQUE constraint on email)
+        cur.execute("SELECT alumni_id FROM alumni WHERE email = %s", (email,))
+        if cur.fetchone():
+            flash(f'{name} is already in the alumni database.', 'warning')
+            return redirect(url_for('roster'))
+
+        # 3. Insert into alumni with sensible defaults
+        cur.execute("""
+            INSERT INTO alumni
+                (name, email, grad_year, position, phone, occupation, donation_status)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (name, email, grad_year, position, phone, occupation, 'Has Not Donated'))
+
+        # 4. Delete the user — players row cascades automatically
+        cur.execute("DELETE FROM users WHERE id = %s", (user_id,))
+
+        mysql.connection.commit()
+        flash(f'{name} successfully moved to the alumni database.', 'success')
+
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f'Could not move player to alumni: {e}', 'danger')
+    finally:
+        cur.close()
+
+    return redirect(url_for('roster'))
 
 @app.route('/add_player', methods=['POST'])
 @login_required
