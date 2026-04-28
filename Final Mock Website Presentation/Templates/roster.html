@@ -76,7 +76,7 @@
                 <td>{{ player['email'] }}</td>
                 <td>{{ player['phone'] }}</td>
                 {% if current_user.role in ['Admin', 'Coach'] %}
-            <td class="d-flex gap-2">
+<td class="d-flex gap-2">
   {% if current_user.role in ['Admin', 'Coach'] %}
   <button
     type="button"
@@ -90,6 +90,15 @@
         onsubmit="return confirm('Are you sure you want to delete {{ player['name'] }}? This cannot be undone.')">
     <button type="submit" class="btn btn-sm btn-danger">Delete</button>
   </form>
+
+  <button
+    type="button"
+    class="btn btn-sm btn-warning"
+    data-bs-toggle="modal"
+    data-bs-target="#moveAlumniModal{{ player['player_id'] }}">
+    Move to Alumni
+  </button>
+
   {% else %}
   <span class="text-muted" style="font-size: 0.85rem;">View Only</span>
   {% endif %}
