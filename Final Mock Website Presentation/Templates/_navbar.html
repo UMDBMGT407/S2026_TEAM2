@@ -2,7 +2,7 @@
   <div class="container">
 
     <a class="navbar-brand d-flex align-items-center" href="{{ url_for('admin_page') }}">
-      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Team Logo" class="logo">
+      <img src="{{ url_for('static', filename='images/team-logo0.png') }}" alt="Team Logo" class="logo">
       Hockey System
     </a>
 
@@ -85,6 +85,11 @@
 
         {% if current_user.is_authenticated %}
         <li class="nav-item">
+          <a class="nav-link {% if request.endpoint == 'chat_page' %}active{% endif %}" href="{{ url_for('chat_page') }}">
+            Chatbot
+          </a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
             Change Password
           </a>
@@ -127,8 +132,7 @@
 
           <div class="mb-3">
             <label class="form-label">New Password</label>
-            <input type="password" class="form-control" name="new_password"
-                   minlength="6" required>
+            <input type="password" class="form-control" name="new_password" minlength="6" required>
             <div class="form-text">Must be at least 6 characters.</div>
           </div>
 
