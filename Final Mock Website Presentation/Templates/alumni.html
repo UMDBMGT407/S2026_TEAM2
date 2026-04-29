@@ -100,10 +100,9 @@
           <div class="col-md-6 alumni-card">
             <div class="card p-4 card-box h-100">
               <div class="d-flex align-items-center mb-3">
-                <div class="profile-img me-3 d-flex align-items-center justify-content-center bg-secondary text-white rounded-circle fs-4 fw-bold"
-                     style="width:80px; height:80px; min-width:80px;">
-                  {{ a.name[0].upper() }}
-                </div>
+                <img src="{{ url_for('static', filename='images/team-logo0.png') }}"
+     alt="Alumni Profile"
+     style="width:80px; height:80px; min-width:80px; border-radius:50%; object-fit:cover;">
                 <div>
                   <h4 class="mb-1">{{ a.name }}</h4>
                   <p class="mb-0">Class of {{ a.grad_year }}</p>
