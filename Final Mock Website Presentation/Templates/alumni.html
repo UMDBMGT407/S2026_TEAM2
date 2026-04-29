@@ -34,12 +34,8 @@
 
     <div class="row mb-4">
       <div class="col-md-6 mb-3 mb-md-0">
-        <input
-          type="text"
-          id="searchInput"
-          class="form-control"
-          placeholder="Search alumni by name, class year, or occupation"
-        >
+        <input type="text" id="searchInput" class="form-control"
+               placeholder="Search alumni by name, class year, or occupation">
       </div>
       <div class="col-md-3 mb-3 mb-md-0">
         <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#addAlumniModal">
@@ -79,12 +75,14 @@
 
     <ul class="nav nav-tabs mb-4" id="alumniTabs" role="tablist">
       <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="records-tab" data-bs-toggle="tab" data-bs-target="#records-pane" type="button" role="tab">
+        <button class="nav-link active" id="records-tab" data-bs-toggle="tab"
+                data-bs-target="#records-pane" type="button" role="tab">
           Alumni Records
         </button>
       </li>
       <li class="nav-item" role="presentation">
-        <button class="nav-link" id="donations-tab" data-bs-toggle="tab" data-bs-target="#donations-pane" type="button" role="tab">
+        <button class="nav-link" id="donations-tab" data-bs-toggle="tab"
+                data-bs-target="#donations-pane" type="button" role="tab">
           Donation Summary
         </button>
       </li>
@@ -101,8 +99,9 @@
             <div class="card p-4 card-box h-100">
               <div class="d-flex align-items-center mb-3">
                 <img src="{{ url_for('static', filename='images/team-logo0.png') }}"
-     alt="Alumni Profile"
-     style="width:80px; height:80px; min-width:80px; border-radius:50%; object-fit:cover;">
+                     alt="Alumni Profile"
+                     style="width:80px; height:80px; min-width:80px; border-radius:50%; object-fit:contain; background:#f0f0f0; padding:4px;"
+                     class="me-3">
                 <div>
                   <h4 class="mb-1">{{ a.name }}</h4>
                   <p class="mb-0">Class of {{ a.grad_year }}</p>
@@ -308,67 +307,3 @@
                 <input type="number" class="form-control" name="grad_year">
               </div>
               <div class="col-md-6">
-                <label class="form-label">Former Position</label>
-                <select class="form-select" name="position">
-                  <option selected>Select position</option>
-                  <option>Forward</option>
-                  <option>Defense</option>
-                  <option>Goalie</option>
-                </select>
-              </div>
-            </div>
-            <div class="row mb-3">
-              <div class="col-md-6">
-                <label class="form-label">Email</label>
-                <input type="email" class="form-control" name="email">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Occupation</label>
-                <input type="text" class="form-control" name="occupation">
-              </div>
-            </div>
-            <div class="row mb-3">
-              <div class="col-md-6">
-                <label class="form-label">Phone Number</label>
-                <input type="text" class="form-control" name="phone">
-              </div>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Donation Status</label>
-              <select class="form-select" name="donation_status" id="donationStatus" onchange="toggleDonationFields()">
-                <option selected>Select status</option>
-                <option>Donated</option>
-                <option>Has Not Donated</option>
-              </select>
-            </div>
-            <div id="donationFields" style="display: none;">
-              <div class="row mb-3">
-                <div class="col-md-6">
-                  <label class="form-label">Donation Amount</label>
-                  <input type="number" step="0.01" class="form-control" name="amount">
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">Donation Date</label>
-                  <input type="date" class="form-control" name="donation_date">
-                </div>
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Donation Message</label>
-                <textarea class="form-control" name="message" rows="3"></textarea>
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-              <button type="submit" class="btn btn-success">Save Alumni</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Newsletter Modal -->
-  <div class="modal fade" id="newsletterModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="mod
