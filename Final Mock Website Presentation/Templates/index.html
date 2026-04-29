@@ -2,21 +2,13 @@
 <html lang="en">
 <head>
 
-  <!-- basic page settings -->
   <meta charset="UTF-8">
-
-  <!-- for phones and tablets -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>UMD Hockey Public Page</title>
 
-  <!-- bootstrap css -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  <!-- shared css file -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/newstyle.css') }}">
 
-  <!-- Calendar CSS -->
   <style>
     .mini-calendar {
       border: 1px solid #ddd;
@@ -24,12 +16,10 @@
       overflow: hidden;
       background: white;
     }
-
     .mini-calendar-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
     }
-
     .mini-calendar-day {
       background: #f8f9fa;
       border: 1px solid #eee;
@@ -38,34 +28,28 @@
       padding: 10px 4px;
       font-size: 0.85rem;
     }
-
     .mini-calendar-cell {
       border: 1px solid #eee;
       min-height: 90px;
       padding: 6px;
       cursor: default;
     }
-
     .mini-calendar-cell.empty {
       background: #f8f9fa;
     }
-
     .mini-calendar-number {
       font-weight: 700;
       font-size: 0.95rem;
     }
-
     .mini-calendar-cell.has-game {
       background: #ffe5e5;
       border: 1px solid #dc3545;
       cursor: pointer;
       transition: background 0.2s ease;
     }
-
     .mini-calendar-cell.has-game:hover {
       background: #ffd6d6;
     }
-
     .mini-game-dot {
       background: #dc3545;
       color: white;
@@ -75,7 +59,6 @@
       display: inline-block;
       margin-top: 4px;
     }
-
     .mini-game-text {
       font-size: 0.78rem;
       margin-top: 5px;
@@ -85,41 +68,26 @@
 </head>
 <body>
 
-  <!-- ===============================
-     SIMPLE HEADER (PUBLIC PAGE)
-     =============================== -->
-
-<nav class="navbar navbar-dark bg-dark">
-
-  <div class="container d-flex align-items-center">
-
-    <!-- logo and team name -->
-    <div class="d-flex align-items-center">
-      <img src="{{ url_for('static', filename='images/team-logo0.png') }}" alt="UMD Hockey Logo" style="height: 36px; width: auto;">
-      <span class="navbar-brand mb-0 h1">UMD Hockey</span>
+  <nav class="navbar navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+        <img src="{{ url_for('static', filename='images/team-logo0.png') }}"
+             alt="UMD Hockey Logo"
+             style="height: 36px; width: auto; border-radius: 0;">
+        <span>UMD Hockey</span>
+      </a>
     </div>
+  </nav>
 
-  </div>
-
-</nav>
-
-  <!-- ===============================
-       HERO SECTION
-       =============================== -->
   <section class="hero text-center">
     <div class="container">
       <h1>UMD Hockey Team Website</h1>
       <p class="mb-3">
         Public information for schedules, team players, and newsletter updates
       </p>
-
-      <!-- login button -->
       <div class="d-flex justify-content-center gap-2 flex-wrap">
-        <a href="{{ url_for('login') }}" class="btn btn-light">
-          Login
-        </a>
+        <a href="{{ url_for('login') }}" class="btn btn-light">Login</a>
       </div>
-      
     </div>
   </section>
 
@@ -133,14 +101,10 @@
     {% endfor %}
   {% endif %}
   {% endwith %}
-  
-  <!-- ===============================
-       MAIN PUBLIC CONTENT
-       =============================== -->
+
   <main class="container my-5">
 
-
-    <!-- GAME CALENDAR FULL WIDTH -->
+    <!-- Game Calendar -->
     <div class="row g-4 mb-4">
       <div class="col-12">
         <div class="card p-4 card-box h-100">
@@ -175,7 +139,7 @@
       </div>
     </div>
 
-    <!-- players section -->
+    <!-- Team Players -->
     <div class="row g-4 mb-4" id="players">
       <div class="col-12">
         <div class="card p-4 card-box">
@@ -183,7 +147,6 @@
           <p class="text-muted">
             Public player information only. Contact details are not shown on the public page.
           </p>
-
           <div class="table-responsive mt-3">
             <table class="table table-striped table-bordered align-middle">
               <thead class="table-dark">
@@ -195,52 +158,45 @@
                   <th>Status</th>
                 </tr>
               </thead>
-              
               <tbody>
                 {% if public_players %}
                   {% for player in public_players %}
-                <tr>
-                  <td>{{ player.jersey_number }}</td>
-                  <td>{{ player.name }}</td>
-                  <td>{{ player.position }}</td>
-                  <td>{{ player.year }}</td>
-                  <td>{{ 'Injured' if player.injured else 'Active' }}</td>
-                </tr>
-                {% endfor %}
-              {% else %}
-                <tr>
-                  <td colspan="5" class="text-center">No players available</td>
-                </tr>
-              {% endif %}
+                  <tr>
+                    <td>{{ player.jersey_number }}</td>
+                    <td>{{ player.name }}</td>
+                    <td>{{ player.position }}</td>
+                    <td>{{ player.year }}</td>
+                    <td>{{ 'Injured' if player.injured else 'Active' }}</td>
+                  </tr>
+                  {% endfor %}
+                {% else %}
+                  <tr>
+                    <td colspan="5" class="text-center">No players available</td>
+                  </tr>
+                {% endif %}
               </tbody>
             </table>
           </div>
-
         </div>
       </div>
     </div>
 
-    <!-- newsletters row -->
+    <!-- Newsletter -->
     <div class="row g-4" id="newsletters">
 
-      <!-- newsletter signup -->
       <div class="col-md-6">
         <div class="card p-4 card-box h-100">
           <h3>Newsletter Signup</h3>
           <p>Subscribe to receive team updates, schedules, and announcements.</p>
-
           <form method="POST" action="{{ url_for('add_subscriber') }}">
             <div class="mb-3">
               <input type="email" class="form-control" name="email" placeholder="Enter your email" required>
             </div>
-            <button type="submit" class="btn btn-danger">
-              Subscribe
-            </button>
+            <button type="submit" class="btn btn-danger">Subscribe</button>
           </form>
         </div>
       </div>
 
-      <!-- past newsletters -->
       <div class="col-md-6">
         <div class="card p-4 card-box h-100">
           <h3>Past Newsletters</h3>
@@ -256,7 +212,6 @@
 
   </main>
 
-  <!-- bootstrap javascript -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     const gameItems = document.querySelectorAll('.game-date-item');
@@ -267,7 +222,6 @@
     const nextMonthBtn = document.getElementById('nextMonthBtn');
 
     const games = [];
-
     gameItems.forEach(item => {
       games.push({
         date: item.dataset.date,
@@ -278,8 +232,8 @@
     });
 
     const monthNames = [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December"
+      "January","February","March","April","May","June",
+      "July","August","September","October","November","December"
     ];
 
     let currentDate = new Date();
@@ -361,5 +315,6 @@
 
     renderCalendar();
   </script>
+
 </body>
 </html>
