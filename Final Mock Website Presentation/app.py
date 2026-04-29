@@ -4,16 +4,55 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 
+import os
+import re
+import csv
+import sqlite3
+
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    load_dotenv = None
+
+try:
+    import openpyxl
+except ImportError:
+    openpyxl = None
+
+try:
+    import PyPDF2
+except ImportError:
+    PyPDF2 = None
+
+try:
+    from groq import Groq
+except ImportError:
+    Groq = None
+
+try:
+    from openai import OpenAI
+except ImportError:
+    OpenAI = None
+
+try:
+    import google.generativeai as genai
+except ImportError:
+    genai = None
+
+
+if load_dotenv:
+    load_dotenv()
+
 
 app = Flask(__name__)
-app.secret_key = 'bmgt407_hockey_secret_key'
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "dev_only_change_me")
 
 # ---------------------------
 # MySQL CONFIG
 # ---------------------------
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'your passwd '
+app.config['MYSQL_PASSWORD'] = os.getenv("MYSQL_PASSWORD", "")
 app.config['MYSQL_DB'] = 'user_management'
 
 mysql = MySQL(app)
@@ -610,6 +649,405 @@ def get_all_subscribers():
     finally:
         cur.close()
 
+
+# ---------------------------
+# CHATBOT HELPER FUNCTIONS
+# ---------------------------
+
+FTS_DB_PATH = os.path.join(os.path.dirname(__file__), "datasets_fts.db")
+
+DEFAULT_OPENAI_KEY = os.getenv("OPENAI_API_KEY", "")
+DEFAULT_GROQ_KEY = os.getenv("GROQ_API_KEY", "")
+DEFAULT_GEMINI_KEY = os.getenv("GEMINI_API_KEY", "")
+
+
+def _fts_conn():
+    conn = sqlite3.connect(FTS_DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+def fts_init():
+    conn = _fts_conn()
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE VIRTUAL TABLE IF NOT EXISTS docs
+        USING fts5(content, file, rownum UNINDEXED, tokenize='porter');
+    """)
+    conn.commit()
+    conn.close()
+
+
+def fts_search(query, limit=5):
+    conn = _fts_conn()
+
+    try:
+        search_words = re.findall(r"[A-Za-z0-9]+", query)
+
+        if not search_words:
+            return []
+
+        fts_query = " OR ".join(search_words)
+
+        sql = """
+            SELECT file, rownum, snippet(docs, 0, '', '', ' ... ', 64) AS snip
+            FROM docs
+            WHERE docs MATCH ?
+            LIMIT ?;
+        """
+
+        rows = conn.execute(sql, (fts_query, limit)).fetchall()
+
+        return [
+            {
+                "file": row["file"],
+                "row": row["rownum"],
+                "snippet": row["snip"]
+            }
+            for row in rows
+        ]
+
+    finally:
+        conn.close()
+
+
+def ask_ai_with_context(user_question, search_results, live_context="", ai_provider="local", api_key="", model=""):
+    if search_results:
+        context = "Live website database context:\n\n"
+
+        for i, hit in enumerate(search_results, start=1):
+            context += f"{i}. {hit['snippet']}\n\n"
+    else:
+        context = "No uploaded file context was used. The answer should rely on live website database context.\n\n"
+
+    if ai_provider == "local":
+        if not search_results:
+            return {
+                "reply": "Please switch to Groq mode to ask questions about the live website database.",
+                "error": None
+            }
+
+        reply = "Based on your team datasets, here’s what I found:\n\n"
+
+        for hit in search_results:
+            reply += f"{hit['snippet']}\n\n"
+
+        return {
+            "reply": reply.strip(),
+            "error": None
+        }
+
+    if ai_provider != "groq":
+        return {
+            "reply": None,
+            "error": "Only Local Search and Groq AI are enabled for this dashboard."
+        }
+
+    if not api_key or not api_key.strip():
+        return {
+            "reply": None,
+            "error": "Groq AI is not configured. Add GROQ_API_KEY to your .env file and restart Flask."
+        }
+
+    if Groq is None:
+        return {
+            "reply": None,
+            "error": "Groq is not installed. Run: pip install groq"
+        }
+
+    system_message = """
+You are a polished assistant for a hockey management dashboard.
+
+Your job is to help the user understand live team information in a clear, natural, and professional way.
+
+Tone:
+- Sound like a helpful team operations assistant.
+- Be concise, but not robotic.
+- Use short paragraphs.
+- Summarize the most important point first.
+- Avoid saying phrases like "Based on the live website database context."
+
+Rules:
+- Only answer using information the user's role is allowed to access.
+- Do not mention database context, uploaded files, JSON, row numbers, API keys, or technical metadata.
+- Do not make up missing information.
+- If the information is not available, say what is missing in a normal way.
+- If the user asks about finances but financial data is not included, say: "I do not have access to financial information for your role."
+- If helpful, end with one practical takeaway.
+"""
+
+    user_message = f"""
+Available team information:
+{context}
+
+{live_context}
+
+User question:
+{user_question}
+
+Write a natural answer for the user. Do not mention database context or technical details.
+"""
+
+    try:
+        client = Groq(api_key=api_key)
+
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {"role": "system", "content": system_message},
+                {"role": "user", "content": user_message}
+            ],
+            max_tokens=500,
+            temperature=0.4
+        )
+
+        return {
+            "reply": response.choices[0].message.content.strip(),
+            "error": None
+        }
+
+    except Exception as e:
+        return {
+            "reply": None,
+            "error": f"Groq Error: {str(e)}"
+        }
+
+
+def extract_rows_simple(path):
+    p = path.lower()
+    out = []
+
+    if p.endswith(".csv"):
+        with open(path, "r", encoding="utf-8", errors="ignore", newline="") as f:
+            reader = csv.reader(f)
+            rows = list(reader)
+
+        if not rows:
+            return out
+
+        header = rows[0]
+
+        for i, row in enumerate(rows[1:], start=2):
+            text = " | ".join(f"{h}: {v}" for h, v in zip(header, row))
+            out.append((i, text))
+
+        return out
+
+    if p.endswith(".xlsx"):
+        if openpyxl is None:
+            return out
+
+        wb = openpyxl.load_workbook(path, data_only=True)
+
+        for sheet_name in wb.sheetnames:
+            ws = wb[sheet_name]
+            rows = list(ws.values)
+
+            if not rows:
+                continue
+
+            header = rows[0]
+
+            for i, row in enumerate(rows[1:], start=2):
+                text = "[Sheet: " + sheet_name + "] "
+                text += " | ".join(
+                    f"{h}: {v}" for h, v in zip(header, row) if v is not None
+                )
+                out.append((i, text))
+
+        return out
+
+    if p.endswith(".pdf"):
+        if PyPDF2 is None:
+            return out
+
+        with open(path, "rb") as f:
+            reader = PyPDF2.PdfReader(f)
+
+            for page_num, page in enumerate(reader.pages, start=1):
+                text = page.extract_text() or ""
+
+                if text.strip():
+                    out.append((page_num, text[:2000]))
+
+        return out
+
+    if p.endswith(".txt"):
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+            lines = f.readlines()
+
+        for i, line in enumerate(lines, start=1):
+            if line.strip():
+                out.append((i, line.strip()))
+
+        return out
+
+    return out
+
+
+def load_datasets():
+    folder = os.path.join(os.path.dirname(__file__), "datasets")
+    os.makedirs(folder, exist_ok=True)
+
+    conn = _fts_conn()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM docs")
+
+    for filename in os.listdir(folder):
+        filepath = os.path.join(folder, filename)
+
+        if not os.path.isfile(filepath):
+            continue
+
+        rows = extract_rows_simple(filepath)
+
+        for rownum, text in rows:
+            cur.execute(
+                "INSERT INTO docs (content, file, rownum) VALUES (?, ?, ?)",
+                (text, filename, rownum)
+            )
+
+    conn.commit()
+    conn.close()
+
+
+def get_live_website_context(user_role):
+    context = "Live website database context:\n\n"
+
+    try:
+        players = get_all_players()
+        games = get_all_games()
+        practices = get_all_practices()
+        equipment_summary = get_equipment_summary()
+
+        context += "Roster Summary:\n"
+        if players:
+            for p in players[:15]:
+                injured_status = "Injured" if p["injured"] else "Active"
+                jersey = p["jersey_number"] if p["jersey_number"] is not None else "N/A"
+                context += (
+                    f"- {p['name']}, Jersey #{jersey}, "
+                    f"Position: {p['position']}, Year: {p['year']}, Status: {injured_status}\n"
+                )
+        else:
+            context += "- No roster records found.\n"
+
+        context += "\nSchedule Summary:\n"
+        if games:
+            for g in games[:15]:
+                context += (
+                    f"- Game vs {g['opponent']} on {g['game_date']} "
+                    f"at {g['location']}, Type: {g['game_type']}, Status: {g['status']}\n"
+                )
+        else:
+            context += "- No game records found.\n"
+
+        context += "\nPractice Summary:\n"
+        if practices:
+            for p in practices[:15]:
+                context += (
+                    f"- {p['title']} on {p['practice_date']} at {p['practice_time']} "
+                    f"in {p['location']}, Status: {p['status']}\n"
+                )
+        else:
+            context += "- No practice records found.\n"
+
+        context += "\nEquipment Summary:\n"
+        context += f"- Total inventory items: {equipment_summary['total_items']}\n"
+        context += f"- Total equipment units: {equipment_summary['total_units']}\n"
+        context += f"- Low stock items: {equipment_summary['low_stock_count']}\n"
+        context += f"- New equipment orders: {equipment_summary['new_orders']}\n"
+        context += f"- In progress equipment orders: {equipment_summary['in_progress_orders']}\n"
+        context += f"- Received equipment orders: {equipment_summary['received_orders']}\n"
+       
+        if user_role in ["Admin", "Coach"]:
+            cur = mysql.connection.cursor()
+            cur.execute("""
+                SELECT
+                    COALESCE(SUM(CASE WHEN entry_type = 'Revenue' THEN amount ELSE 0 END), 0),
+                    COALESCE(SUM(CASE WHEN entry_type = 'Expense' THEN amount ELSE 0 END), 0),
+                    COALESCE(SUM(CASE WHEN entry_type = 'Revenue' THEN amount ELSE -amount END), 0)
+                FROM financial_entries
+            """)
+            row = cur.fetchone()
+            cur.close()
+
+            context += "\nFinancial Summary:\n"
+            context += f"- Total revenue: ${float(row[0]):,.2f}\n"
+            context += f"- Total expenses: ${float(row[1]):,.2f}\n"
+            context += f"- Net balance: ${float(row[2]):,.2f}\n"
+
+
+    except Exception as e:
+        context += f"Live website context could not be loaded: {e}\n"
+
+    return context
+
+
+
+try:
+    fts_init()
+    load_datasets()
+except Exception as e:
+    print("Dataset load error:", e)
+
+
+@app.route("/api/status", methods=["GET"])
+@login_required
+def api_status():
+    def is_configured(key):
+        return bool(key and key.strip() and "..." not in key)
+
+    return jsonify(keys={
+        "openai": is_configured(DEFAULT_OPENAI_KEY),
+        "groq": is_configured(DEFAULT_GROQ_KEY),
+        "gemini": is_configured(DEFAULT_GEMINI_KEY)
+    })
+
+
+@app.route('/chat')
+@login_required
+def chat_page():
+    return render_template('chat.html')
+
+
+@app.route('/chat/send', methods=['POST'])
+@login_required
+def chat_send():
+    data = request.get_json(silent=True) or {}
+
+    q = (data.get("message") or "").strip()
+    ai_provider = data.get("ai_provider", "local")
+    model = data.get("model", "")
+
+    if ai_provider not in ["local", "groq"]:
+        ai_provider = "local"
+
+    api_key = DEFAULT_GROQ_KEY if ai_provider == "groq" else ""
+
+    if not q:
+        return jsonify(error="Empty message."), 400
+
+    try:
+        hits = fts_search(q, limit=5)
+    except Exception as e:
+        return jsonify(error="Search is unavailable right now: " + str(e)), 500
+
+    live_context = get_live_website_context(current_user.role)
+    result = ask_ai_with_context(q, hits, live_context, ai_provider, api_key, model)
+
+    if result["error"]:
+        return jsonify(error=result["error"]), 400
+
+    return jsonify(
+        reply=result["reply"],
+        sources=hits,
+        provider=ai_provider
+    ), 200
+
+
+
+
 # ---------------------------
 # ROOT / PUBLIC ROUTES
 # ---------------------------
@@ -695,6 +1133,7 @@ def logout():
 # ---------------------------
 @app.route('/home')
 @login_required
+@role_required('Admin', 'Coach')
 def home():
     cur = mysql.connection.cursor()
     try:
