@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Alumni Portal</title>
-
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/newstyle.css') }}">
 </head>
@@ -90,7 +89,6 @@
 
     <div class="tab-content">
 
-      <!-- Alumni Records Tab -->
       <div class="tab-pane fade show active" id="records-pane" role="tabpanel">
         <div class="row g-4" id="alumniCards">
 
@@ -108,7 +106,6 @@
                   <p class="mb-0"><em>{{ a.position }}</em></p>
                 </div>
               </div>
-
               <p><strong>Email:</strong> {{ a.email }}</p>
               <p><strong>Occupation:</strong> {{ a.occupation }}</p>
               <p><strong>Phone:</strong> {{ a.phone }}</p>
@@ -119,7 +116,6 @@
                   <span class="badge bg-secondary">Has Not Donated</span>
                 {% endif %}
               </p>
-
               <div class="d-flex gap-2 mt-3">
                 <button type="button" class="btn btn-sm btn-outline-primary"
                         data-bs-toggle="modal"
@@ -144,7 +140,6 @@
         </div>
       </div>
 
-      <!-- Donations Tab -->
       <div class="tab-pane fade" id="donations-pane" role="tabpanel">
         <div class="card p-4 card-box mb-4">
           <h3>Donation Summary</h3>
@@ -178,7 +173,6 @@
             </table>
           </div>
         </div>
-
         <div class="row g-4">
           <div class="col-md-6">
             <div class="card p-4 card-box h-100">
@@ -207,7 +201,6 @@
       <a href="{{ url_for('admin_page') }}" class="btn btn-secondary">Back to Dashboard</a>
     </div>
 
-    <!-- Edit Alumni Modals -->
     {% for a in alumni %}
     <div class="modal fade" id="editAlumniModal{{ a.alumni_id }}" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-lg">
@@ -307,3 +300,110 @@
                 <input type="number" class="form-control" name="grad_year">
               </div>
               <div class="col-md-6">
+                <label class="form-label">Former Position</label>
+                <select class="form-select" name="position">
+                  <option selected>Select position</option>
+                  <option>Forward</option>
+                  <option>Defense</option>
+                  <option>Goalie</option>
+                </select>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" name="email">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Occupation</label>
+                <input type="text" class="form-control" name="occupation">
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Phone Number</label>
+                <input type="text" class="form-control" name="phone">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Donation Status</label>
+              <select class="form-select" name="donation_status" id="donationStatus"
+                      onchange="toggleDonationFields()">
+                <option selected>Select status</option>
+                <option>Donated</option>
+                <option>Has Not Donated</option>
+              </select>
+            </div>
+            <div id="donationFields" style="display: none;">
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label class="form-label">Donation Amount</label>
+                  <input type="number" step="0.01" class="form-control" name="amount">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Donation Date</label>
+                  <input type="date" class="form-control" name="donation_date">
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Donation Message</label>
+                <textarea class="form-control" name="message" rows="3"></textarea>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-success">Save Alumni</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Newsletter Modal -->
+  <div class="modal fade" id="newsletterModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Newsletter Subscription</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form method="POST" action="{{ url_for('add_subscriber') }}">
+            <div class="mb-3">
+              <label class="form-label">Email Address</label>
+              <input type="email" class="form-control" name="email"
+                     placeholder="Enter your email" required>
+            </div>
+            <div class="modal-footer px-0 pb-0">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-primary">Subscribe</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function toggleDonationFields() {
+      const status = document.getElementById("donationStatus").value;
+      document.getElementById("donationFields").style.display = status === "Donated" ? "block" : "none";
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const searchInput = document.getElementById("searchInput");
+      if (searchInput) {
+        searchInput.addEventListener("keyup", function () {
+          const value = this.value.toLowerCase();
+          document.querySelectorAll(".alumni-card").forEach(card => {
+            card.style.display = card.innerText.toLowerCase().includes(value) ? "" : "none";
+          });
+        });
+      }
+    });
+  </script>
+
+</body>
+</html>
