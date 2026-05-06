@@ -8,6 +8,10 @@ import os
 import re
 import csv
 import sqlite3
+import sys
+sys.path.insert(0, '/home/bmgts101t02/.local/lib/python3.10/site-packages')
+sys.path.insert(0, '/usr/lib/python3/dist-packages')
+sys.path.insert(0, '/usr/lib/python3.10/dist-packages')
 
 try:
     from dotenv import load_dotenv
@@ -24,9 +28,11 @@ try:
 except ImportError:
     PyPDF2 = None
 
+import importlib
 try:
-    from groq import Groq
-except ImportError:
+    groq_module = importlib.import_module('groq')
+    Groq = groq_module.Groq
+except Exception:
     Groq = None
 
 try:
@@ -51,9 +57,9 @@ app.secret_key = os.getenv("FLASK_SECRET_KEY", "dev_only_change_me")
 # MySQL CONFIG
 # ---------------------------
 app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = os.getenv("MYSQL_PASSWORD", "")
-app.config['MYSQL_DB'] = 'user_management'
+app.config['MYSQL_USER'] = 'bmgts101t02'
+app.config['MYSQL_PASSWORD'] = 'MX]Ywq7820253'
+app.config['MYSQL_DB'] = 'bmgts101t02_user_management'
 
 mysql = MySQL(app)
 
@@ -657,7 +663,7 @@ def get_all_subscribers():
 FTS_DB_PATH = os.path.join(os.path.dirname(__file__), "datasets_fts.db")
 
 DEFAULT_OPENAI_KEY = os.getenv("OPENAI_API_KEY", "")
-DEFAULT_GROQ_KEY = os.getenv("GROQ_API_KEY", "")
+DEFAULT_GROQ_KEY = os.getenv("GROQ_API_KEY", "'Insert Key'")
 DEFAULT_GEMINI_KEY = os.getenv("GEMINI_API_KEY", "")
 
 
@@ -749,11 +755,6 @@ def ask_ai_with_context(user_question, search_results, live_context="", ai_provi
             "error": "Groq AI is not configured. Add GROQ_API_KEY to your .env file and restart Flask."
         }
 
-    if Groq is None:
-        return {
-            "reply": None,
-            "error": "Groq is not installed. Run: pip install groq"
-        }
 
     system_message = """
 You are a polished assistant for a hockey management dashboard.
@@ -789,7 +790,10 @@ Write a natural answer for the user. Do not mention database context or technica
 """
 
     try:
-        client = Groq(api_key=api_key)
+        import sys
+        sys.path.insert(0, '/home/bmgts101t02/.local/lib/python3.10/site-packages')
+        from groq import Groq as GroqClient
+        client = GroqClient(api_key=api_key)
 
         response = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
@@ -1024,6 +1028,7 @@ def chat_send():
         ai_provider = "local"
 
     api_key = DEFAULT_GROQ_KEY if ai_provider == "groq" else ""
+    ai_provider = "groq"  # force groq always
 
     if not q:
         return jsonify(error="Empty message."), 400
@@ -3084,6 +3089,7 @@ def add_user():
 
 @app.route('/users', methods=['GET'])
 @login_required
+@role_required('Admin')
 def get_users():
     cur = mysql.connection.cursor()
     cur.execute("SELECT id, name, email, role FROM users ORDER BY name")
